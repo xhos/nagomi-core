@@ -60,7 +60,7 @@ func (c *Client) loadSupportedCurrencies() error {
 	if err != nil {
 		return fmt.Errorf("failed to fetch supported currencies: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("API returned status %d when fetching currencies", resp.StatusCode)
@@ -177,7 +177,7 @@ func (c *Client) GetExchangeRate(fromCurrency, toCurrency string, date *time.Tim
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch exchange rate: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return 0, fmt.Errorf("API returned status %d when fetching exchange rate", resp.StatusCode)

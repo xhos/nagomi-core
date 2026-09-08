@@ -75,7 +75,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		tx3 := createTx(account.ID, anchorDate.Add(72*time.Hour), 10000, incoming) // +$100 on Jan 18
 
 		// Sync balances
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -111,7 +111,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		tx1 := createTx(account.ID, anchorDate.Add(-5*24*time.Hour), 10000, incoming) // +$100 on Jan 10
 		tx2 := createTx(account.ID, anchorDate.Add(-3*24*time.Hour), 5000, outgoing)  // -$50 on Jan 12
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -149,7 +149,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		// After anchor
 		txAfter := createTx(account.ID, anchorDate.Add(2*24*time.Hour), 20000, incoming) // +$200 on Jan 17
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -182,7 +182,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		// Transaction exactly on anchor date (>= means it goes to after_anchor CTE)
 		txOnAnchor := createTx(account.ID, anchorDate, 15000, incoming) // +$150 on Jan 15
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -215,7 +215,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		tx1 := createTx(account.ID, sameDate, 10000, incoming) // +$100, lower ID
 		tx2 := createTx(account.ID, sameDate, 5000, outgoing)  // -$50, higher ID
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -240,7 +240,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		})
 
 		// Should not error on empty account
-		err := tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err := tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed on empty account: %v", err)
 		}
@@ -267,7 +267,7 @@ func TestSyncAccountBalances(t *testing.T) {
 
 		tx1 := createTx(account.ID, anchorDate.Add(24*time.Hour), 20000, incoming) // +$200
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -297,7 +297,7 @@ func TestSyncAccountBalances(t *testing.T) {
 
 		txID := createTx(account.ID, anchorDate.Add(24*time.Hour), 5000, incoming)
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -338,7 +338,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		tx3 := createTx(account.ID, anchorDate.Add(-2*24*time.Hour), 20000, incoming) // +$200 on Jan 13
 		tx4 := createTx(account.ID, anchorDate.Add(-1*24*time.Hour), 7500, outgoing)  // -$75 on Jan 14
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -383,7 +383,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		tx1 := createTx(account.ID, anchorDate.Add(24*time.Hour), 50000, 0)        // direction=0, $500
 		tx2 := createTx(account.ID, anchorDate.Add(48*time.Hour), 10000, incoming) // +$100
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -415,7 +415,7 @@ func TestSyncAccountBalances(t *testing.T) {
 
 		tx1 := createTx(account.ID, anchorDate.Add(24*time.Hour), 10000, incoming)
 
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed: %v", err)
 		}
@@ -429,7 +429,7 @@ func TestSyncAccountBalances(t *testing.T) {
 		}
 
 		// Resync
-		err = tdb.Queries.SyncAccountBalances(ctx, account.ID)
+		err = tdb.SyncAccountBalances(ctx, account.ID)
 		if err != nil {
 			t.Fatalf("SyncAccountBalances failed on resync: %v", err)
 		}

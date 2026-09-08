@@ -54,7 +54,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("database connection failed", "err", err)
 	}
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 	logger.Info("database connection established")
 
 	// ----- services ---------------

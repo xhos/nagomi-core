@@ -25,7 +25,7 @@ func TestMergeAccounts(t *testing.T) {
 			Colors:         []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 		if len(aliases) > 0 {
-			if err := tdb.Queries.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
+			if err := tdb.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
 				ID:      account.ID,
 				UserID:  userID,
 				Aliases: aliases,
@@ -67,7 +67,7 @@ func TestMergeAccounts(t *testing.T) {
 		tx1 := createTx(secondary.ID)
 		tx2 := createTx(secondary.ID)
 
-		moved, err := tdb.Queries.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
+		moved, err := tdb.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
 			PrimaryID:   primary.ID,
 			SecondaryID: secondary.ID,
 		})
@@ -91,7 +91,7 @@ func TestMergeAccounts(t *testing.T) {
 
 		// Simulate what the service does: merge aliases
 		merged := []string{"old-1234", "1235", "old-1235", "visa-gold"}
-		if err := tdb.Queries.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
+		if err := tdb.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
 			ID:      primary.ID,
 			UserID:  userID,
 			Aliases: merged,
@@ -99,7 +99,7 @@ func TestMergeAccounts(t *testing.T) {
 			t.Fatalf("SetAccountAliases: %v", err)
 		}
 
-		row, err := tdb.Queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: primary.ID})
+		row, err := tdb.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: primary.ID})
 		if err != nil {
 			t.Fatalf("GetAccount: %v", err)
 		}
@@ -120,7 +120,7 @@ func TestMergeAccounts(t *testing.T) {
 		primary := makeAccount(userID, "1234", nil)
 		secondary := makeAccount(userID, "1235", nil)
 
-		_, err := tdb.Queries.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
+		_, err := tdb.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
 			PrimaryID:   primary.ID,
 			SecondaryID: secondary.ID,
 		})
@@ -128,7 +128,7 @@ func TestMergeAccounts(t *testing.T) {
 			t.Fatalf("MoveAccountTransactions: %v", err)
 		}
 
-		affected, err := tdb.Queries.DeleteAccount(ctx, sqlc.DeleteAccountParams{
+		affected, err := tdb.DeleteAccount(ctx, sqlc.DeleteAccountParams{
 			ID:     secondary.ID,
 			UserID: userID,
 		})
@@ -139,7 +139,7 @@ func TestMergeAccounts(t *testing.T) {
 			t.Errorf("DeleteAccount affected %d rows, want 1", affected)
 		}
 
-		if _, err := tdb.Queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: secondary.ID}); err == nil {
+		if _, err := tdb.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: secondary.ID}); err == nil {
 			t.Error("secondary account should not exist after deletion")
 		}
 	})
@@ -151,14 +151,14 @@ func TestMergeAccounts(t *testing.T) {
 
 		txID := createTx(secondary.ID)
 
-		if _, err := tdb.Queries.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
+		if _, err := tdb.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
 			PrimaryID:   primary.ID,
 			SecondaryID: secondary.ID,
 		}); err != nil {
 			t.Fatalf("MoveAccountTransactions: %v", err)
 		}
 
-		if _, err := tdb.Queries.DeleteAccount(ctx, sqlc.DeleteAccountParams{
+		if _, err := tdb.DeleteAccount(ctx, sqlc.DeleteAccountParams{
 			ID: secondary.ID, UserID: userID,
 		}); err != nil {
 			t.Fatalf("DeleteAccount: %v", err)
@@ -175,7 +175,7 @@ func TestMergeAccounts(t *testing.T) {
 		primary := makeAccount(userID, "1234", nil)
 		secondary := makeAccount(userID, "1235", nil)
 
-		moved, err := tdb.Queries.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
+		moved, err := tdb.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
 			PrimaryID:   primary.ID,
 			SecondaryID: secondary.ID,
 		})
@@ -195,7 +195,7 @@ func TestMergeAccounts(t *testing.T) {
 		primaryTx := createTx(primary.ID)
 		secondaryTx := createTx(secondary.ID)
 
-		if _, err := tdb.Queries.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
+		if _, err := tdb.MoveAccountTransactions(ctx, sqlc.MoveAccountTransactionsParams{
 			PrimaryID:   primary.ID,
 			SecondaryID: secondary.ID,
 		}); err != nil {

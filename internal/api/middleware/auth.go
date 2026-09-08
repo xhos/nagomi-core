@@ -41,8 +41,8 @@ func validateJWT(ctx context.Context, tokenString, webURL string) (*User, error)
 	}
 
 	var email, name string
-	token.Get("email", &email)
-	token.Get("name", &name)
+	_ = token.Get("email", &email)
+	_ = token.Get("name", &name)
 
 	return &User{
 		ID:    userID,

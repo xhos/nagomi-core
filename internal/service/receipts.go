@@ -75,8 +75,7 @@ func newRcptSvc(queries *sqlc.Queries, logger *log.Logger, ocrURL string, store 
 // ----- methods -----------------------------------------------------------------------------
 
 func (s *rcptSvc) Upload(ctx context.Context, userID uuid.UUID, imageData []byte, contentType string) (*pb.Receipt, error) {
-	ext, ok := contentTypeToExt[contentType]
-	if !ok {
+	if _, ok := contentTypeToExt[contentType]; !ok {
 		return nil, fmt.Errorf("ReceiptService.Upload: unsupported content type %q: %w", contentType, ErrValidation)
 	}
 
@@ -84,7 +83,7 @@ func (s *rcptSvc) Upload(ctx context.Context, userID uuid.UUID, imageData []byte
 	imageTakenAt := extractEXIFDate(imageData)
 
 	imageData, contentType = resizeImage(imageData, contentType)
-	ext = contentTypeToExt[contentType]
+	ext := contentTypeToExt[contentType]
 
 	sum := sha256.Sum256(imageData)
 	imageHash := hex.EncodeToString(sum[:])

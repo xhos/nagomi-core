@@ -270,14 +270,6 @@ func (s *Server) GetCategorySpendingComparison(ctx context.Context, req *connect
 	}), nil
 }
 
-// categoryKeyToString converts a category ID to a unique string key for the map
-func categoryKeyToString(id *int64) string {
-	if id == nil {
-		return "uncategorized"
-	}
-	return fmt.Sprintf("cat_%d", *id)
-}
-
 // sortCategoriesByCurrentSpending sorts categories by current period spending descending
 func sortCategoriesByCurrentSpending(categories []*pb.CategorySpendingItem) {
 	sort.Slice(categories, func(i, j int) bool {

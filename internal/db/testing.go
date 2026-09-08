@@ -57,7 +57,7 @@ func (tdb *TestDB) CreateTestUser(ctx context.Context) uuid.UUID {
 	userID := uuid.New()
 	email := userID.String() + "@test.local"
 
-	_, err := tdb.Queries.CreateUser(ctx, sqlc.CreateUserParams{
+	_, err := tdb.CreateUser(ctx, sqlc.CreateUserParams{
 		ID:    userID,
 		Email: email,
 	})
@@ -66,7 +66,7 @@ func (tdb *TestDB) CreateTestUser(ctx context.Context) uuid.UUID {
 	}
 
 	tdb.t.Cleanup(func() {
-		_, _ = tdb.Queries.DeleteUser(context.Background(), userID)
+		_, _ = tdb.DeleteUser(context.Background(), userID)
 	})
 
 	return userID
@@ -75,13 +75,13 @@ func (tdb *TestDB) CreateTestUser(ctx context.Context) uuid.UUID {
 func (tdb *TestDB) CreateTestAccount(ctx context.Context, params sqlc.CreateAccountParams) sqlc.Account {
 	tdb.t.Helper()
 
-	account, err := tdb.Queries.CreateAccount(ctx, params)
+	account, err := tdb.CreateAccount(ctx, params)
 	if err != nil {
 		tdb.t.Fatalf("failed to create test account: %v", err)
 	}
 
 	tdb.t.Cleanup(func() {
-		_, _ = tdb.Queries.DeleteAccount(context.Background(), sqlc.DeleteAccountParams{
+		_, _ = tdb.DeleteAccount(context.Background(), sqlc.DeleteAccountParams{
 			ID:     account.ID,
 			UserID: params.OwnerID,
 		})

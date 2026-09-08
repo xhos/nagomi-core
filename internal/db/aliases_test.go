@@ -29,7 +29,7 @@ func TestAccountAliases(t *testing.T) {
 		userID := tdb.CreateTestUser(ctx)
 		account := makeAccount(userID, "5546")
 
-		if err := tdb.Queries.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{
+		if err := tdb.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{
 			ID:     account.ID,
 			UserID: userID,
 			Alias:  "old-5546",
@@ -37,7 +37,7 @@ func TestAccountAliases(t *testing.T) {
 			t.Fatalf("AddAccountAlias: %v", err)
 		}
 
-		found, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
+		found, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
 			UserID: userID,
 			Alias:  "old-5546",
 		})
@@ -54,7 +54,7 @@ func TestAccountAliases(t *testing.T) {
 		account := makeAccount(userID, "acct-idem")
 
 		for i := 0; i < 3; i++ {
-			if err := tdb.Queries.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{
+			if err := tdb.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{
 				ID:     account.ID,
 				UserID: userID,
 				Alias:  "same-alias",
@@ -63,7 +63,7 @@ func TestAccountAliases(t *testing.T) {
 			}
 		}
 
-		row, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
+		row, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
 			UserID: userID,
 			Alias:  "same-alias",
 		})
@@ -79,9 +79,9 @@ func TestAccountAliases(t *testing.T) {
 		userID := tdb.CreateTestUser(ctx)
 		account := makeAccount(userID, "acct-remove")
 
-		_ = tdb.Queries.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userID, Alias: "to-remove"})
+		_ = tdb.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userID, Alias: "to-remove"})
 
-		if err := tdb.Queries.RemoveAccountAlias(ctx, sqlc.RemoveAccountAliasParams{
+		if err := tdb.RemoveAccountAlias(ctx, sqlc.RemoveAccountAliasParams{
 			ID:     account.ID,
 			UserID: userID,
 			Alias:  "to-remove",
@@ -89,7 +89,7 @@ func TestAccountAliases(t *testing.T) {
 			t.Fatalf("RemoveAccountAlias: %v", err)
 		}
 
-		if _, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
+		if _, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
 			UserID: userID,
 			Alias:  "to-remove",
 		}); err == nil {
@@ -101,9 +101,9 @@ func TestAccountAliases(t *testing.T) {
 		userID := tdb.CreateTestUser(ctx)
 		account := makeAccount(userID, "acct-set")
 
-		_ = tdb.Queries.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userID, Alias: "old"})
+		_ = tdb.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userID, Alias: "old"})
 
-		if err := tdb.Queries.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
+		if err := tdb.SetAccountAliases(ctx, sqlc.SetAccountAliasesParams{
 			ID:      account.ID,
 			UserID:  userID,
 			Aliases: []string{"new-1", "new-2"},
@@ -111,11 +111,11 @@ func TestAccountAliases(t *testing.T) {
 			t.Fatalf("SetAccountAliases: %v", err)
 		}
 
-		if _, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{UserID: userID, Alias: "old"}); err == nil {
+		if _, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{UserID: userID, Alias: "old"}); err == nil {
 			t.Error("old alias should not exist after set")
 		}
 		for _, alias := range []string{"new-1", "new-2"} {
-			if _, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{UserID: userID, Alias: alias}); err != nil {
+			if _, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{UserID: userID, Alias: alias}); err != nil {
 				t.Errorf("alias %q should exist: %v", alias, err)
 			}
 		}
@@ -126,9 +126,9 @@ func TestAccountAliases(t *testing.T) {
 		userB := tdb.CreateTestUser(ctx)
 		account := makeAccount(userA, "acct-isolation")
 
-		_ = tdb.Queries.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userA, Alias: "shared-number"})
+		_ = tdb.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userA, Alias: "shared-number"})
 
-		if _, err := tdb.Queries.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
+		if _, err := tdb.FindAccountByAlias(ctx, sqlc.FindAccountByAliasParams{
 			UserID: userB,
 			Alias:  "shared-number",
 		}); err == nil {
@@ -140,7 +140,7 @@ func TestAccountAliases(t *testing.T) {
 		userID := tdb.CreateTestUser(ctx)
 		account := makeAccount(userID, "3745")
 
-		found, err := tdb.Queries.FindAccountByName(ctx, sqlc.FindAccountByNameParams{
+		found, err := tdb.FindAccountByName(ctx, sqlc.FindAccountByNameParams{
 			UserID: userID,
 			Name:   "3745",
 		})
@@ -157,7 +157,7 @@ func TestAccountAliases(t *testing.T) {
 		account5546 := makeAccount(userID, "5546")
 		_ = makeAccount(userID, "3745")
 
-		found, err := tdb.Queries.FindAccountByName(ctx, sqlc.FindAccountByNameParams{
+		found, err := tdb.FindAccountByName(ctx, sqlc.FindAccountByNameParams{
 			UserID: userID,
 			Name:   "5546",
 		})
