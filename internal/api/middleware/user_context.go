@@ -116,7 +116,7 @@ func extractUserIDFromMessage(msg any) string {
 	}
 
 	val := reflect.ValueOf(msg)
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		val = val.Elem()
 	}
 
