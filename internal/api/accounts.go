@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	pb "null-core/internal/gen/null/v1"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"connectrpc.com/connect"
 )

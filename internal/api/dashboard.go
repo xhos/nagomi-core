@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
-	pb "null-core/internal/gen/null/v1"
-	"null-core/internal/service"
+	pb "nagomi-core/internal/gen/nagomi/v1"
+	"nagomi-core/internal/service"
 
 	"connectrpc.com/connect"
 	"google.golang.org/genproto/googleapis/type/date"

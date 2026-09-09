@@ -5,9 +5,9 @@ import (
 	"sort"
 	"time"
 
-	"null-core/internal/db/sqlc"
-	"null-core/internal/exchange"
-	pb "null-core/internal/gen/null/v1"
+	"nagomi-core/internal/db/sqlc"
+	"nagomi-core/internal/exchange"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/type/money"

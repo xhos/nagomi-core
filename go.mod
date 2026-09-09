@@ -1,4 +1,4 @@
-module null-core
+module nagomi-core
 
 go 1.25.0
 

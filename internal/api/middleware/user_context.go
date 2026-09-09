@@ -46,13 +46,13 @@ func UserContext() Middleware {
 // extractUserIDFromRequest extracts user_id from Connect-RPC request body
 func extractUserIDFromRequest(r *http.Request) string {
 	// Only process Connect-RPC requests
-	if !strings.Contains(r.URL.Path, "/null.v1.") {
+	if !strings.Contains(r.URL.Path, "/nagomi.v1.") {
 		return ""
 	}
 
 	// Skip health checks and user service requests that don't need user_id
 	if strings.Contains(r.URL.Path, "grpc.health") ||
-		strings.Contains(r.URL.Path, "/null.v1.UserService/GetUser") {
+		strings.Contains(r.URL.Path, "/nagomi.v1.UserService/GetUser") {
 		return ""
 	}
 

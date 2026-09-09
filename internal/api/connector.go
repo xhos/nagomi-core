@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"null-core/internal/api/middleware"
-	pb "null-core/internal/gen/null/v1"
+	"nagomi-core/internal/api/middleware"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/timestamppb"

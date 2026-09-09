@@ -4,8 +4,8 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      module: buf.build/xhos/null-protos
-      value: null-core/internal/gen
+      module: buf.build/xhos/nagomi-protos
+      value: nagomi-core/internal/gen
 
 inputs:
   - directory: proto

@@ -2,9 +2,9 @@ package api
 
 import (
 	"net/http"
-	"null-core/internal/api/middleware"
-	"null-core/internal/gen/null/v1/nullv1connect"
-	"null-core/internal/service"
+	"nagomi-core/internal/api/middleware"
+	"nagomi-core/internal/gen/nagomi/v1/nagomiv1connect"
+	"nagomi-core/internal/service"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
@@ -20,15 +20,15 @@ type Server struct {
 
 func NewServer(services *service.Services, logger *log.Logger) *Server {
 	healthCheck := grpchealth.NewStaticChecker(
-		"null.v1.UserService",
-		"null.v1.AccountService",
-		"null.v1.TransactionService",
-		"null.v1.CategoryService",
-		"null.v1.RuleService",
-		"null.v1.DashboardService",
-		"null.v1.ReceiptService",
-		"null.v1.ConnectorService",
-		"null.v1.ConnectionsService",
+		"nagomi.v1.UserService",
+		"nagomi.v1.AccountService",
+		"nagomi.v1.TransactionService",
+		"nagomi.v1.CategoryService",
+		"nagomi.v1.RuleService",
+		"nagomi.v1.DashboardService",
+		"nagomi.v1.ReceiptService",
+		"nagomi.v1.ConnectorService",
+		"nagomi.v1.ConnectionsService",
 	)
 
 	return &Server{
@@ -70,15 +70,15 @@ func (s *Server) registerServices(mux *http.ServeMux) {
 	mux.Handle(healthPath, healthHandler)
 
 	reflector := grpcreflect.NewStaticReflector(
-		"null.v1.UserService",
-		"null.v1.AccountService",
-		"null.v1.TransactionService",
-		"null.v1.CategoryService",
-		"null.v1.RuleService",
-		"null.v1.DashboardService",
-		"null.v1.ReceiptService",
-		"null.v1.ConnectorService",
-		"null.v1.ConnectionsService",
+		"nagomi.v1.UserService",
+		"nagomi.v1.AccountService",
+		"nagomi.v1.TransactionService",
+		"nagomi.v1.CategoryService",
+		"nagomi.v1.RuleService",
+		"nagomi.v1.DashboardService",
+		"nagomi.v1.ReceiptService",
+		"nagomi.v1.ConnectorService",
+		"nagomi.v1.ConnectionsService",
 	)
 	reflectPath, reflectHandler := grpcreflect.NewHandlerV1(reflector)
 	mux.Handle(reflectPath, reflectHandler)
@@ -91,31 +91,31 @@ func (s *Server) registerServices(mux *http.ServeMux) {
 		middleware.UserIDExtractor(),
 	)
 
-	path, handler := nullv1connect.NewUserServiceHandler(s, interceptors)
+	path, handler := nagomiv1connect.NewUserServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewAccountServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewAccountServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewTransactionServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewTransactionServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewCategoryServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewCategoryServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewRuleServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewRuleServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewDashboardServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewDashboardServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewReceiptServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewReceiptServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewConnectorServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewConnectorServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
-	path, handler = nullv1connect.NewConnectionsServiceHandler(s, interceptors)
+	path, handler = nagomiv1connect.NewConnectionsServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
 	s.log.Info("all connect-go services registered",

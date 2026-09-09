@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	pb "null-core/internal/gen/null/v1"
-	"null-core/internal/service"
+	pb "nagomi-core/internal/gen/nagomi/v1"
+	"nagomi-core/internal/service"
 
 	"connectrpc.com/connect"
 )

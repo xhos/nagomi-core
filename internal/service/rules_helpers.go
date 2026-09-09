@@ -1,9 +1,9 @@
 package service
 
 import (
-	"null-core/internal/db/sqlc"
-	pb "null-core/internal/gen/null/v1"
-	"null-core/internal/rules"
+	"nagomi-core/internal/db/sqlc"
+	pb "nagomi-core/internal/gen/nagomi/v1"
+	"nagomi-core/internal/rules"
 
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/structpb"

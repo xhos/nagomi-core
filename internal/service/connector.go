@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"null-core/internal/crypto"
-	"null-core/internal/db/sqlc"
+	"nagomi-core/internal/crypto"
+	"nagomi-core/internal/db/sqlc"
 
 	"github.com/charmbracelet/log"
 )
@@ -17,7 +17,7 @@ type ConnectorService interface {
 }
 
 // SyncJob is a decrypted view of a connected_accounts row. credentials
-// are JSON bytes whose shape depends on provider. callers (null-connector)
+// are JSON bytes whose shape depends on provider. callers (nagomi-connector)
 // are responsible for per-provider decoding.
 type SyncJob struct {
 	ID          int64

@@ -1,4 +1,4 @@
 [submodule "proto"]
 	path = proto
-	url = git@github.com:xhos/null-protos.git
+	url = git@github.com:xhos/nagomi-protos.git
 	branch = main

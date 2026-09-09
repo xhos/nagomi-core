@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	pb "null-core/internal/gen/null/v1"
-	"null-core/internal/rules"
+	pb "nagomi-core/internal/gen/nagomi/v1"
+	"nagomi-core/internal/rules"
 
 	"connectrpc.com/connect"
 	"google.golang.org/grpc/codes"

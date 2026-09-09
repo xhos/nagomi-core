@@ -3,11 +3,11 @@ package service
 import (
 	"fmt"
 
-	"null-core/internal/config"
-	"null-core/internal/crypto"
-	"null-core/internal/db"
-	"null-core/internal/exchange"
-	"null-core/internal/storage"
+	"nagomi-core/internal/config"
+	"nagomi-core/internal/crypto"
+	"nagomi-core/internal/db"
+	"nagomi-core/internal/exchange"
+	"nagomi-core/internal/storage"
 
 	"github.com/charmbracelet/log"
 )
@@ -50,7 +50,7 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		Accounts:     newAcctSvc(queries, logger.WithPrefix("acct")),
 		Dashboard:    newDashSvc(queries, exchangeClient),
 		Users:        newUserSvc(queries, logger.WithPrefix("user")),
-		Receipts:     newRcptSvc(queries, logger.WithPrefix("rcpt"), cfg.NullReceiptsURL, store),
+		Receipts:     newRcptSvc(queries, logger.WithPrefix("rcpt"), cfg.NagomiReceiptsURL, store),
 		Connector:    newConnSvc(queries, cipher, logger.WithPrefix("connector")),
 		Connections:  newConnectionSvc(queries, cipher),
 	}, nil

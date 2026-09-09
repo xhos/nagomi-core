@@ -11,10 +11,10 @@ import (
 	"path"
 	"time"
 
-	"null-core/internal/db/sqlc"
-	pb "null-core/internal/gen/null/v1"
-	"null-core/internal/gen/null/v1/nullv1connect"
-	"null-core/internal/storage"
+	"nagomi-core/internal/db/sqlc"
+	pb "nagomi-core/internal/gen/nagomi/v1"
+	"nagomi-core/internal/gen/nagomi/v1/nagomiv1connect"
+	"nagomi-core/internal/storage"
 
 	"connectrpc.com/connect"
 	"github.com/charmbracelet/log"
@@ -38,12 +38,12 @@ type ReceiptService interface {
 type rcptSvc struct {
 	queries   *sqlc.Queries
 	log       *log.Logger
-	ocrClient nullv1connect.ReceiptOCRServiceClient
+	ocrClient nagomiv1connect.ReceiptOCRServiceClient
 	store     *storage.Store
 }
 
 func newRcptSvc(queries *sqlc.Queries, logger *log.Logger, ocrURL string, store *storage.Store) ReceiptService {
-	var ocrClient nullv1connect.ReceiptOCRServiceClient
+	var ocrClient nagomiv1connect.ReceiptOCRServiceClient
 	if ocrURL != "" {
 		// gRPC requires HTTP/2; over plaintext that means h2c,
 		// which http.DefaultClient doesn't support.
@@ -56,7 +56,7 @@ func newRcptSvc(queries *sqlc.Queries, logger *log.Logger, ocrURL string, store 
 				},
 			},
 		}
-		ocrClient = nullv1connect.NewReceiptOCRServiceClient(
+		ocrClient = nagomiv1connect.NewReceiptOCRServiceClient(
 			h2cClient,
 			ocrURL,
 			connect.WithGRPC(),

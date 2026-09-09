@@ -1,6 +1,6 @@
-# null-core
+# nagomi-core
 
-null-core is a high-performance gRPC (or rather [connect-go](https://github.com/connectrpc/connect-go)) API built in Go that handles core financial operations including user management, account management, transaction processing, and categorization, among other things.
+nagomi-core is a high-performance gRPC (or rather [connect-go](https://github.com/connectrpc/connect-go)) API built in Go that handles core financial operations including user management, account management, transaction processing, and categorization, among other things.
 
 ## ⚙️ config
 
@@ -10,8 +10,8 @@ null-core is a high-performance gRPC (or rather [connect-go](https://github.com/
 |---------------------------|--------------------------------------------|----------------------|------------|
 | `API_KEY`                 | Authentication key for gRPC API access     |                      | [x]        |
 | `DATABASE_URL`            | PostgreSQL connection string               |                      | [x]        |
-| `NULL_GATEWAY_URL`        | URL for null-gateway (auth + proxy)        |                      | [x]        |
-| `NULL_RECEIPTS_URL`       | gRPC endpoint for receipt parsing service  |                      | [x]        |
+| `NAGOMI_GATEWAY_URL`        | URL for nagomi-gateway (auth + proxy)        |                      | [x]        |
+| `NAGOMI_RECEIPTS_URL`       | gRPC endpoint for receipt parsing service  |                      | [x]        |
 | `EXCHANGE_API_URL`        | Exchange rate API endpoint                 |                      | [x]        |
 | `S3_ENDPOINT`             | S3-compatible endpoint URL (Garage/B2/...) |                      | [x]        |
 | `S3_BUCKET`               | Bucket used for receipt images             |                      | [x]        |
@@ -24,12 +24,12 @@ null-core is a high-performance gRPC (or rather [connect-go](https://github.com/
 
 ## 🌱 ecosystem
 
-- [null-core](https://github.com/xhos/null-core) - main backend service (this repo)
-- [null-web](https://github.com/xhos/null-web) - frontend web application
-- [null-mobile](https://github.com/xhos/null-mobile) - mobile appplication
-- [null-protos](https://github.com/xhos/null-protos) - shared protobuf definitions
-- [null-receipts](https://github.com/xhos/null-receipts) - receipt parsing microservice
-- [null-email-parser](https://github.com/xhos/null-email-parser) - email parsing service
+- [nagomi-core](https://github.com/xhos/nagomi-core) - main backend service (this repo)
+- [nagomi-web](https://github.com/xhos/nagomi-web) - frontend web application
+- [nagomi-mobile](https://github.com/xhos/nagomi-mobile) - mobile appplication
+- [nagomi-protos](https://github.com/xhos/nagomi-protos) - shared protobuf definitions
+- [nagomi-receipts](https://github.com/xhos/nagomi-receipts) - receipt parsing microservice
+- [nagomi-email-parser](https://github.com/xhos/nagomi-email-parser) - email parsing service
 
 
-null-web is the expected frontend to use, but it is possible to build your own client. The only thing tightly coupled is the Better Auth JWT authentication mechanism, but you can use inter-service API keys to authenticate instead if you prefer.
+nagomi-web is the expected frontend to use, but it is possible to build your own client. The only thing tightly coupled is the Better Auth JWT authentication mechanism, but you can use inter-service API keys to authenticate instead if you prefer.

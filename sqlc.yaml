@@ -73,13 +73,13 @@ sql:
           # map columns directly to proto enums
           - column: 'accounts.account_type'
             go_type:
-              import: 'null-core/internal/gen/null/v1'
+              import: 'nagomi-core/internal/gen/nagomi/v1'
               type: 'AccountType'
           - column: 'transactions.tx_direction'
             go_type:
-              import: 'null-core/internal/gen/null/v1'
+              import: 'nagomi-core/internal/gen/nagomi/v1'
               type: 'TransactionDirection'
           - column: 'receipts.status'
             go_type:
-              import: 'null-core/internal/gen/null/v1'
+              import: 'nagomi-core/internal/gen/nagomi/v1'
               type: 'ReceiptStatus'

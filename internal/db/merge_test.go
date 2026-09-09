@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"null-core/internal/db/sqlc"
+	"nagomi-core/internal/db/sqlc"
 
 	"github.com/google/uuid"
 )

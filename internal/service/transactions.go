@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"math"
 
-	"null-core/internal/db/sqlc"
-	"null-core/internal/exchange"
-	pb "null-core/internal/gen/null/v1"
+	"nagomi-core/internal/db/sqlc"
+	"nagomi-core/internal/exchange"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
@@ -80,7 +80,7 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 	for _, params := range paramsList {
 		tx, err := s.queries.CreateTransaction(ctx, params)
 		if err != nil {
-			// null-connector and null-email parser may send duplicats.
+			// nagomi-connector and nagomi-email-parser may send duplicats.
 			// that is expected and ignored.
 			if errors.Is(err, pgx.ErrNoRows) && params.ExternalID != nil {
 				s.log.Debug("skipping duplicate transaction", "external_id", *params.ExternalID, "account_id", params.AccountID)

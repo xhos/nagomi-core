@@ -48,11 +48,11 @@
 
     packages = forAllSystems (system: pkgs: {
       default = pkgs.buildGoModule {
-        pname = "null-core";
+        pname = "nagomi-core";
         version = self.shortRev or self.dirtyShortRev or "dev";
         src = ./.;
         vendorHash = "sha256-R4AHEa2t2cclh0QTOLYWYn+sm2DZm4WR6+aU2NdynX8=";
-        subPackages = ["cmd/null"];
+        subPackages = ["cmd/nagomi"];
       };
     });
 
@@ -73,7 +73,7 @@
           grpcurl
 
           (writeShellScriptBin "run" ''
-            exec ${air}/bin/air -build.cmd "go build -o ./tmp/main ./cmd/null/main.go" -build.bin ./tmp/main
+            exec ${air}/bin/air -build.cmd "go build -o ./tmp/main ./cmd/nagomi/main.go" -build.bin ./tmp/main
           '')
 
           (writeShellScriptBin "regen" ''

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"null-core/internal/db/sqlc"
-	pb "null-core/internal/gen/null/v1"
+	"nagomi-core/internal/db/sqlc"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/type/money"

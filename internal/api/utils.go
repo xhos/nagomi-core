@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"null-core/internal/api/middleware"
-	"null-core/internal/service"
+	"nagomi-core/internal/api/middleware"
+	"nagomi-core/internal/service"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"

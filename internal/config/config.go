@@ -14,8 +14,8 @@ type Config struct {
 	CredentialsKey string
 
 	DatabaseURL     string
-	NullGatewayURL  string
-	NullReceiptsURL string
+	NagomiGatewayURL  string
+	NagomiReceiptsURL string
 	ExchangeAPIURL  string
 
 	S3Endpoint  string
@@ -49,16 +49,16 @@ func Load() Config {
 		panic("CREDENTIALS_KEY environment variable is required (64 hex chars)")
 	}
 
-	nullGatewayURL := os.Getenv("NULL_GATEWAY_URL")
-	if nullGatewayURL == "" {
-		panic("NULL_GATEWAY_URL environment variable is required")
+	nagomiGatewayURL := os.Getenv("NAGOMI_GATEWAY_URL")
+	if nagomiGatewayURL == "" {
+		panic("NAGOMI_GATEWAY_URL environment variable is required")
 	}
 
-	nullReceiptsURL := os.Getenv("NULL_RECEIPTS_URL")
-	if nullReceiptsURL == "" {
+	nagomiReceiptsURL := os.Getenv("NAGOMI_RECEIPTS_URL")
+	if nagomiReceiptsURL == "" {
 		// TODO: need to make this log print uniform with the app-wide logger
 		// configuration. perhaps create the logger here, use it and then return it?
-		log.Warn("NULL_RECEIPTS_URL is not set!")
+		log.Warn("NAGOMI_RECEIPTS_URL is not set!")
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
@@ -116,8 +116,8 @@ func Load() Config {
 		APIKey:          apiKey,
 		CredentialsKey:  credentialsKey,
 		DatabaseURL:     databaseURL,
-		NullGatewayURL:  nullGatewayURL,
-		NullReceiptsURL: nullReceiptsURL,
+		NagomiGatewayURL:  nagomiGatewayURL,
+		NagomiReceiptsURL: nagomiReceiptsURL,
 		ExchangeAPIURL:  exchangeAPIURL,
 		S3Endpoint:      s3Endpoint,
 		S3Bucket:        s3Bucket,

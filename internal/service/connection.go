@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"null-core/internal/crypto"
-	"null-core/internal/db/sqlc"
+	"nagomi-core/internal/crypto"
+	"nagomi-core/internal/db/sqlc"
 
 	"github.com/google/uuid"
 )

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://null-core/internal/rules/rule.schema.json",
+  "$id": "https://nagomi-core/internal/rules/rule.schema.json",
   "title": "Transaction Rule Conditions",
   "type": "object",
   "required": ["logic", "conditions"],
