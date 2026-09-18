@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.NULL_DISPATCH_TOKEN }}
+          github-token: ${{ secrets.NAGOMI_DISPATCH_TOKEN }}
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: 'xhos',
