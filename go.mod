@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
 	github.com/charmbracelet/log v1.0.0
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.9.1
+	github.com/jackc/pgx/v5 v5.9.2
 	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/pressly/goose/v3 v3.27.0
 	github.com/rs/cors v1.11.1
