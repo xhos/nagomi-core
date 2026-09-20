@@ -17,6 +17,9 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
+// migrationLockKey is an arbitrary fixed key for pg_advisory_lock.
+const migrationLockKey = 0x6e61676f6d69 // "nagomi"
+
 type DB struct {
 	*sqlc.Queries
 	log  *log.Logger
@@ -65,6 +68,20 @@ func RunMigrations(dsn string) error {
 	if err := goose.SetDialect("postgres"); err != nil {
 		return fmt.Errorf("failed to set goose dialect: %w", err)
 	}
+
+	// Serialize concurrent migrators (parallel test packages, multiple
+	// instances booting) with a session-level advisory lock.
+	ctx := context.Background()
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to acquire migration lock connection: %w", err)
+	}
+	defer func() { _ = conn.Close() }()
+
+	if _, err := conn.ExecContext(ctx, "SELECT pg_advisory_lock($1)", migrationLockKey); err != nil {
+		return fmt.Errorf("failed to acquire migration lock: %w", err)
+	}
+	defer func() { _, _ = conn.ExecContext(ctx, "SELECT pg_advisory_unlock($1)", migrationLockKey) }()
 
 	if err := goose.Up(db, "migrations"); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
