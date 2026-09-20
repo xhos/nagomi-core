@@ -1075,6 +1075,111 @@ func (*GetCurrenciesRequest) Descriptor() ([]byte, []int) {
 	return file_nagomi_v1_dashboard_services_proto_rawDescGZIP(), []int{18}
 }
 
+type GetExchangeRatesRequest struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ReportingCurrency string                 `protobuf:"bytes,1,opt,name=reporting_currency,json=reportingCurrency,proto3" json:"reporting_currency,omitempty"`
+	Currencies        []string               `protobuf:"bytes,2,rep,name=currencies,proto3" json:"currencies,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetExchangeRatesRequest) Reset() {
+	*x = GetExchangeRatesRequest{}
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExchangeRatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExchangeRatesRequest) ProtoMessage() {}
+
+func (x *GetExchangeRatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExchangeRatesRequest.ProtoReflect.Descriptor instead.
+func (*GetExchangeRatesRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_dashboard_services_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetExchangeRatesRequest) GetReportingCurrency() string {
+	if x != nil {
+		return x.ReportingCurrency
+	}
+	return ""
+}
+
+func (x *GetExchangeRatesRequest) GetCurrencies() []string {
+	if x != nil {
+		return x.Currencies
+	}
+	return nil
+}
+
+type GetExchangeRatesResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ReportingCurrency string                 `protobuf:"bytes,1,opt,name=reporting_currency,json=reportingCurrency,proto3" json:"reporting_currency,omitempty"`
+	// Multiply an amount in the map key's currency by this rate.
+	Rates         map[string]float64 `protobuf:"bytes,2,rep,name=rates,proto3" json:"rates,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExchangeRatesResponse) Reset() {
+	*x = GetExchangeRatesResponse{}
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExchangeRatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExchangeRatesResponse) ProtoMessage() {}
+
+func (x *GetExchangeRatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExchangeRatesResponse.ProtoReflect.Descriptor instead.
+func (*GetExchangeRatesResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_dashboard_services_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetExchangeRatesResponse) GetReportingCurrency() string {
+	if x != nil {
+		return x.ReportingCurrency
+	}
+	return ""
+}
+
+func (x *GetExchangeRatesResponse) GetRates() map[string]float64 {
+	if x != nil {
+		return x.Rates
+	}
+	return nil
+}
+
 type GetCurrenciesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Currencies    []*CurrencyInfo        `protobuf:"bytes,1,rep,name=currencies,proto3" json:"currencies,omitempty"`
@@ -1084,7 +1189,7 @@ type GetCurrenciesResponse struct {
 
 func (x *GetCurrenciesResponse) Reset() {
 	*x = GetCurrenciesResponse{}
-	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[19]
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1096,7 +1201,7 @@ func (x *GetCurrenciesResponse) String() string {
 func (*GetCurrenciesResponse) ProtoMessage() {}
 
 func (x *GetCurrenciesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[19]
+	mi := &file_nagomi_v1_dashboard_services_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1109,7 +1214,7 @@ func (x *GetCurrenciesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrenciesResponse.ProtoReflect.Descriptor instead.
 func (*GetCurrenciesResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_dashboard_services_proto_rawDescGZIP(), []int{19}
+	return file_nagomi_v1_dashboard_services_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetCurrenciesResponse) GetCurrencies() []*CurrencyInfo {
@@ -1220,11 +1325,23 @@ const file_nagomi_v1_dashboard_services_proto_rawDesc = "" +
 	"\fCurrencyInfo\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"\x16\n" +
-	"\x14GetCurrenciesRequest\"P\n" +
+	"\x14GetCurrenciesRequest\"h\n" +
+	"\x17GetExchangeRatesRequest\x12-\n" +
+	"\x12reporting_currency\x18\x01 \x01(\tR\x11reportingCurrency\x12\x1e\n" +
+	"\n" +
+	"currencies\x18\x02 \x03(\tR\n" +
+	"currencies\"\xc9\x01\n" +
+	"\x18GetExchangeRatesResponse\x12-\n" +
+	"\x12reporting_currency\x18\x01 \x01(\tR\x11reportingCurrency\x12D\n" +
+	"\x05rates\x18\x02 \x03(\v2..nagomi.v1.GetExchangeRatesResponse.RatesEntryR\x05rates\x1a8\n" +
+	"\n" +
+	"RatesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x01R\x05value:\x028\x01\"P\n" +
 	"\x15GetCurrenciesResponse\x127\n" +
 	"\n" +
 	"currencies\x18\x01 \x03(\v2\x17.nagomi.v1.CurrencyInfoR\n" +
-	"currencies2\x9a\a\n" +
+	"currencies2\xf7\a\n" +
 	"\x10DashboardService\x12d\n" +
 	"\x13GetDashboardSummary\x12%.nagomi.v1.GetDashboardSummaryRequest\x1a&.nagomi.v1.GetDashboardSummaryResponse\x12g\n" +
 	"\x14GetMonthlyComparison\x12&.nagomi.v1.GetMonthlyComparisonRequest\x1a'.nagomi.v1.GetMonthlyComparisonResponse\x12[\n" +
@@ -1234,7 +1351,8 @@ const file_nagomi_v1_dashboard_services_proto_rawDesc = "" +
 	"\x13GetFinancialSummary\x12%.nagomi.v1.GetFinancialSummaryRequest\x1a&.nagomi.v1.GetFinancialSummaryResponse\x12\x82\x01\n" +
 	"\x1dGetCategorySpendingComparison\x12/.nagomi.v1.GetCategorySpendingComparisonRequest\x1a0.nagomi.v1.GetCategorySpendingComparisonResponse\x12a\n" +
 	"\x12GetNetWorthHistory\x12$.nagomi.v1.GetNetWorthHistoryRequest\x1a%.nagomi.v1.GetNetWorthHistoryResponse\x12R\n" +
-	"\rGetCurrencies\x12\x1f.nagomi.v1.GetCurrenciesRequest\x1a .nagomi.v1.GetCurrenciesResponseB\x99\x01\n" +
+	"\rGetCurrencies\x12\x1f.nagomi.v1.GetCurrenciesRequest\x1a .nagomi.v1.GetCurrenciesResponse\x12[\n" +
+	"\x10GetExchangeRates\x12\".nagomi.v1.GetExchangeRatesRequest\x1a#.nagomi.v1.GetExchangeRatesResponseB\x99\x01\n" +
 	"\rcom.nagomi.v1B\x16DashboardServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -1250,7 +1368,7 @@ func file_nagomi_v1_dashboard_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_dashboard_services_proto_rawDescData
 }
 
-var file_nagomi_v1_dashboard_services_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_nagomi_v1_dashboard_services_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_nagomi_v1_dashboard_services_proto_goTypes = []any{
 	(*GetDashboardSummaryRequest)(nil),            // 0: nagomi.v1.GetDashboardSummaryRequest
 	(*GetDashboardSummaryResponse)(nil),           // 1: nagomi.v1.GetDashboardSummaryResponse
@@ -1271,77 +1389,83 @@ var file_nagomi_v1_dashboard_services_proto_goTypes = []any{
 	(*GetNetWorthHistoryResponse)(nil),            // 16: nagomi.v1.GetNetWorthHistoryResponse
 	(*CurrencyInfo)(nil),                          // 17: nagomi.v1.CurrencyInfo
 	(*GetCurrenciesRequest)(nil),                  // 18: nagomi.v1.GetCurrenciesRequest
-	(*GetCurrenciesResponse)(nil),                 // 19: nagomi.v1.GetCurrenciesResponse
-	(*date.Date)(nil),                             // 20: google.type.Date
-	(*DashboardSummary)(nil),                      // 21: nagomi.v1.DashboardSummary
-	(*MonthlyComparison)(nil),                     // 22: nagomi.v1.MonthlyComparison
-	(*TopCategory)(nil),                           // 23: nagomi.v1.TopCategory
-	(*TopMerchant)(nil),                           // 24: nagomi.v1.TopMerchant
-	(*TrendPoint)(nil),                            // 25: nagomi.v1.TrendPoint
-	(*money.Money)(nil),                           // 26: google.type.Money
-	(PeriodType)(0),                               // 27: nagomi.v1.PeriodType
-	(*Category)(nil),                              // 28: nagomi.v1.Category
-	(*CategorySpendingComparison)(nil),            // 29: nagomi.v1.CategorySpendingComparison
-	(*PeriodInfo)(nil),                            // 30: nagomi.v1.PeriodInfo
-	(*CategorySpendingTotals)(nil),                // 31: nagomi.v1.CategorySpendingTotals
-	(Granularity)(0),                              // 32: nagomi.v1.Granularity
-	(*NetWorthPoint)(nil),                         // 33: nagomi.v1.NetWorthPoint
+	(*GetExchangeRatesRequest)(nil),               // 19: nagomi.v1.GetExchangeRatesRequest
+	(*GetExchangeRatesResponse)(nil),              // 20: nagomi.v1.GetExchangeRatesResponse
+	(*GetCurrenciesResponse)(nil),                 // 21: nagomi.v1.GetCurrenciesResponse
+	nil,                                           // 22: nagomi.v1.GetExchangeRatesResponse.RatesEntry
+	(*date.Date)(nil),                             // 23: google.type.Date
+	(*DashboardSummary)(nil),                      // 24: nagomi.v1.DashboardSummary
+	(*MonthlyComparison)(nil),                     // 25: nagomi.v1.MonthlyComparison
+	(*TopCategory)(nil),                           // 26: nagomi.v1.TopCategory
+	(*TopMerchant)(nil),                           // 27: nagomi.v1.TopMerchant
+	(*TrendPoint)(nil),                            // 28: nagomi.v1.TrendPoint
+	(*money.Money)(nil),                           // 29: google.type.Money
+	(PeriodType)(0),                               // 30: nagomi.v1.PeriodType
+	(*Category)(nil),                              // 31: nagomi.v1.Category
+	(*CategorySpendingComparison)(nil),            // 32: nagomi.v1.CategorySpendingComparison
+	(*PeriodInfo)(nil),                            // 33: nagomi.v1.PeriodInfo
+	(*CategorySpendingTotals)(nil),                // 34: nagomi.v1.CategorySpendingTotals
+	(Granularity)(0),                              // 35: nagomi.v1.Granularity
+	(*NetWorthPoint)(nil),                         // 36: nagomi.v1.NetWorthPoint
 }
 var file_nagomi_v1_dashboard_services_proto_depIdxs = []int32{
-	20, // 0: nagomi.v1.GetDashboardSummaryRequest.start_date:type_name -> google.type.Date
-	20, // 1: nagomi.v1.GetDashboardSummaryRequest.end_date:type_name -> google.type.Date
-	21, // 2: nagomi.v1.GetDashboardSummaryResponse.summary:type_name -> nagomi.v1.DashboardSummary
-	22, // 3: nagomi.v1.GetMonthlyComparisonResponse.comparisons:type_name -> nagomi.v1.MonthlyComparison
-	20, // 4: nagomi.v1.GetTopCategoriesRequest.start_date:type_name -> google.type.Date
-	20, // 5: nagomi.v1.GetTopCategoriesRequest.end_date:type_name -> google.type.Date
-	23, // 6: nagomi.v1.GetTopCategoriesResponse.categories:type_name -> nagomi.v1.TopCategory
-	20, // 7: nagomi.v1.GetTopMerchantsRequest.start_date:type_name -> google.type.Date
-	20, // 8: nagomi.v1.GetTopMerchantsRequest.end_date:type_name -> google.type.Date
-	24, // 9: nagomi.v1.GetTopMerchantsResponse.merchants:type_name -> nagomi.v1.TopMerchant
-	20, // 10: nagomi.v1.GetSpendingTrendsRequest.start_date:type_name -> google.type.Date
-	20, // 11: nagomi.v1.GetSpendingTrendsRequest.end_date:type_name -> google.type.Date
-	25, // 12: nagomi.v1.GetSpendingTrendsResponse.trends:type_name -> nagomi.v1.TrendPoint
-	26, // 13: nagomi.v1.GetFinancialSummaryResponse.total_balance:type_name -> google.type.Money
-	26, // 14: nagomi.v1.GetFinancialSummaryResponse.total_debt:type_name -> google.type.Money
-	26, // 15: nagomi.v1.GetFinancialSummaryResponse.net_balance:type_name -> google.type.Money
-	27, // 16: nagomi.v1.GetCategorySpendingComparisonRequest.period_type:type_name -> nagomi.v1.PeriodType
-	20, // 17: nagomi.v1.GetCategorySpendingComparisonRequest.custom_start_date:type_name -> google.type.Date
-	20, // 18: nagomi.v1.GetCategorySpendingComparisonRequest.custom_end_date:type_name -> google.type.Date
-	28, // 19: nagomi.v1.CategorySpendingItem.category:type_name -> nagomi.v1.Category
-	29, // 20: nagomi.v1.CategorySpendingItem.spending:type_name -> nagomi.v1.CategorySpendingComparison
-	30, // 21: nagomi.v1.GetCategorySpendingComparisonResponse.current_period:type_name -> nagomi.v1.PeriodInfo
-	30, // 22: nagomi.v1.GetCategorySpendingComparisonResponse.previous_period:type_name -> nagomi.v1.PeriodInfo
+	23, // 0: nagomi.v1.GetDashboardSummaryRequest.start_date:type_name -> google.type.Date
+	23, // 1: nagomi.v1.GetDashboardSummaryRequest.end_date:type_name -> google.type.Date
+	24, // 2: nagomi.v1.GetDashboardSummaryResponse.summary:type_name -> nagomi.v1.DashboardSummary
+	25, // 3: nagomi.v1.GetMonthlyComparisonResponse.comparisons:type_name -> nagomi.v1.MonthlyComparison
+	23, // 4: nagomi.v1.GetTopCategoriesRequest.start_date:type_name -> google.type.Date
+	23, // 5: nagomi.v1.GetTopCategoriesRequest.end_date:type_name -> google.type.Date
+	26, // 6: nagomi.v1.GetTopCategoriesResponse.categories:type_name -> nagomi.v1.TopCategory
+	23, // 7: nagomi.v1.GetTopMerchantsRequest.start_date:type_name -> google.type.Date
+	23, // 8: nagomi.v1.GetTopMerchantsRequest.end_date:type_name -> google.type.Date
+	27, // 9: nagomi.v1.GetTopMerchantsResponse.merchants:type_name -> nagomi.v1.TopMerchant
+	23, // 10: nagomi.v1.GetSpendingTrendsRequest.start_date:type_name -> google.type.Date
+	23, // 11: nagomi.v1.GetSpendingTrendsRequest.end_date:type_name -> google.type.Date
+	28, // 12: nagomi.v1.GetSpendingTrendsResponse.trends:type_name -> nagomi.v1.TrendPoint
+	29, // 13: nagomi.v1.GetFinancialSummaryResponse.total_balance:type_name -> google.type.Money
+	29, // 14: nagomi.v1.GetFinancialSummaryResponse.total_debt:type_name -> google.type.Money
+	29, // 15: nagomi.v1.GetFinancialSummaryResponse.net_balance:type_name -> google.type.Money
+	30, // 16: nagomi.v1.GetCategorySpendingComparisonRequest.period_type:type_name -> nagomi.v1.PeriodType
+	23, // 17: nagomi.v1.GetCategorySpendingComparisonRequest.custom_start_date:type_name -> google.type.Date
+	23, // 18: nagomi.v1.GetCategorySpendingComparisonRequest.custom_end_date:type_name -> google.type.Date
+	31, // 19: nagomi.v1.CategorySpendingItem.category:type_name -> nagomi.v1.Category
+	32, // 20: nagomi.v1.CategorySpendingItem.spending:type_name -> nagomi.v1.CategorySpendingComparison
+	33, // 21: nagomi.v1.GetCategorySpendingComparisonResponse.current_period:type_name -> nagomi.v1.PeriodInfo
+	33, // 22: nagomi.v1.GetCategorySpendingComparisonResponse.previous_period:type_name -> nagomi.v1.PeriodInfo
 	13, // 23: nagomi.v1.GetCategorySpendingComparisonResponse.categories:type_name -> nagomi.v1.CategorySpendingItem
-	29, // 24: nagomi.v1.GetCategorySpendingComparisonResponse.uncategorized:type_name -> nagomi.v1.CategorySpendingComparison
-	31, // 25: nagomi.v1.GetCategorySpendingComparisonResponse.totals:type_name -> nagomi.v1.CategorySpendingTotals
-	20, // 26: nagomi.v1.GetNetWorthHistoryRequest.start_date:type_name -> google.type.Date
-	20, // 27: nagomi.v1.GetNetWorthHistoryRequest.end_date:type_name -> google.type.Date
-	32, // 28: nagomi.v1.GetNetWorthHistoryRequest.granularity:type_name -> nagomi.v1.Granularity
-	33, // 29: nagomi.v1.GetNetWorthHistoryResponse.data_points:type_name -> nagomi.v1.NetWorthPoint
-	17, // 30: nagomi.v1.GetCurrenciesResponse.currencies:type_name -> nagomi.v1.CurrencyInfo
-	0,  // 31: nagomi.v1.DashboardService.GetDashboardSummary:input_type -> nagomi.v1.GetDashboardSummaryRequest
-	2,  // 32: nagomi.v1.DashboardService.GetMonthlyComparison:input_type -> nagomi.v1.GetMonthlyComparisonRequest
-	4,  // 33: nagomi.v1.DashboardService.GetTopCategories:input_type -> nagomi.v1.GetTopCategoriesRequest
-	6,  // 34: nagomi.v1.DashboardService.GetTopMerchants:input_type -> nagomi.v1.GetTopMerchantsRequest
-	8,  // 35: nagomi.v1.DashboardService.GetSpendingTrends:input_type -> nagomi.v1.GetSpendingTrendsRequest
-	10, // 36: nagomi.v1.DashboardService.GetFinancialSummary:input_type -> nagomi.v1.GetFinancialSummaryRequest
-	12, // 37: nagomi.v1.DashboardService.GetCategorySpendingComparison:input_type -> nagomi.v1.GetCategorySpendingComparisonRequest
-	15, // 38: nagomi.v1.DashboardService.GetNetWorthHistory:input_type -> nagomi.v1.GetNetWorthHistoryRequest
-	18, // 39: nagomi.v1.DashboardService.GetCurrencies:input_type -> nagomi.v1.GetCurrenciesRequest
-	1,  // 40: nagomi.v1.DashboardService.GetDashboardSummary:output_type -> nagomi.v1.GetDashboardSummaryResponse
-	3,  // 41: nagomi.v1.DashboardService.GetMonthlyComparison:output_type -> nagomi.v1.GetMonthlyComparisonResponse
-	5,  // 42: nagomi.v1.DashboardService.GetTopCategories:output_type -> nagomi.v1.GetTopCategoriesResponse
-	7,  // 43: nagomi.v1.DashboardService.GetTopMerchants:output_type -> nagomi.v1.GetTopMerchantsResponse
-	9,  // 44: nagomi.v1.DashboardService.GetSpendingTrends:output_type -> nagomi.v1.GetSpendingTrendsResponse
-	11, // 45: nagomi.v1.DashboardService.GetFinancialSummary:output_type -> nagomi.v1.GetFinancialSummaryResponse
-	14, // 46: nagomi.v1.DashboardService.GetCategorySpendingComparison:output_type -> nagomi.v1.GetCategorySpendingComparisonResponse
-	16, // 47: nagomi.v1.DashboardService.GetNetWorthHistory:output_type -> nagomi.v1.GetNetWorthHistoryResponse
-	19, // 48: nagomi.v1.DashboardService.GetCurrencies:output_type -> nagomi.v1.GetCurrenciesResponse
-	40, // [40:49] is the sub-list for method output_type
-	31, // [31:40] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	32, // 24: nagomi.v1.GetCategorySpendingComparisonResponse.uncategorized:type_name -> nagomi.v1.CategorySpendingComparison
+	34, // 25: nagomi.v1.GetCategorySpendingComparisonResponse.totals:type_name -> nagomi.v1.CategorySpendingTotals
+	23, // 26: nagomi.v1.GetNetWorthHistoryRequest.start_date:type_name -> google.type.Date
+	23, // 27: nagomi.v1.GetNetWorthHistoryRequest.end_date:type_name -> google.type.Date
+	35, // 28: nagomi.v1.GetNetWorthHistoryRequest.granularity:type_name -> nagomi.v1.Granularity
+	36, // 29: nagomi.v1.GetNetWorthHistoryResponse.data_points:type_name -> nagomi.v1.NetWorthPoint
+	22, // 30: nagomi.v1.GetExchangeRatesResponse.rates:type_name -> nagomi.v1.GetExchangeRatesResponse.RatesEntry
+	17, // 31: nagomi.v1.GetCurrenciesResponse.currencies:type_name -> nagomi.v1.CurrencyInfo
+	0,  // 32: nagomi.v1.DashboardService.GetDashboardSummary:input_type -> nagomi.v1.GetDashboardSummaryRequest
+	2,  // 33: nagomi.v1.DashboardService.GetMonthlyComparison:input_type -> nagomi.v1.GetMonthlyComparisonRequest
+	4,  // 34: nagomi.v1.DashboardService.GetTopCategories:input_type -> nagomi.v1.GetTopCategoriesRequest
+	6,  // 35: nagomi.v1.DashboardService.GetTopMerchants:input_type -> nagomi.v1.GetTopMerchantsRequest
+	8,  // 36: nagomi.v1.DashboardService.GetSpendingTrends:input_type -> nagomi.v1.GetSpendingTrendsRequest
+	10, // 37: nagomi.v1.DashboardService.GetFinancialSummary:input_type -> nagomi.v1.GetFinancialSummaryRequest
+	12, // 38: nagomi.v1.DashboardService.GetCategorySpendingComparison:input_type -> nagomi.v1.GetCategorySpendingComparisonRequest
+	15, // 39: nagomi.v1.DashboardService.GetNetWorthHistory:input_type -> nagomi.v1.GetNetWorthHistoryRequest
+	18, // 40: nagomi.v1.DashboardService.GetCurrencies:input_type -> nagomi.v1.GetCurrenciesRequest
+	19, // 41: nagomi.v1.DashboardService.GetExchangeRates:input_type -> nagomi.v1.GetExchangeRatesRequest
+	1,  // 42: nagomi.v1.DashboardService.GetDashboardSummary:output_type -> nagomi.v1.GetDashboardSummaryResponse
+	3,  // 43: nagomi.v1.DashboardService.GetMonthlyComparison:output_type -> nagomi.v1.GetMonthlyComparisonResponse
+	5,  // 44: nagomi.v1.DashboardService.GetTopCategories:output_type -> nagomi.v1.GetTopCategoriesResponse
+	7,  // 45: nagomi.v1.DashboardService.GetTopMerchants:output_type -> nagomi.v1.GetTopMerchantsResponse
+	9,  // 46: nagomi.v1.DashboardService.GetSpendingTrends:output_type -> nagomi.v1.GetSpendingTrendsResponse
+	11, // 47: nagomi.v1.DashboardService.GetFinancialSummary:output_type -> nagomi.v1.GetFinancialSummaryResponse
+	14, // 48: nagomi.v1.DashboardService.GetCategorySpendingComparison:output_type -> nagomi.v1.GetCategorySpendingComparisonResponse
+	16, // 49: nagomi.v1.DashboardService.GetNetWorthHistory:output_type -> nagomi.v1.GetNetWorthHistoryResponse
+	21, // 50: nagomi.v1.DashboardService.GetCurrencies:output_type -> nagomi.v1.GetCurrenciesResponse
+	20, // 51: nagomi.v1.DashboardService.GetExchangeRates:output_type -> nagomi.v1.GetExchangeRatesResponse
+	42, // [42:52] is the sub-list for method output_type
+	32, // [32:42] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_dashboard_services_proto_init() }
@@ -1367,7 +1491,7 @@ func file_nagomi_v1_dashboard_services_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_dashboard_services_proto_rawDesc), len(file_nagomi_v1_dashboard_services_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

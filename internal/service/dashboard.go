@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -77,6 +79,7 @@ type DashboardService interface {
 	GetNetWorthHistory(ctx context.Context, params NetWorthHistoryParams) ([]*pb.NetWorthPoint, error)
 	GetEarliestTransactionDate(ctx context.Context, userID uuid.UUID) (time.Time, error)
 	GetCurrencies(ctx context.Context) ([]*pb.CurrencyInfo, error)
+	GetExchangeRates(ctx context.Context, reportingCurrency string, currencies []string) (map[string]float64, error)
 }
 
 type dashSvc struct {
@@ -350,4 +353,35 @@ func (s *dashSvc) GetCurrencies(_ context.Context) ([]*pb.CurrencyInfo, error) {
 	sort.Slice(result, func(i, j int) bool { return result[i].Code < result[j].Code })
 
 	return result, nil
+}
+
+func (s *dashSvc) GetExchangeRates(ctx context.Context, reportingCurrency string, currencies []string) (map[string]float64, error) {
+	if len(reportingCurrency) != 3 || len(currencies) > 50 {
+		return nil, fmt.Errorf("invalid reporting currency or too many currencies: %w", ErrValidation)
+	}
+	rates := make(map[string]float64, len(currencies))
+	for _, currency := range currencies {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		if len(currency) != 3 {
+			return nil, fmt.Errorf("invalid currency: %w", ErrValidation)
+		}
+		if _, ok := rates[currency]; ok {
+			continue
+		}
+		if currency == reportingCurrency {
+			rates[currency] = 1
+			continue
+		}
+		rate, err := s.exchangeClient.GetExchangeRate(currency, reportingCurrency, nil)
+		if err != nil {
+			return nil, wrapErr("DashboardService.GetExchangeRates", err)
+		}
+		if rate <= 0 || math.IsNaN(rate) || math.IsInf(rate, 0) {
+			return nil, fmt.Errorf("invalid exchange rate for %s", currency)
+		}
+		rates[currency] = rate
+	}
+	return rates, nil
 }

@@ -60,6 +60,9 @@ const (
 	// DashboardServiceGetCurrenciesProcedure is the fully-qualified name of the DashboardService's
 	// GetCurrencies RPC.
 	DashboardServiceGetCurrenciesProcedure = "/nagomi.v1.DashboardService/GetCurrencies"
+	// DashboardServiceGetExchangeRatesProcedure is the fully-qualified name of the DashboardService's
+	// GetExchangeRates RPC.
+	DashboardServiceGetExchangeRatesProcedure = "/nagomi.v1.DashboardService/GetExchangeRates"
 )
 
 // DashboardServiceClient is a client for the nagomi.v1.DashboardService service.
@@ -75,6 +78,8 @@ type DashboardServiceClient interface {
 	GetCategorySpendingComparison(context.Context, *connect.Request[v1.GetCategorySpendingComparisonRequest]) (*connect.Response[v1.GetCategorySpendingComparisonResponse], error)
 	GetNetWorthHistory(context.Context, *connect.Request[v1.GetNetWorthHistoryRequest]) (*connect.Response[v1.GetNetWorthHistoryResponse], error)
 	GetCurrencies(context.Context, *connect.Request[v1.GetCurrenciesRequest]) (*connect.Response[v1.GetCurrenciesResponse], error)
+	// Latest exchange rates for reporting; source amounts remain in account currency.
+	GetExchangeRates(context.Context, *connect.Request[v1.GetExchangeRatesRequest]) (*connect.Response[v1.GetExchangeRatesResponse], error)
 }
 
 // NewDashboardServiceClient constructs a client for the nagomi.v1.DashboardService service. By
@@ -142,6 +147,12 @@ func NewDashboardServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(dashboardServiceMethods.ByName("GetCurrencies")),
 			connect.WithClientOptions(opts...),
 		),
+		getExchangeRates: connect.NewClient[v1.GetExchangeRatesRequest, v1.GetExchangeRatesResponse](
+			httpClient,
+			baseURL+DashboardServiceGetExchangeRatesProcedure,
+			connect.WithSchema(dashboardServiceMethods.ByName("GetExchangeRates")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -156,6 +167,7 @@ type dashboardServiceClient struct {
 	getCategorySpendingComparison *connect.Client[v1.GetCategorySpendingComparisonRequest, v1.GetCategorySpendingComparisonResponse]
 	getNetWorthHistory            *connect.Client[v1.GetNetWorthHistoryRequest, v1.GetNetWorthHistoryResponse]
 	getCurrencies                 *connect.Client[v1.GetCurrenciesRequest, v1.GetCurrenciesResponse]
+	getExchangeRates              *connect.Client[v1.GetExchangeRatesRequest, v1.GetExchangeRatesResponse]
 }
 
 // GetDashboardSummary calls nagomi.v1.DashboardService.GetDashboardSummary.
@@ -203,6 +215,11 @@ func (c *dashboardServiceClient) GetCurrencies(ctx context.Context, req *connect
 	return c.getCurrencies.CallUnary(ctx, req)
 }
 
+// GetExchangeRates calls nagomi.v1.DashboardService.GetExchangeRates.
+func (c *dashboardServiceClient) GetExchangeRates(ctx context.Context, req *connect.Request[v1.GetExchangeRatesRequest]) (*connect.Response[v1.GetExchangeRatesResponse], error) {
+	return c.getExchangeRates.CallUnary(ctx, req)
+}
+
 // DashboardServiceHandler is an implementation of the nagomi.v1.DashboardService service.
 type DashboardServiceHandler interface {
 	GetDashboardSummary(context.Context, *connect.Request[v1.GetDashboardSummaryRequest]) (*connect.Response[v1.GetDashboardSummaryResponse], error)
@@ -216,6 +233,8 @@ type DashboardServiceHandler interface {
 	GetCategorySpendingComparison(context.Context, *connect.Request[v1.GetCategorySpendingComparisonRequest]) (*connect.Response[v1.GetCategorySpendingComparisonResponse], error)
 	GetNetWorthHistory(context.Context, *connect.Request[v1.GetNetWorthHistoryRequest]) (*connect.Response[v1.GetNetWorthHistoryResponse], error)
 	GetCurrencies(context.Context, *connect.Request[v1.GetCurrenciesRequest]) (*connect.Response[v1.GetCurrenciesResponse], error)
+	// Latest exchange rates for reporting; source amounts remain in account currency.
+	GetExchangeRates(context.Context, *connect.Request[v1.GetExchangeRatesRequest]) (*connect.Response[v1.GetExchangeRatesResponse], error)
 }
 
 // NewDashboardServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -279,6 +298,12 @@ func NewDashboardServiceHandler(svc DashboardServiceHandler, opts ...connect.Han
 		connect.WithSchema(dashboardServiceMethods.ByName("GetCurrencies")),
 		connect.WithHandlerOptions(opts...),
 	)
+	dashboardServiceGetExchangeRatesHandler := connect.NewUnaryHandler(
+		DashboardServiceGetExchangeRatesProcedure,
+		svc.GetExchangeRates,
+		connect.WithSchema(dashboardServiceMethods.ByName("GetExchangeRates")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/nagomi.v1.DashboardService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DashboardServiceGetDashboardSummaryProcedure:
@@ -299,6 +324,8 @@ func NewDashboardServiceHandler(svc DashboardServiceHandler, opts ...connect.Han
 			dashboardServiceGetNetWorthHistoryHandler.ServeHTTP(w, r)
 		case DashboardServiceGetCurrenciesProcedure:
 			dashboardServiceGetCurrenciesHandler.ServeHTTP(w, r)
+		case DashboardServiceGetExchangeRatesProcedure:
+			dashboardServiceGetExchangeRatesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -342,4 +369,8 @@ func (UnimplementedDashboardServiceHandler) GetNetWorthHistory(context.Context, 
 
 func (UnimplementedDashboardServiceHandler) GetCurrencies(context.Context, *connect.Request[v1.GetCurrenciesRequest]) (*connect.Response[v1.GetCurrenciesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.DashboardService.GetCurrencies is not implemented"))
+}
+
+func (UnimplementedDashboardServiceHandler) GetExchangeRates(context.Context, *connect.Request[v1.GetExchangeRatesRequest]) (*connect.Response[v1.GetExchangeRatesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.DashboardService.GetExchangeRates is not implemented"))
 }

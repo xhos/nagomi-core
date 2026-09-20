@@ -384,3 +384,11 @@ func (s *Server) GetCurrencies(ctx context.Context, _ *connect.Request[pb.GetCur
 		Currencies: currencies,
 	}), nil
 }
+
+func (s *Server) GetExchangeRates(ctx context.Context, req *connect.Request[pb.GetExchangeRatesRequest]) (*connect.Response[pb.GetExchangeRatesResponse], error) {
+	rates, err := s.services.Dashboard.GetExchangeRates(ctx, req.Msg.ReportingCurrency, req.Msg.Currencies)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+	return connect.NewResponse(&pb.GetExchangeRatesResponse{ReportingCurrency: req.Msg.ReportingCurrency, Rates: rates}), nil
+}

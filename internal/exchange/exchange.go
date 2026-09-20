@@ -15,11 +15,12 @@ type rateEntry struct {
 }
 
 type Client struct {
-	baseURL        string
-	httpClient     *http.Client
-	supportedCodes map[string]bool
-	currencyNames  map[string]string
-	codesLoaded    bool
+	baseURL         string
+	httpClient      *http.Client
+	supportedCodes  map[string]bool
+	currencyNames   map[string]string
+	codesLoaded     bool
+	currencyCacheMu sync.Mutex
 
 	rateCacheMu  sync.RWMutex
 	rateCache    map[string]rateEntry
@@ -50,6 +51,8 @@ func NewClient(baseURL string) *Client {
 
 // loadSupportedCurrencies fetches and caches supported currency codes
 func (c *Client) loadSupportedCurrencies() error {
+	c.currencyCacheMu.Lock()
+	defer c.currencyCacheMu.Unlock()
 	if c.codesLoaded {
 		return nil
 	}

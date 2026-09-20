@@ -28,6 +28,7 @@ const (
 	DashboardService_GetCategorySpendingComparison_FullMethodName = "/nagomi.v1.DashboardService/GetCategorySpendingComparison"
 	DashboardService_GetNetWorthHistory_FullMethodName            = "/nagomi.v1.DashboardService/GetNetWorthHistory"
 	DashboardService_GetCurrencies_FullMethodName                 = "/nagomi.v1.DashboardService/GetCurrencies"
+	DashboardService_GetExchangeRates_FullMethodName              = "/nagomi.v1.DashboardService/GetExchangeRates"
 )
 
 // DashboardServiceClient is the client API for DashboardService service.
@@ -47,6 +48,8 @@ type DashboardServiceClient interface {
 	GetCategorySpendingComparison(ctx context.Context, in *GetCategorySpendingComparisonRequest, opts ...grpc.CallOption) (*GetCategorySpendingComparisonResponse, error)
 	GetNetWorthHistory(ctx context.Context, in *GetNetWorthHistoryRequest, opts ...grpc.CallOption) (*GetNetWorthHistoryResponse, error)
 	GetCurrencies(ctx context.Context, in *GetCurrenciesRequest, opts ...grpc.CallOption) (*GetCurrenciesResponse, error)
+	// Latest exchange rates for reporting; source amounts remain in account currency.
+	GetExchangeRates(ctx context.Context, in *GetExchangeRatesRequest, opts ...grpc.CallOption) (*GetExchangeRatesResponse, error)
 }
 
 type dashboardServiceClient struct {
@@ -147,6 +150,16 @@ func (c *dashboardServiceClient) GetCurrencies(ctx context.Context, in *GetCurre
 	return out, nil
 }
 
+func (c *dashboardServiceClient) GetExchangeRates(ctx context.Context, in *GetExchangeRatesRequest, opts ...grpc.CallOption) (*GetExchangeRatesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExchangeRatesResponse)
+	err := c.cc.Invoke(ctx, DashboardService_GetExchangeRates_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DashboardServiceServer is the server API for DashboardService service.
 // All implementations must embed UnimplementedDashboardServiceServer
 // for forward compatibility.
@@ -164,6 +177,8 @@ type DashboardServiceServer interface {
 	GetCategorySpendingComparison(context.Context, *GetCategorySpendingComparisonRequest) (*GetCategorySpendingComparisonResponse, error)
 	GetNetWorthHistory(context.Context, *GetNetWorthHistoryRequest) (*GetNetWorthHistoryResponse, error)
 	GetCurrencies(context.Context, *GetCurrenciesRequest) (*GetCurrenciesResponse, error)
+	// Latest exchange rates for reporting; source amounts remain in account currency.
+	GetExchangeRates(context.Context, *GetExchangeRatesRequest) (*GetExchangeRatesResponse, error)
 	mustEmbedUnimplementedDashboardServiceServer()
 }
 
@@ -200,6 +215,9 @@ func (UnimplementedDashboardServiceServer) GetNetWorthHistory(context.Context, *
 }
 func (UnimplementedDashboardServiceServer) GetCurrencies(context.Context, *GetCurrenciesRequest) (*GetCurrenciesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrencies not implemented")
+}
+func (UnimplementedDashboardServiceServer) GetExchangeRates(context.Context, *GetExchangeRatesRequest) (*GetExchangeRatesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetExchangeRates not implemented")
 }
 func (UnimplementedDashboardServiceServer) mustEmbedUnimplementedDashboardServiceServer() {}
 func (UnimplementedDashboardServiceServer) testEmbeddedByValue()                          {}
@@ -384,6 +402,24 @@ func _DashboardService_GetCurrencies_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DashboardService_GetExchangeRates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExchangeRatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DashboardServiceServer).GetExchangeRates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DashboardService_GetExchangeRates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DashboardServiceServer).GetExchangeRates(ctx, req.(*GetExchangeRatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DashboardService_ServiceDesc is the grpc.ServiceDesc for DashboardService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -426,6 +462,10 @@ var DashboardService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrencies",
 			Handler:    _DashboardService_GetCurrencies_Handler,
+		},
+		{
+			MethodName: "GetExchangeRates",
+			Handler:    _DashboardService_GetExchangeRates_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
