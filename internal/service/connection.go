@@ -59,6 +59,9 @@ func (s *connectionSvc) List(ctx context.Context, userID uuid.UUID) ([]Connectio
 }
 
 func (s *connectionSvc) Create(ctx context.Context, userID uuid.UUID, provider string, credentialsJSON []byte, syncIntervalMinutes *int32) (int64, error) {
+	if syncIntervalMinutes != nil && *syncIntervalMinutes <= 0 {
+		return 0, fmt.Errorf("sync interval must be positive: %w", ErrValidation)
+	}
 	switch provider {
 	case "wise", "snaptrade":
 	default:
@@ -111,6 +114,9 @@ func (s *connectionSvc) TriggerSync(ctx context.Context, userID uuid.UUID, id in
 }
 
 func (s *connectionSvc) SetSyncInterval(ctx context.Context, userID uuid.UUID, id int64, minutes *int32) error {
+	if minutes != nil && *minutes <= 0 {
+		return fmt.Errorf("sync interval must be positive: %w", ErrValidation)
+	}
 	affected, err := s.queries.SetSyncInterval(ctx, sqlc.SetSyncIntervalParams{
 		ID:                  id,
 		UserID:              userID,

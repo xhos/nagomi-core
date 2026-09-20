@@ -1,7 +1,7 @@
 -- name: ListDueSyncJobs :many
 select *
 from connected_accounts
-where status = 'active' and next_run_at is not null and next_run_at <= now()
+where status in ('active', 'broken') and next_run_at is not null and next_run_at <= now()
 order by next_run_at;
 
 -- name: GetConnectedAccount :one
@@ -11,7 +11,7 @@ where id = @id::bigint;
 
 -- name: CompleteSyncJob :exec
 update connected_accounts
-set sync_cursor = sqlc.narg('sync_cursor')::timestamptz,
+set sync_cursor = coalesce(sqlc.narg('sync_cursor')::timestamptz, sync_cursor),
     status      = coalesce(sqlc.narg('status')::text, status),
     next_run_at = case
       when sync_interval_minutes is not null
@@ -37,14 +37,15 @@ order by created_at desc;
 
 -- name: TriggerSync :execrows
 update connected_accounts
-set next_run_at = now()
+set next_run_at = now(), status = 'active'
 where id = @id::bigint and user_id = @user_id::uuid;
 
 -- name: SetSyncInterval :execrows
 update connected_accounts
 set sync_interval_minutes = sqlc.narg('sync_interval_minutes')::int,
     next_run_at = case
-      when sqlc.narg('sync_interval_minutes')::int is not null and next_run_at is null
+      when sqlc.narg('sync_interval_minutes')::int is null then null
+      when sqlc.narg('sync_interval_minutes')::int is not null
         then now() + (sqlc.narg('sync_interval_minutes')::int * interval '1 minute')
       else next_run_at
     end

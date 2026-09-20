@@ -14,7 +14,7 @@ import (
 
 const completeSyncJob = `-- name: CompleteSyncJob :exec
 update connected_accounts
-set sync_cursor = $1::timestamptz,
+set sync_cursor = coalesce($1::timestamptz, sync_cursor),
     status      = coalesce($2::text, status),
     next_run_at = case
       when sync_interval_minutes is not null
@@ -161,7 +161,7 @@ func (q *Queries) ListConnectionsForUser(ctx context.Context, userID uuid.UUID) 
 const listDueSyncJobs = `-- name: ListDueSyncJobs :many
 select id, user_id, provider, credentials, sync_cursor, status, created_at, updated_at, sync_interval_minutes, next_run_at
 from connected_accounts
-where status = 'active' and next_run_at is not null and next_run_at <= now()
+where status in ('active', 'broken') and next_run_at is not null and next_run_at <= now()
 order by next_run_at
 `
 
@@ -200,7 +200,8 @@ const setSyncInterval = `-- name: SetSyncInterval :execrows
 update connected_accounts
 set sync_interval_minutes = $1::int,
     next_run_at = case
-      when $1::int is not null and next_run_at is null
+      when $1::int is null then null
+      when $1::int is not null
         then now() + ($1::int * interval '1 minute')
       else next_run_at
     end
@@ -223,7 +224,7 @@ func (q *Queries) SetSyncInterval(ctx context.Context, arg SetSyncIntervalParams
 
 const triggerSync = `-- name: TriggerSync :execrows
 update connected_accounts
-set next_run_at = now()
+set next_run_at = now(), status = 'active'
 where id = $1::bigint and user_id = $2::uuid
 `
 
