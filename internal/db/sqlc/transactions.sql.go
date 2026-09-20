@@ -236,6 +236,115 @@ func (q *Queries) CategorizeTransactionAtomic(ctx context.Context, arg Categoriz
 	return i, err
 }
 
+const countTransactions = `-- name: CountTransactions :one
+select count(*)
+from
+  transactions t
+  join accounts a on t.account_id = a.id
+  left join account_users au on a.id = au.account_id
+  and au.user_id = $1::uuid
+  left join categories c on t.category_id = c.id
+where
+  (
+    a.owner_id = $1::uuid
+    or au.user_id is not null
+  )
+  and (
+    $2::timestamptz is null
+    or t.tx_date >= $2::timestamptz
+  )
+  and (
+    $3::timestamptz is null
+    or t.tx_date <= $3::timestamptz
+  )
+  and (
+    $4::bigint is null
+    or t.tx_amount_cents >= $4::bigint
+  )
+  and (
+    $5::bigint is null
+    or t.tx_amount_cents <= $5::bigint
+  )
+  and (
+    $6::smallint is null
+    or t.tx_direction = $6::smallint
+  )
+  and (
+    $7::bigint [] is null
+    or t.account_id = ANY($7::bigint [])
+  )
+  and (
+    $8::text [] is null
+    or c.slug = ANY($8::text [])
+  )
+  and (
+    $9::text is null
+    or t.merchant ILIKE ('%' || $9::text || '%')
+  )
+  and (
+    $10::text is null
+    or t.tx_desc ILIKE ('%' || $10::text || '%')
+  )
+  and (
+    $11::char(3) is null
+    or t.tx_currency = $11::char(3)
+  )
+  and (
+    $12::time is null
+    or t.tx_date::time >= $12::time
+  )
+  and (
+    $13::time is null
+    or t.tx_date::time <= $13::time
+  )
+  and (
+    $14::boolean is null
+    or (
+      $14::boolean = true
+      and t.category_id is null
+    )
+  )
+`
+
+type CountTransactionsParams struct {
+	UserID         uuid.UUID   `db:"user_id" json:"user_id"`
+	Start          *time.Time  `db:"start" json:"start"`
+	End            *time.Time  `db:"end" json:"end"`
+	AmountMinCents *int64      `db:"amount_min_cents" json:"amount_min_cents"`
+	AmountMaxCents *int64      `db:"amount_max_cents" json:"amount_max_cents"`
+	Direction      *int16      `db:"direction" json:"direction"`
+	AccountIds     []int64     `db:"account_ids" json:"account_ids"`
+	Categories     []string    `db:"categories" json:"categories"`
+	MerchantQ      *string     `db:"merchant_q" json:"merchant_q"`
+	DescQ          *string     `db:"desc_q" json:"desc_q"`
+	Currency       *string     `db:"currency" json:"currency"`
+	TodStart       pgtype.Time `db:"tod_start" json:"tod_start"`
+	TodEnd         pgtype.Time `db:"tod_end" json:"tod_end"`
+	Uncategorized  *bool       `db:"uncategorized" json:"uncategorized"`
+}
+
+func (q *Queries) CountTransactions(ctx context.Context, arg CountTransactionsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countTransactions,
+		arg.UserID,
+		arg.Start,
+		arg.End,
+		arg.AmountMinCents,
+		arg.AmountMaxCents,
+		arg.Direction,
+		arg.AccountIds,
+		arg.Categories,
+		arg.MerchantQ,
+		arg.DescQ,
+		arg.Currency,
+		arg.TodStart,
+		arg.TodEnd,
+		arg.Uncategorized,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createTransaction = `-- name: CreateTransaction :one
 insert into
   transactions (
@@ -940,27 +1049,27 @@ set
   tx_currency = coalesce($5::char(3), tx_currency),
   tx_direction = coalesce($6::smallint, tx_direction),
   tx_desc = coalesce($7::text, tx_desc),
-  category_id = coalesce($8::bigint, category_id),
-  merchant = coalesce($9::text, merchant),
-  user_notes = coalesce($10::text, user_notes),
-  foreign_amount_cents = coalesce($11::bigint, foreign_amount_cents),
-  foreign_currency = coalesce($12::char(3), foreign_currency),
-  exchange_rate = coalesce($13::double precision, exchange_rate),
-  suggestions = coalesce($14::text[], suggestions),
-  category_manually_set = coalesce($15::boolean, category_manually_set),
-  merchant_manually_set = coalesce($16::boolean, merchant_manually_set),
-  forgiven = coalesce($17::boolean, forgiven)
+  category_id = case when $8::boolean then null else coalesce($9::bigint, category_id) end,
+  merchant = coalesce($10::text, merchant),
+  user_notes = coalesce($11::text, user_notes),
+  foreign_amount_cents = coalesce($12::bigint, foreign_amount_cents),
+  foreign_currency = coalesce($13::char(3), foreign_currency),
+  exchange_rate = coalesce($14::double precision, exchange_rate),
+  suggestions = coalesce($15::text[], suggestions),
+  category_manually_set = coalesce($16::boolean, category_manually_set),
+  merchant_manually_set = coalesce($17::boolean, merchant_manually_set),
+  forgiven = coalesce($18::boolean, forgiven)
 where
-  id = $18::bigint
+  id = $19::bigint
   and account_id in (
     select
       a.id
     from
       accounts a
       left join account_users au on a.id = au.account_id
-      and au.user_id = $19::uuid
+      and au.user_id = $20::uuid
     where
-      a.owner_id = $19::uuid
+      a.owner_id = $20::uuid
       or au.user_id is not null
   )
 `
@@ -973,6 +1082,7 @@ type UpdateTransactionParams struct {
 	TxCurrency          *string    `db:"tx_currency" json:"tx_currency"`
 	TxDirection         *int16     `db:"tx_direction" json:"tx_direction"`
 	TxDesc              *string    `db:"tx_desc" json:"tx_desc"`
+	ClearCategory       bool       `db:"clear_category" json:"clear_category"`
 	CategoryID          *int64     `db:"category_id" json:"category_id"`
 	Merchant            *string    `db:"merchant" json:"merchant"`
 	UserNotes           *string    `db:"user_notes" json:"user_notes"`
@@ -996,6 +1106,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		arg.TxCurrency,
 		arg.TxDirection,
 		arg.TxDesc,
+		arg.ClearCategory,
 		arg.CategoryID,
 		arg.Merchant,
 		arg.UserNotes,

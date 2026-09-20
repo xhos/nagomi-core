@@ -82,6 +82,75 @@ order by
 limit
   COALESCE(sqlc.narg('limit')::int, 100);
 
+-- name: CountTransactions :one
+select count(*)
+from
+  transactions t
+  join accounts a on t.account_id = a.id
+  left join account_users au on a.id = au.account_id
+  and au.user_id = sqlc.arg(user_id)::uuid
+  left join categories c on t.category_id = c.id
+where
+  (
+    a.owner_id = sqlc.arg(user_id)::uuid
+    or au.user_id is not null
+  )
+  and (
+    sqlc.narg('start')::timestamptz is null
+    or t.tx_date >= sqlc.narg('start')::timestamptz
+  )
+  and (
+    sqlc.narg('end')::timestamptz is null
+    or t.tx_date <= sqlc.narg('end')::timestamptz
+  )
+  and (
+    sqlc.narg('amount_min_cents')::bigint is null
+    or t.tx_amount_cents >= sqlc.narg('amount_min_cents')::bigint
+  )
+  and (
+    sqlc.narg('amount_max_cents')::bigint is null
+    or t.tx_amount_cents <= sqlc.narg('amount_max_cents')::bigint
+  )
+  and (
+    sqlc.narg('direction')::smallint is null
+    or t.tx_direction = sqlc.narg('direction')::smallint
+  )
+  and (
+    sqlc.narg('account_ids')::bigint [] is null
+    or t.account_id = ANY(sqlc.narg('account_ids')::bigint [])
+  )
+  and (
+    sqlc.narg('categories')::text [] is null
+    or c.slug = ANY(sqlc.narg('categories')::text [])
+  )
+  and (
+    sqlc.narg('merchant_q')::text is null
+    or t.merchant ILIKE ('%' || sqlc.narg('merchant_q')::text || '%')
+  )
+  and (
+    sqlc.narg('desc_q')::text is null
+    or t.tx_desc ILIKE ('%' || sqlc.narg('desc_q')::text || '%')
+  )
+  and (
+    sqlc.narg('currency')::char(3) is null
+    or t.tx_currency = sqlc.narg('currency')::char(3)
+  )
+  and (
+    sqlc.narg('tod_start')::time is null
+    or t.tx_date::time >= sqlc.narg('tod_start')::time
+  )
+  and (
+    sqlc.narg('tod_end')::time is null
+    or t.tx_date::time <= sqlc.narg('tod_end')::time
+  )
+  and (
+    sqlc.narg('uncategorized')::boolean is null
+    or (
+      sqlc.narg('uncategorized')::boolean = true
+      and t.category_id is null
+    )
+  );
+
 -- name: GetTransaction :one
 select
   t.*
@@ -199,7 +268,7 @@ set
   tx_currency = coalesce(sqlc.narg('tx_currency')::char(3), tx_currency),
   tx_direction = coalesce(sqlc.narg('tx_direction')::smallint, tx_direction),
   tx_desc = coalesce(sqlc.narg('tx_desc')::text, tx_desc),
-  category_id = coalesce(sqlc.narg('category_id')::bigint, category_id),
+  category_id = case when @clear_category::boolean then null else coalesce(sqlc.narg('category_id')::bigint, category_id) end,
   merchant = coalesce(sqlc.narg('merchant')::text, merchant),
   user_notes = coalesce(sqlc.narg('user_notes')::text, user_notes),
   foreign_amount_cents = coalesce(sqlc.narg('foreign_amount_cents')::bigint, foreign_amount_cents),

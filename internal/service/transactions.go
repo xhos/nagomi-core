@@ -23,6 +23,7 @@ type TransactionService interface {
 	Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateTransactionRequest) error
 	Delete(ctx context.Context, userID uuid.UUID, ids []int64) error
 	List(ctx context.Context, userID uuid.UUID, req *pb.ListTransactionsRequest) ([]*pb.Transaction, *pb.Cursor, error)
+	Count(ctx context.Context, userID uuid.UUID, req *pb.ListTransactionsRequest) (int64, error)
 	Categorize(ctx context.Context, userID uuid.UUID, transactionIDs []int64, categoryID int64) error
 	SplitTransaction(ctx context.Context, userID uuid.UUID, req *pb.SplitTransactionRequest) ([]*pb.Transaction, error)
 	ForgiveTransaction(ctx context.Context, userID uuid.UUID, transactionID int64, forgiven bool) error
@@ -241,6 +242,17 @@ func (s *txnSvc) List(ctx context.Context, userID uuid.UUID, req *pb.ListTransac
 	}
 
 	return result, nextCursor, nil
+}
+
+func (s *txnSvc) Count(ctx context.Context, userID uuid.UUID, req *pb.ListTransactionsRequest) (int64, error) {
+	p := buildListTxParams(userID, req)
+	return s.queries.CountTransactions(ctx, sqlc.CountTransactionsParams{
+		UserID: p.UserID, Start: p.Start, End: p.End,
+		AmountMinCents: p.AmountMinCents, AmountMaxCents: p.AmountMaxCents,
+		Direction: p.Direction, AccountIds: p.AccountIds, Categories: p.Categories,
+		MerchantQ: p.MerchantQ, DescQ: p.DescQ, Currency: p.Currency,
+		TodStart: p.TodStart, TodEnd: p.TodEnd, Uncategorized: p.Uncategorized,
+	})
 }
 
 func (s *txnSvc) Categorize(ctx context.Context, userID uuid.UUID, transactionIDs []int64, categoryID int64) error {

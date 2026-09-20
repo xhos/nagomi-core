@@ -19,9 +19,14 @@ func (s *Server) ListTransactions(ctx context.Context, req *connect.Request[pb.L
 		return nil, wrapErr(err)
 	}
 
+	total, err := s.services.Transactions.Count(ctx, userID, req.Msg)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
 	return connect.NewResponse(&pb.ListTransactionsResponse{
 		Transactions: transactions,
-		TotalCount:   int64(len(transactions)),
+		TotalCount:   total,
 		NextCursor:   nextCursor,
 	}), nil
 }

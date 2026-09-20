@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"nagomi-core/internal/db/sqlc"
 	pb "nagomi-core/internal/gen/nagomi/v1"
@@ -171,6 +172,13 @@ func buildUpdateTxParams(userID uuid.UUID, req *pb.UpdateTransactionRequest) sql
 	if req.CategoryId != nil {
 		params.CategoryID = req.CategoryId
 		manuallySet := *req.CategoryId > 0
+		params.CategoryManuallySet = &manuallySet
+	}
+	// An explicitly masked, absent category means the user chose uncategorized.
+	// Keep it manually set so later rule evaluation does not undo that choice.
+	if req.CategoryId == nil && slices.Contains(req.GetUpdateMask().GetPaths(), "category_id") {
+		params.ClearCategory = true
+		manuallySet := true
 		params.CategoryManuallySet = &manuallySet
 	}
 	if req.ForeignAmount != nil {
