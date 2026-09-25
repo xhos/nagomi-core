@@ -2,12 +2,16 @@ package exchange
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 )
+
+// ErrUnsupportedCurrency means the exchange API has no rates for the currency.
+var ErrUnsupportedCurrency = errors.New("not supported")
 
 type rateEntry struct {
 	rate      float64
@@ -27,13 +31,19 @@ type Client struct {
 	rateCacheTTL time.Duration
 }
 
-type RatesResponse struct {
-	Base  string             `json:"base"`
-	Date  string             `json:"date"`
-	Rates map[string]float64 `json:"rates"`
+// Rate is one entry of a Frankfurter v2 /rates response.
+type Rate struct {
+	Date  string  `json:"date"`
+	Base  string  `json:"base"`
+	Quote string  `json:"quote"`
+	Rate  float64 `json:"rate"`
 }
 
-type CurrenciesResponse map[string]string
+// Currency is one entry of a Frankfurter v2 /currencies response.
+type Currency struct {
+	ISOCode string `json:"iso_code"`
+	Name    string `json:"name"`
+}
 
 func NewClient(baseURL string) *Client {
 	return &Client{
@@ -69,15 +79,15 @@ func (c *Client) loadSupportedCurrencies() error {
 		return fmt.Errorf("API returned status %d when fetching currencies", resp.StatusCode)
 	}
 
-	var currencies CurrenciesResponse
+	var currencies []Currency
 	err = json.NewDecoder(resp.Body).Decode(&currencies)
 	if err != nil {
 		return fmt.Errorf("failed to parse currencies response: %w", err)
 	}
 
-	for code, name := range currencies {
-		c.supportedCodes[code] = true
-		c.currencyNames[code] = name
+	for _, cur := range currencies {
+		c.supportedCodes[cur.ISOCode] = true
+		c.currencyNames[cur.ISOCode] = cur.Name
 	}
 	c.codesLoaded = true
 
@@ -97,7 +107,7 @@ func (c *Client) validateCurrency(currencyCode string) error {
 
 	isSupported := c.supportedCodes[currencyCode]
 	if !isSupported {
-		return fmt.Errorf("currency code '%s' is not supported", currencyCode)
+		return fmt.Errorf("currency code '%s' is %w", currencyCode, ErrUnsupportedCurrency)
 	}
 
 	return nil
@@ -107,7 +117,7 @@ func (c *Client) validateCurrency(currencyCode string) error {
 func (c *Client) IsValidCurrency(currencyCode string) (bool, error) {
 	err := c.validateCurrency(currencyCode)
 	if err != nil {
-		if strings.Contains(err.Error(), "is not supported") {
+		if errors.Is(err, ErrUnsupportedCurrency) {
 			return false, nil
 		}
 		return false, err
@@ -147,11 +157,6 @@ func (c *Client) GetExchangeRate(fromCurrency, toCurrency string, date *time.Tim
 		if date.After(tomorrow) {
 			return 0, fmt.Errorf("cannot get exchange rates for future dates")
 		}
-
-		earliestDate := time.Date(1999, 1, 4, 0, 0, 0, 0, time.UTC)
-		if date.Before(earliestDate) {
-			return 0, fmt.Errorf("exchange rates not available before 1999-01-04")
-		}
 	}
 
 	// Build cache key: "USD:EUR:2024-01-15" or "USD:EUR:latest"
@@ -169,11 +174,10 @@ func (c *Client) GetExchangeRate(fromCurrency, toCurrency string, date *time.Tim
 	}
 	c.rateCacheMu.RUnlock()
 
-	var url string
+	// A historical date resolves to the latest published rate on or before it.
+	url := fmt.Sprintf("%s/rates?base=%s&quotes=%s", c.baseURL, fromCurrency, toCurrency)
 	if isHistorical {
-		url = fmt.Sprintf("%s/%s?base=%s&symbols=%s", c.baseURL, dateKey, fromCurrency, toCurrency)
-	} else {
-		url = fmt.Sprintf("%s/latest?base=%s&symbols=%s", c.baseURL, fromCurrency, toCurrency)
+		url += "&date=" + dateKey
 	}
 
 	resp, err := c.httpClient.Get(url)
@@ -186,16 +190,16 @@ func (c *Client) GetExchangeRate(fromCurrency, toCurrency string, date *time.Tim
 		return 0, fmt.Errorf("API returned status %d when fetching exchange rate", resp.StatusCode)
 	}
 
-	var ratesResp RatesResponse
-	err = json.NewDecoder(resp.Body).Decode(&ratesResp)
+	var rates []Rate
+	err = json.NewDecoder(resp.Body).Decode(&rates)
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse rates response: %w", err)
 	}
 
-	rate, exists := ratesResp.Rates[toCurrency]
-	if !exists {
+	if len(rates) == 0 || rates[0].Quote != toCurrency {
 		return 0, fmt.Errorf("exchange rate not found for %s to %s", fromCurrency, toCurrency)
 	}
+	rate := rates[0].Rate
 
 	// Store in cache
 	c.rateCacheMu.Lock()

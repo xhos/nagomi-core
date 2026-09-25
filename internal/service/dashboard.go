@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -375,6 +376,10 @@ func (s *dashSvc) GetExchangeRates(ctx context.Context, reportingCurrency string
 			continue
 		}
 		rate, err := s.exchangeClient.GetExchangeRate(currency, reportingCurrency, nil)
+		if errors.Is(err, exchange.ErrUnsupportedCurrency) {
+			// Left out rather than guessed; callers treat a missing key as unconvertible.
+			continue
+		}
 		if err != nil {
 			return nil, wrapErr("DashboardService.GetExchangeRates", err)
 		}

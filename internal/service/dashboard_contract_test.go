@@ -91,13 +91,13 @@ func TestTransactionDashboardContract(t *testing.T) {
 func TestReportingRates(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/currencies" {
-			_, _ = w.Write([]byte(`{"CAD":"Canadian Dollar","USD":"US Dollar"}`))
+			_, _ = w.Write([]byte(`[{"iso_code":"CAD","name":"Canadian Dollar"},{"iso_code":"USD","name":"US Dollar"}]`))
 			return
 		}
-		if r.URL.Query().Get("base") != "USD" || r.URL.Query().Get("symbols") != "CAD" {
+		if r.URL.Path != "/rates" || r.URL.Query().Get("base") != "USD" || r.URL.Query().Get("quotes") != "CAD" {
 			t.Errorf("wrong conversion: %s", r.URL)
 		}
-		_, _ = w.Write([]byte(`{"rates":{"CAD":1.36}}`))
+		_, _ = w.Write([]byte(`[{"date":"2026-09-24","base":"USD","quote":"CAD","rate":1.36}]`))
 	}))
 	defer server.Close()
 	svc := newDashSvc(nil, exchange.NewClient(server.URL))
@@ -105,7 +105,11 @@ func TestReportingRates(t *testing.T) {
 	if err != nil || rates["CAD"] != 1 || rates["USD"] != 1.36 || len(rates) != 2 {
 		t.Fatalf("rates=%v err=%v", rates, err)
 	}
-	if _, err := svc.GetExchangeRates(context.Background(), "CAD", []string{"XYZ"}); err == nil {
-		t.Fatal("missing rates must fail, not become 1:1")
+	rates, err = svc.GetExchangeRates(context.Background(), "CAD", []string{"USD", "XYZ"})
+	if err != nil || rates["USD"] != 1.36 {
+		t.Fatalf("unsupported currency must not fail the others: rates=%v err=%v", rates, err)
+	}
+	if _, ok := rates["XYZ"]; ok {
+		t.Fatal("unsupported currency must be omitted, not become 1:1")
 	}
 }
