@@ -131,6 +131,64 @@ func (TransactionDirection) EnumDescriptor() ([]byte, []int) {
 	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{1}
 }
 
+type TransactionSource int32
+
+const (
+	TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED TransactionSource = 0
+	TransactionSource_TRANSACTION_SOURCE_MANUAL      TransactionSource = 1
+	TransactionSource_TRANSACTION_SOURCE_EMAIL       TransactionSource = 2
+	TransactionSource_TRANSACTION_SOURCE_CONNECTOR   TransactionSource = 3
+	TransactionSource_TRANSACTION_SOURCE_STATEMENT   TransactionSource = 4
+	TransactionSource_TRANSACTION_SOURCE_SPLIT       TransactionSource = 5
+)
+
+// Enum value maps for TransactionSource.
+var (
+	TransactionSource_name = map[int32]string{
+		0: "TRANSACTION_SOURCE_UNSPECIFIED",
+		1: "TRANSACTION_SOURCE_MANUAL",
+		2: "TRANSACTION_SOURCE_EMAIL",
+		3: "TRANSACTION_SOURCE_CONNECTOR",
+		4: "TRANSACTION_SOURCE_STATEMENT",
+		5: "TRANSACTION_SOURCE_SPLIT",
+	}
+	TransactionSource_value = map[string]int32{
+		"TRANSACTION_SOURCE_UNSPECIFIED": 0,
+		"TRANSACTION_SOURCE_MANUAL":      1,
+		"TRANSACTION_SOURCE_EMAIL":       2,
+		"TRANSACTION_SOURCE_CONNECTOR":   3,
+		"TRANSACTION_SOURCE_STATEMENT":   4,
+		"TRANSACTION_SOURCE_SPLIT":       5,
+	}
+)
+
+func (x TransactionSource) Enum() *TransactionSource {
+	p := new(TransactionSource)
+	*p = x
+	return p
+}
+
+func (x TransactionSource) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TransactionSource) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_enums_proto_enumTypes[2].Descriptor()
+}
+
+func (TransactionSource) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_enums_proto_enumTypes[2]
+}
+
+func (x TransactionSource) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TransactionSource.Descriptor instead.
+func (TransactionSource) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{2}
+}
+
 type PeriodType int32
 
 const (
@@ -182,11 +240,11 @@ func (x PeriodType) String() string {
 }
 
 func (PeriodType) Descriptor() protoreflect.EnumDescriptor {
-	return file_nagomi_v1_enums_proto_enumTypes[2].Descriptor()
+	return file_nagomi_v1_enums_proto_enumTypes[3].Descriptor()
 }
 
 func (PeriodType) Type() protoreflect.EnumType {
-	return &file_nagomi_v1_enums_proto_enumTypes[2]
+	return &file_nagomi_v1_enums_proto_enumTypes[3]
 }
 
 func (x PeriodType) Number() protoreflect.EnumNumber {
@@ -195,7 +253,7 @@ func (x PeriodType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PeriodType.Descriptor instead.
 func (PeriodType) EnumDescriptor() ([]byte, []int) {
-	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{2}
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{3}
 }
 
 type Granularity int32
@@ -234,11 +292,11 @@ func (x Granularity) String() string {
 }
 
 func (Granularity) Descriptor() protoreflect.EnumDescriptor {
-	return file_nagomi_v1_enums_proto_enumTypes[3].Descriptor()
+	return file_nagomi_v1_enums_proto_enumTypes[4].Descriptor()
 }
 
 func (Granularity) Type() protoreflect.EnumType {
-	return &file_nagomi_v1_enums_proto_enumTypes[3]
+	return &file_nagomi_v1_enums_proto_enumTypes[4]
 }
 
 func (x Granularity) Number() protoreflect.EnumNumber {
@@ -247,7 +305,7 @@ func (x Granularity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Granularity.Descriptor instead.
 func (Granularity) EnumDescriptor() ([]byte, []int) {
-	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{3}
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{4}
 }
 
 var File_nagomi_v1_enums_proto protoreflect.FileDescriptor
@@ -266,7 +324,14 @@ const file_nagomi_v1_enums_proto_rawDesc = "" +
 	"\x14TransactionDirection\x12\x19\n" +
 	"\x15DIRECTION_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12DIRECTION_INCOMING\x10\x01\x12\x16\n" +
-	"\x12DIRECTION_OUTGOING\x10\x02*\xf1\x01\n" +
+	"\x12DIRECTION_OUTGOING\x10\x02*\xd6\x01\n" +
+	"\x11TransactionSource\x12\"\n" +
+	"\x1eTRANSACTION_SOURCE_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19TRANSACTION_SOURCE_MANUAL\x10\x01\x12\x1c\n" +
+	"\x18TRANSACTION_SOURCE_EMAIL\x10\x02\x12 \n" +
+	"\x1cTRANSACTION_SOURCE_CONNECTOR\x10\x03\x12 \n" +
+	"\x1cTRANSACTION_SOURCE_STATEMENT\x10\x04\x12\x1c\n" +
+	"\x18TRANSACTION_SOURCE_SPLIT\x10\x05*\xf1\x01\n" +
 	"\n" +
 	"PeriodType\x12\x1b\n" +
 	"\x17PERIOD_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
@@ -299,12 +364,13 @@ func file_nagomi_v1_enums_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_enums_proto_rawDescData
 }
 
-var file_nagomi_v1_enums_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_nagomi_v1_enums_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_nagomi_v1_enums_proto_goTypes = []any{
 	(AccountType)(0),          // 0: nagomi.v1.AccountType
 	(TransactionDirection)(0), // 1: nagomi.v1.TransactionDirection
-	(PeriodType)(0),           // 2: nagomi.v1.PeriodType
-	(Granularity)(0),          // 3: nagomi.v1.Granularity
+	(TransactionSource)(0),    // 2: nagomi.v1.TransactionSource
+	(PeriodType)(0),           // 3: nagomi.v1.PeriodType
+	(Granularity)(0),          // 4: nagomi.v1.Granularity
 }
 var file_nagomi_v1_enums_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -324,7 +390,7 @@ func file_nagomi_v1_enums_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_enums_proto_rawDesc), len(file_nagomi_v1_enums_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      5,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,

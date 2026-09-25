@@ -188,7 +188,8 @@ insert into
     exchange_rate,
     suggestions,
     split_from_id,
-    forgiven
+    forgiven,
+    source
   )
 select
   sqlc.narg('external_id')::text,
@@ -210,7 +211,8 @@ select
   sqlc.narg('exchange_rate')::double precision,
   sqlc.narg('suggestions')::text [],
   sqlc.narg('split_from_id')::bigint,
-  coalesce(sqlc.narg('forgiven')::boolean, false)
+  coalesce(sqlc.narg('forgiven')::boolean, false),
+  coalesce(nullif(sqlc.arg(source)::smallint, 0), 1)
 from
   accounts a
   left join account_users au on a.id = au.account_id

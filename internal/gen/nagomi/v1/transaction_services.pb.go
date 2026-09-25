@@ -375,6 +375,8 @@ type TransactionInput struct {
 	ExchangeRate  *float64               `protobuf:"fixed64,10,opt,name=exchange_rate,json=exchangeRate,proto3,oneof" json:"exchange_rate,omitempty"`
 	SplitFromId   *int64                 `protobuf:"varint,11,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
 	ExternalId    *string                `protobuf:"bytes,12,opt,name=external_id,json=externalId,proto3,oneof" json:"external_id,omitempty"`
+	// unspecified is manual
+	Source        TransactionSource `protobuf:"varint,13,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -491,6 +493,13 @@ func (x *TransactionInput) GetExternalId() string {
 		return *x.ExternalId
 	}
 	return ""
+}
+
+func (x *TransactionInput) GetSource() TransactionSource {
+	if x != nil {
+		return x.Source
+	}
+	return TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED
 }
 
 type CreateTransactionRequest struct {
@@ -1377,7 +1386,7 @@ var File_nagomi_v1_transaction_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\n" +
-	"$nagomi/v1/transaction_services.proto\x12\tnagomi.v1\x1a\x16nagomi/v1/common.proto\x1a\x15nagomi/v1/enums.proto\x1a\x17google/type/money.proto\x1a\x1bnagomi/v1/transaction.proto\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x90\t\n" +
+	"$nagomi/v1/transaction_services.proto\x12\tnagomi.v1\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/type/money.proto\x1a\x16nagomi/v1/common.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bnagomi/v1/transaction.proto\"\x90\t\n" +
 	"\x17ListTransactionsRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12+\n" +
 	"\n" +
@@ -1434,7 +1443,7 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"R\n" +
 	"\x16GetTransactionResponse\x128\n" +
-	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\xad\x05\n" +
+	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\xed\x05\n" +
 	"\x10TransactionInput\x12&\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\x123\n" +
@@ -1452,7 +1461,8 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	" \x01(\x01H\x05R\fexchangeRate\x88\x01\x01\x12'\n" +
 	"\rsplit_from_id\x18\v \x01(\x03H\x06R\vsplitFromId\x88\x01\x01\x12$\n" +
 	"\vexternal_id\x18\f \x01(\tH\aR\n" +
-	"externalId\x88\x01\x01B\x0e\n" +
+	"externalId\x88\x01\x01\x12>\n" +
+	"\x06source\x18\r \x01(\x0e2\x1c.nagomi.v1.TransactionSourceB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06sourceB\x0e\n" +
 	"\f_descriptionB\v\n" +
 	"\t_merchantB\r\n" +
 	"\v_user_notesB\x0e\n" +
@@ -1591,7 +1601,8 @@ var file_nagomi_v1_transaction_services_proto_goTypes = []any{
 	(TransactionDirection)(0),              // 24: nagomi.v1.TransactionDirection
 	(*TimeOfDay)(nil),                      // 25: nagomi.v1.TimeOfDay
 	(*Transaction)(nil),                    // 26: nagomi.v1.Transaction
-	(*fieldmaskpb.FieldMask)(nil),          // 27: google.protobuf.FieldMask
+	(TransactionSource)(0),                 // 27: nagomi.v1.TransactionSource
+	(*fieldmaskpb.FieldMask)(nil),          // 28: google.protobuf.FieldMask
 }
 var file_nagomi_v1_transaction_services_proto_depIdxs = []int32{
 	21, // 0: nagomi.v1.ListTransactionsRequest.start_date:type_name -> google.protobuf.Timestamp
@@ -1609,41 +1620,42 @@ var file_nagomi_v1_transaction_services_proto_depIdxs = []int32{
 	23, // 12: nagomi.v1.TransactionInput.tx_amount:type_name -> google.type.Money
 	24, // 13: nagomi.v1.TransactionInput.direction:type_name -> nagomi.v1.TransactionDirection
 	23, // 14: nagomi.v1.TransactionInput.foreign_amount:type_name -> google.type.Money
-	4,  // 15: nagomi.v1.CreateTransactionRequest.transactions:type_name -> nagomi.v1.TransactionInput
-	26, // 16: nagomi.v1.CreateTransactionResponse.transactions:type_name -> nagomi.v1.Transaction
-	27, // 17: nagomi.v1.UpdateTransactionRequest.update_mask:type_name -> google.protobuf.FieldMask
-	21, // 18: nagomi.v1.UpdateTransactionRequest.tx_date:type_name -> google.protobuf.Timestamp
-	23, // 19: nagomi.v1.UpdateTransactionRequest.tx_amount:type_name -> google.type.Money
-	24, // 20: nagomi.v1.UpdateTransactionRequest.direction:type_name -> nagomi.v1.TransactionDirection
-	23, // 21: nagomi.v1.UpdateTransactionRequest.foreign_amount:type_name -> google.type.Money
-	23, // 22: nagomi.v1.SplitEntry.amount:type_name -> google.type.Money
-	13, // 23: nagomi.v1.SplitTransactionRequest.splits:type_name -> nagomi.v1.SplitEntry
-	26, // 24: nagomi.v1.SplitTransactionResponse.created_splits:type_name -> nagomi.v1.Transaction
-	23, // 25: nagomi.v1.FriendBalance.balance:type_name -> google.type.Money
-	19, // 26: nagomi.v1.GetFriendBalancesResponse.balances:type_name -> nagomi.v1.FriendBalance
-	0,  // 27: nagomi.v1.TransactionService.ListTransactions:input_type -> nagomi.v1.ListTransactionsRequest
-	2,  // 28: nagomi.v1.TransactionService.GetTransaction:input_type -> nagomi.v1.GetTransactionRequest
-	5,  // 29: nagomi.v1.TransactionService.CreateTransaction:input_type -> nagomi.v1.CreateTransactionRequest
-	7,  // 30: nagomi.v1.TransactionService.UpdateTransaction:input_type -> nagomi.v1.UpdateTransactionRequest
-	9,  // 31: nagomi.v1.TransactionService.DeleteTransaction:input_type -> nagomi.v1.DeleteTransactionRequest
-	11, // 32: nagomi.v1.TransactionService.CategorizeTransactions:input_type -> nagomi.v1.CategorizeTransactionsRequest
-	14, // 33: nagomi.v1.TransactionService.SplitTransaction:input_type -> nagomi.v1.SplitTransactionRequest
-	16, // 34: nagomi.v1.TransactionService.ForgiveTransaction:input_type -> nagomi.v1.ForgiveTransactionRequest
-	18, // 35: nagomi.v1.TransactionService.GetFriendBalances:input_type -> nagomi.v1.GetFriendBalancesRequest
-	1,  // 36: nagomi.v1.TransactionService.ListTransactions:output_type -> nagomi.v1.ListTransactionsResponse
-	3,  // 37: nagomi.v1.TransactionService.GetTransaction:output_type -> nagomi.v1.GetTransactionResponse
-	6,  // 38: nagomi.v1.TransactionService.CreateTransaction:output_type -> nagomi.v1.CreateTransactionResponse
-	8,  // 39: nagomi.v1.TransactionService.UpdateTransaction:output_type -> nagomi.v1.UpdateTransactionResponse
-	10, // 40: nagomi.v1.TransactionService.DeleteTransaction:output_type -> nagomi.v1.DeleteTransactionResponse
-	12, // 41: nagomi.v1.TransactionService.CategorizeTransactions:output_type -> nagomi.v1.CategorizeTransactionsResponse
-	15, // 42: nagomi.v1.TransactionService.SplitTransaction:output_type -> nagomi.v1.SplitTransactionResponse
-	17, // 43: nagomi.v1.TransactionService.ForgiveTransaction:output_type -> nagomi.v1.ForgiveTransactionResponse
-	20, // 44: nagomi.v1.TransactionService.GetFriendBalances:output_type -> nagomi.v1.GetFriendBalancesResponse
-	36, // [36:45] is the sub-list for method output_type
-	27, // [27:36] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	27, // 15: nagomi.v1.TransactionInput.source:type_name -> nagomi.v1.TransactionSource
+	4,  // 16: nagomi.v1.CreateTransactionRequest.transactions:type_name -> nagomi.v1.TransactionInput
+	26, // 17: nagomi.v1.CreateTransactionResponse.transactions:type_name -> nagomi.v1.Transaction
+	28, // 18: nagomi.v1.UpdateTransactionRequest.update_mask:type_name -> google.protobuf.FieldMask
+	21, // 19: nagomi.v1.UpdateTransactionRequest.tx_date:type_name -> google.protobuf.Timestamp
+	23, // 20: nagomi.v1.UpdateTransactionRequest.tx_amount:type_name -> google.type.Money
+	24, // 21: nagomi.v1.UpdateTransactionRequest.direction:type_name -> nagomi.v1.TransactionDirection
+	23, // 22: nagomi.v1.UpdateTransactionRequest.foreign_amount:type_name -> google.type.Money
+	23, // 23: nagomi.v1.SplitEntry.amount:type_name -> google.type.Money
+	13, // 24: nagomi.v1.SplitTransactionRequest.splits:type_name -> nagomi.v1.SplitEntry
+	26, // 25: nagomi.v1.SplitTransactionResponse.created_splits:type_name -> nagomi.v1.Transaction
+	23, // 26: nagomi.v1.FriendBalance.balance:type_name -> google.type.Money
+	19, // 27: nagomi.v1.GetFriendBalancesResponse.balances:type_name -> nagomi.v1.FriendBalance
+	0,  // 28: nagomi.v1.TransactionService.ListTransactions:input_type -> nagomi.v1.ListTransactionsRequest
+	2,  // 29: nagomi.v1.TransactionService.GetTransaction:input_type -> nagomi.v1.GetTransactionRequest
+	5,  // 30: nagomi.v1.TransactionService.CreateTransaction:input_type -> nagomi.v1.CreateTransactionRequest
+	7,  // 31: nagomi.v1.TransactionService.UpdateTransaction:input_type -> nagomi.v1.UpdateTransactionRequest
+	9,  // 32: nagomi.v1.TransactionService.DeleteTransaction:input_type -> nagomi.v1.DeleteTransactionRequest
+	11, // 33: nagomi.v1.TransactionService.CategorizeTransactions:input_type -> nagomi.v1.CategorizeTransactionsRequest
+	14, // 34: nagomi.v1.TransactionService.SplitTransaction:input_type -> nagomi.v1.SplitTransactionRequest
+	16, // 35: nagomi.v1.TransactionService.ForgiveTransaction:input_type -> nagomi.v1.ForgiveTransactionRequest
+	18, // 36: nagomi.v1.TransactionService.GetFriendBalances:input_type -> nagomi.v1.GetFriendBalancesRequest
+	1,  // 37: nagomi.v1.TransactionService.ListTransactions:output_type -> nagomi.v1.ListTransactionsResponse
+	3,  // 38: nagomi.v1.TransactionService.GetTransaction:output_type -> nagomi.v1.GetTransactionResponse
+	6,  // 39: nagomi.v1.TransactionService.CreateTransaction:output_type -> nagomi.v1.CreateTransactionResponse
+	8,  // 40: nagomi.v1.TransactionService.UpdateTransaction:output_type -> nagomi.v1.UpdateTransactionResponse
+	10, // 41: nagomi.v1.TransactionService.DeleteTransaction:output_type -> nagomi.v1.DeleteTransactionResponse
+	12, // 42: nagomi.v1.TransactionService.CategorizeTransactions:output_type -> nagomi.v1.CategorizeTransactionsResponse
+	15, // 43: nagomi.v1.TransactionService.SplitTransaction:output_type -> nagomi.v1.SplitTransactionResponse
+	17, // 44: nagomi.v1.TransactionService.ForgiveTransaction:output_type -> nagomi.v1.ForgiveTransactionResponse
+	20, // 45: nagomi.v1.TransactionService.GetFriendBalances:output_type -> nagomi.v1.GetFriendBalancesResponse
+	37, // [37:46] is the sub-list for method output_type
+	28, // [28:37] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_transaction_services_proto_init() }

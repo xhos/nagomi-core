@@ -113,6 +113,7 @@ type Transaction struct {
 	UpdatedAt           time.Time                   `db:"updated_at" json:"updated_at"`
 	SplitFromID         *int64                      `db:"split_from_id" json:"split_from_id"`
 	Forgiven            bool                        `db:"forgiven" json:"forgiven"`
+	Source              int16                       `db:"source" json:"source"`
 }
 
 type TransactionRule struct {

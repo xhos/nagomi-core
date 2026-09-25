@@ -53,9 +53,10 @@ type Transaction struct {
 	AccountName *string   `protobuf:"bytes,19,opt,name=account_name,json=accountName,proto3,oneof" json:"account_name,omitempty"`
 	ReceiptId   *int64    `protobuf:"varint,20,opt,name=receipt_id,json=receiptId,proto3,oneof" json:"receipt_id,omitempty"`
 	// splitting
-	SplitFromId   *int64         `protobuf:"varint,21,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
-	Forgiven      bool           `protobuf:"varint,22,opt,name=forgiven,proto3" json:"forgiven,omitempty"`
-	Splits        []*Transaction `protobuf:"bytes,23,rep,name=splits,proto3" json:"splits,omitempty"`
+	SplitFromId   *int64            `protobuf:"varint,21,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
+	Forgiven      bool              `protobuf:"varint,22,opt,name=forgiven,proto3" json:"forgiven,omitempty"`
+	Splits        []*Transaction    `protobuf:"bytes,23,rep,name=splits,proto3" json:"splits,omitempty"`
+	Source        TransactionSource `protobuf:"varint,24,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -251,6 +252,13 @@ func (x *Transaction) GetSplits() []*Transaction {
 	return nil
 }
 
+func (x *Transaction) GetSource() TransactionSource {
+	if x != nil {
+		return x.Source
+	}
+	return TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED
+}
+
 type TransactionWithScore struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Transaction   *Transaction           `protobuf:"bytes,1,opt,name=transaction,proto3" json:"transaction,omitempty"`
@@ -367,7 +375,7 @@ var File_nagomi_v1_transaction_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"\n" +
-	"\x1bnagomi/v1/transaction.proto\x12\tnagomi.v1\x1a\x18nagomi/v1/category.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x98\n" +
+	"\x1bnagomi/v1/transaction.proto\x12\tnagomi.v1\x1a\x18nagomi/v1/category.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xce\n" +
 	"\n" +
 	"\vTransaction\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x123\n" +
@@ -401,7 +409,8 @@ const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"R\treceiptId\x88\x01\x01\x12'\n" +
 	"\rsplit_from_id\x18\x15 \x01(\x03H\vR\vsplitFromId\x88\x01\x01\x12\x1a\n" +
 	"\bforgiven\x18\x16 \x01(\bR\bforgiven\x12.\n" +
-	"\x06splits\x18\x17 \x03(\v2\x16.nagomi.v1.TransactionR\x06splitsB\x0e\n" +
+	"\x06splits\x18\x17 \x03(\v2\x16.nagomi.v1.TransactionR\x06splits\x124\n" +
+	"\x06source\x18\x18 \x01(\x0e2\x1c.nagomi.v1.TransactionSourceR\x06sourceB\x0e\n" +
 	"\f_external_idB\x0e\n" +
 	"\f_descriptionB\x0e\n" +
 	"\f_category_idB\v\n" +
@@ -446,6 +455,7 @@ var file_nagomi_v1_transaction_proto_goTypes = []any{
 	(*money.Money)(nil),               // 4: google.type.Money
 	(TransactionDirection)(0),         // 5: nagomi.v1.TransactionDirection
 	(*Category)(nil),                  // 6: nagomi.v1.Category
+	(TransactionSource)(0),            // 7: nagomi.v1.TransactionSource
 }
 var file_nagomi_v1_transaction_proto_depIdxs = []int32{
 	3,  // 0: nagomi.v1.Transaction.tx_date:type_name -> google.protobuf.Timestamp
@@ -457,12 +467,13 @@ var file_nagomi_v1_transaction_proto_depIdxs = []int32{
 	3,  // 6: nagomi.v1.Transaction.updated_at:type_name -> google.protobuf.Timestamp
 	6,  // 7: nagomi.v1.Transaction.category:type_name -> nagomi.v1.Category
 	0,  // 8: nagomi.v1.Transaction.splits:type_name -> nagomi.v1.Transaction
-	0,  // 9: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	7,  // 9: nagomi.v1.Transaction.source:type_name -> nagomi.v1.TransactionSource
+	0,  // 10: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
+	11, // [11:11] is the sub-list for method output_type
+	11, // [11:11] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_transaction_proto_init() }

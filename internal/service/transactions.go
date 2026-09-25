@@ -81,8 +81,7 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 	for _, params := range paramsList {
 		tx, err := s.queries.CreateTransaction(ctx, params)
 		if err != nil {
-			// nagomi-connector and nagomi-email-parser may send duplicats.
-			// that is expected and ignored.
+			// duplicates are ignored
 			if errors.Is(err, pgx.ErrNoRows) && params.ExternalID != nil {
 				s.log.Debug("skipping duplicate transaction", "external_id", *params.ExternalID, "account_id", params.AccountID)
 				continue
@@ -328,6 +327,7 @@ func (s *txnSvc) SplitTransaction(ctx context.Context, userID uuid.UUID, req *pb
 			CategoryManuallySet: &categoryManuallySet,
 			MerchantManuallySet: &merchantManuallySet,
 			SplitFromID:         &sourceID,
+			Source:              int16(pb.TransactionSource_TRANSACTION_SOURCE_SPLIT),
 		}
 
 		processed, err := s.processForeignCurrency(ctx, userID, &params)

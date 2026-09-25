@@ -93,9 +93,15 @@ func buildCreateTxParamsList(userID uuid.UUID, req *pb.CreateTransactionRequest)
 		categoryManuallySet := false
 		merchantManuallySet := false
 
+		source := txInput.GetSource()
+		if source == pb.TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED {
+			source = pb.TransactionSource_TRANSACTION_SOURCE_MANUAL
+		}
+
 		params := sqlc.CreateTransactionParams{
 			UserID:              userID,
 			AccountID:           txInput.GetAccountId(),
+			Source:              int16(source),
 			ExternalID:          txInput.ExternalId,
 			TxDate:              fromProtoTimestamp(txInput.TxDate),
 			TxAmountCents:       moneyToCents(txAmount),
@@ -236,6 +242,7 @@ func transactionToPb(tx *sqlc.Transaction) *pb.Transaction {
 		UpdatedAt:           timestamppb.New(tx.UpdatedAt),
 		SplitFromId:         tx.SplitFromID,
 		Forgiven:            tx.Forgiven,
+		Source:              pb.TransactionSource(tx.Source),
 	}
 
 	if tx.BalanceAfterCents != nil && tx.BalanceCurrency != nil {
