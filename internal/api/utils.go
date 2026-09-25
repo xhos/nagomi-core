@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"nagomi-core/internal/api/middleware"
@@ -10,6 +11,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/genproto/googleapis/type/money"
 	"google.golang.org/grpc/codes"
@@ -21,17 +23,22 @@ func wrapErr(err error) error {
 		return nil
 	}
 
+	// connect errors, not grpc-go status errors: connect doesn't recognise the latter
+	// and would send every one of them as code unknown
 	if errors.Is(err, service.ErrDuplicate) {
-		return status.Error(codes.AlreadyExists, err.Error())
+		return connect.NewError(connect.CodeAlreadyExists, err)
 	}
 	if errors.Is(err, service.ErrValidation) {
-		return status.Error(codes.InvalidArgument, err.Error())
+		return connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	if errors.Is(err, service.ErrUnimplemented) {
-		return status.Error(codes.Unimplemented, err.Error())
+		return connect.NewError(connect.CodeUnimplemented, err)
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return connect.NewError(connect.CodeNotFound, errors.New("not found"))
 	}
 
-	return status.Errorf(codes.Internal, "internal error: %v", err)
+	return connect.NewError(connect.CodeInternal, fmt.Errorf("internal error: %w", err))
 }
 
 func getUserID(ctx context.Context) (uuid.UUID, error) {

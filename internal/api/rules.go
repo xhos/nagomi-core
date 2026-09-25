@@ -3,13 +3,12 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	pb "nagomi-core/internal/gen/nagomi/v1"
 	"nagomi-core/internal/rules"
 
 	"connectrpc.com/connect"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -60,31 +59,31 @@ func (s *Server) CreateRule(ctx context.Context, req *connect.Request[pb.CreateR
 
 	// validate that at least one action (category or merchant) is specified
 	if req.Msg.CategoryId == nil && req.Msg.Merchant == nil {
-		return nil, status.Error(codes.InvalidArgument, "At least one action (category_id or merchant) must be specified")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("at least one action (category_id or merchant) must be specified"))
 	}
 
 	conditionsBytes, err := req.Msg.GetConditions().MarshalJSON()
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Invalid conditions JSON")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid conditions JSON"))
 	}
 
 	validationResult := rules.ValidateRuleJSONDetailed(conditionsBytes)
 	if !validationResult.Valid {
-		errorMsg := "Rule validation failed:"
+		errorMsg := "rule validation failed:"
 		for _, validationErr := range validationResult.Errors {
 			errorMsg += " " + validationErr.Error() + ";"
 		}
-		return nil, status.Error(codes.InvalidArgument, errorMsg)
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(errorMsg))
 	}
 
 	normalizedRule, err := rules.NormalizeAndValidateRule(conditionsBytes)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Rule normalization failed: "+err.Error())
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule normalization failed: "+err.Error()))
 	}
 
 	normalizedBytes, err := json.Marshal(normalizedRule)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to serialize normalized rule")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to serialize normalized rule"))
 	}
 	conditionsBytes = normalizedBytes
 
@@ -124,26 +123,26 @@ func (s *Server) UpdateRule(ctx context.Context, req *connect.Request[pb.UpdateR
 	if req.Msg.Conditions != nil {
 		condBytes, err := req.Msg.Conditions.MarshalJSON()
 		if err != nil {
-			return nil, status.Error(codes.InvalidArgument, "Invalid conditions JSON")
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid conditions JSON"))
 		}
 
 		validationResult := rules.ValidateRuleJSONDetailed(condBytes)
 		if !validationResult.Valid {
-			errorMsg := "Rule validation failed:"
+			errorMsg := "rule validation failed:"
 			for _, validationErr := range validationResult.Errors {
 				errorMsg += " " + validationErr.Error() + ";"
 			}
-			return nil, status.Error(codes.InvalidArgument, errorMsg)
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(errorMsg))
 		}
 
 		normalizedRule, err := rules.NormalizeAndValidateRule(condBytes)
 		if err != nil {
-			return nil, status.Error(codes.InvalidArgument, "Rule normalization failed: "+err.Error())
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule normalization failed: "+err.Error()))
 		}
 
 		normalizedBytes, err := json.Marshal(normalizedRule)
 		if err != nil {
-			return nil, status.Error(codes.Internal, "Failed to serialize normalized rule")
+			return nil, connect.NewError(connect.CodeInternal, errors.New("failed to serialize normalized rule"))
 		}
 		conditionsBytes = normalizedBytes
 	}
