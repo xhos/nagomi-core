@@ -29,6 +29,7 @@ func NewServer(services *service.Services, logger *log.Logger) *Server {
 		"nagomi.v1.ReceiptService",
 		"nagomi.v1.ConnectorService",
 		"nagomi.v1.ConnectionsService",
+		"nagomi.v1.StatementService",
 	)
 
 	return &Server{
@@ -79,6 +80,7 @@ func (s *Server) registerServices(mux *http.ServeMux) {
 		"nagomi.v1.ReceiptService",
 		"nagomi.v1.ConnectorService",
 		"nagomi.v1.ConnectionsService",
+		"nagomi.v1.StatementService",
 	)
 	reflectPath, reflectHandler := grpcreflect.NewHandlerV1(reflector)
 	mux.Handle(reflectPath, reflectHandler)
@@ -116,6 +118,9 @@ func (s *Server) registerServices(mux *http.ServeMux) {
 	mux.Handle(path, handler)
 
 	path, handler = nagomiv1connect.NewConnectionsServiceHandler(s, interceptors)
+	mux.Handle(path, handler)
+
+	path, handler = nagomiv1connect.NewStatementServiceHandler(s, interceptors)
 	mux.Handle(path, handler)
 
 	s.log.Info("all connect-go services registered",

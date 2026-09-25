@@ -22,6 +22,7 @@ type Services struct {
 	Receipts     ReceiptService
 	Connector    ConnectorService
 	Connections  ConnectionService
+	Statements   StatementService
 }
 
 func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, error) {
@@ -43,8 +44,10 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		return nil, fmt.Errorf("init credentials cipher: %w", err)
 	}
 
+	txnSvc := newTxnSvc(queries, logger.WithPrefix("txn"), catSvc, ruleSvc, exchangeClient)
+
 	return &Services{
-		Transactions: newTxnSvc(queries, logger.WithPrefix("txn"), catSvc, ruleSvc, exchangeClient),
+		Transactions: txnSvc,
 		Categories:   catSvc,
 		Rules:        ruleSvc,
 		Accounts:     newAcctSvc(queries, logger.WithPrefix("acct")),
@@ -53,5 +56,6 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		Receipts:     newRcptSvc(queries, logger.WithPrefix("rcpt"), cfg.NagomiReceiptsURL, store),
 		Connector:    newConnSvc(queries, cipher, logger.WithPrefix("connector")),
 		Connections:  newConnectionSvc(queries, cipher),
+		Statements:   newStmtSvc(database.Pool(), queries, logger.WithPrefix("stmt"), cfg.NagomiStatementsURL, store, txnSvc),
 	}, nil
 }

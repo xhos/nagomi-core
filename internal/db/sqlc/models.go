@@ -89,6 +89,29 @@ type ReceiptItem struct {
 	UpdatedAt      time.Time `db:"updated_at" json:"updated_at"`
 }
 
+type Statement struct {
+	ID                  int64      `db:"id" json:"id"`
+	UserID              uuid.UUID  `db:"user_id" json:"user_id"`
+	AccountID           *int64     `db:"account_id" json:"account_id"`
+	Status              int16      `db:"status" json:"status"`
+	FilePath            string     `db:"file_path" json:"file_path"`
+	FileHash            string     `db:"file_hash" json:"file_hash"`
+	FileName            string     `db:"file_name" json:"file_name"`
+	Parser              string     `db:"parser" json:"parser"`
+	Bank                string     `db:"bank" json:"bank"`
+	AccountType         int16      `db:"account_type" json:"account_type"`
+	AccountNumber       string     `db:"account_number" json:"account_number"`
+	PeriodStart         time.Time  `db:"period_start" json:"period_start"`
+	PeriodEnd           time.Time  `db:"period_end" json:"period_end"`
+	Currency            string     `db:"currency" json:"currency"`
+	OpeningBalanceCents *int64     `db:"opening_balance_cents" json:"opening_balance_cents"`
+	ClosingBalanceCents *int64     `db:"closing_balance_cents" json:"closing_balance_cents"`
+	LineCount           int32      `db:"line_count" json:"line_count"`
+	Parsed              []byte     `db:"parsed" json:"parsed"`
+	CreatedAt           time.Time  `db:"created_at" json:"created_at"`
+	ImportedAt          *time.Time `db:"imported_at" json:"imported_at"`
+}
+
 type Transaction struct {
 	ID                  int64                       `db:"id" json:"id"`
 	AccountID           int64                       `db:"account_id" json:"account_id"`
@@ -114,6 +137,7 @@ type Transaction struct {
 	SplitFromID         *int64                      `db:"split_from_id" json:"split_from_id"`
 	Forgiven            bool                        `db:"forgiven" json:"forgiven"`
 	Source              int16                       `db:"source" json:"source"`
+	StatementID         *int64                      `db:"statement_id" json:"statement_id"`
 }
 
 type TransactionRule struct {

@@ -16,6 +16,7 @@ type Config struct {
 	DatabaseURL     string
 	NagomiGatewayURL  string
 	NagomiReceiptsURL string
+	NagomiStatementsURL string
 	ExchangeAPIURL  string
 
 	S3Endpoint  string
@@ -59,6 +60,11 @@ func Load() Config {
 		// TODO: need to make this log print uniform with the app-wide logger
 		// configuration. perhaps create the logger here, use it and then return it?
 		log.Warn("NAGOMI_RECEIPTS_URL is not set!")
+	}
+
+	nagomiStatementsURL := os.Getenv("NAGOMI_STATEMENTS_URL")
+	if nagomiStatementsURL == "" {
+		log.Warn("NAGOMI_STATEMENTS_URL is not set!")
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
@@ -118,6 +124,7 @@ func Load() Config {
 		DatabaseURL:     databaseURL,
 		NagomiGatewayURL:  nagomiGatewayURL,
 		NagomiReceiptsURL: nagomiReceiptsURL,
+		NagomiStatementsURL: nagomiStatementsURL,
 		ExchangeAPIURL:  exchangeAPIURL,
 		S3Endpoint:      s3Endpoint,
 		S3Bucket:        s3Bucket,

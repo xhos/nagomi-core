@@ -28,6 +28,8 @@ type TransactionService interface {
 	SplitTransaction(ctx context.Context, userID uuid.UUID, req *pb.SplitTransactionRequest) ([]*pb.Transaction, error)
 	ForgiveTransaction(ctx context.Context, userID uuid.UUID, transactionID int64, forgiven bool) error
 	GetFriendBalances(ctx context.Context, userID uuid.UUID) ([]*pb.FriendBalance, error)
+	// ApplyRules runs the user's rules over transactions created outside Create.
+	ApplyRules(ctx context.Context, userID uuid.UUID, transactionIDs []int64)
 }
 
 type txnSvc struct {
@@ -114,6 +116,12 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 	}
 
 	return result, nil
+}
+
+func (s *txnSvc) ApplyRules(ctx context.Context, userID uuid.UUID, transactionIDs []int64) {
+	for _, id := range transactionIDs {
+		s.applyRulesToTransaction(ctx, userID, id)
+	}
 }
 
 func (s *txnSvc) Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Transaction, error) {

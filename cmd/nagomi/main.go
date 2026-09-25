@@ -66,6 +66,7 @@ func main() {
 
 	// ----- receipt OCR worker ----
 	go services.Receipts.StartWorker(context.Background())
+	go services.Statements.StartCleanup(context.Background())
 
 	// ----- api layer --------
 	srv := api.NewServer(services, logger.WithPrefix("api"))

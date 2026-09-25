@@ -189,7 +189,8 @@ insert into
     suggestions,
     split_from_id,
     forgiven,
-    source
+    source,
+    statement_id
   )
 select
   sqlc.narg('external_id')::text,
@@ -212,7 +213,8 @@ select
   sqlc.narg('suggestions')::text [],
   sqlc.narg('split_from_id')::bigint,
   coalesce(sqlc.narg('forgiven')::boolean, false),
-  coalesce(nullif(sqlc.arg(source)::smallint, 0), 1)
+  coalesce(nullif(sqlc.arg(source)::smallint, 0), 1),
+  sqlc.narg('statement_id')::bigint
 from
   accounts a
   left join account_users au on a.id = au.account_id

@@ -3,11 +3,8 @@ package service
 import (
 	"context"
 	"crypto/sha256"
-	"crypto/tls"
 	"encoding/hex"
 	"fmt"
-	"net"
-	"net/http"
 	"path"
 	"time"
 
@@ -19,7 +16,6 @@ import (
 	"connectrpc.com/connect"
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
-	"golang.org/x/net/http2"
 )
 
 // ----- interface ---------------------------------------------------------------------------
@@ -45,19 +41,8 @@ type rcptSvc struct {
 func newRcptSvc(queries *sqlc.Queries, logger *log.Logger, ocrURL string, store *storage.Store) ReceiptService {
 	var ocrClient nagomiv1connect.ReceiptOCRServiceClient
 	if ocrURL != "" {
-		// gRPC requires HTTP/2; over plaintext that means h2c,
-		// which http.DefaultClient doesn't support.
-		h2cClient := &http.Client{
-			Transport: &http2.Transport{
-				AllowHTTP: true,
-				DialTLSContext: func(ctx context.Context, network, addr string, _ *tls.Config) (net.Conn, error) {
-					var d net.Dialer
-					return d.DialContext(ctx, network, addr)
-				},
-			},
-		}
 		ocrClient = nagomiv1connect.NewReceiptOCRServiceClient(
-			h2cClient,
+			newH2CClient(),
 			ocrURL,
 			connect.WithGRPC(),
 			connect.WithSendMaxBytes(16*1024*1024),
