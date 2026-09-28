@@ -36,6 +36,9 @@ const (
 	// StatementServicePreviewStatementImportProcedure is the fully-qualified name of the
 	// StatementService's PreviewStatementImport RPC.
 	StatementServicePreviewStatementImportProcedure = "/nagomi.v1.StatementService/PreviewStatementImport"
+	// StatementServicePlanStatementImportProcedure is the fully-qualified name of the
+	// StatementService's PlanStatementImport RPC.
+	StatementServicePlanStatementImportProcedure = "/nagomi.v1.StatementService/PlanStatementImport"
 	// StatementServiceCommitStatementImportProcedure is the fully-qualified name of the
 	// StatementService's CommitStatementImport RPC.
 	StatementServiceCommitStatementImportProcedure = "/nagomi.v1.StatementService/CommitStatementImport"
@@ -55,6 +58,11 @@ type StatementServiceClient interface {
 	// parses and stores the file as a pending statement. uploading a file that is
 	// already pending returns that preview; one already imported is ALREADY_EXISTS.
 	PreviewStatementImport(context.Context, *connect.Request[v1.PreviewStatementImportRequest]) (*connect.Response[v1.PreviewStatementImportResponse], error)
+	// what committing a pending statement into this account would do, for when the
+	// user picks an account other than the matched one
+	PlanStatementImport(context.Context, *connect.Request[v1.PlanStatementImportRequest]) (*connect.Response[v1.PlanStatementImportResponse], error)
+	// reconciles the account against the statement: confirms matched transactions,
+	// creates the missing ones and deletes provisional ones it doesn't contain
 	CommitStatementImport(context.Context, *connect.Request[v1.CommitStatementImportRequest]) (*connect.Response[v1.CommitStatementImportResponse], error)
 	ListStatements(context.Context, *connect.Request[v1.ListStatementsRequest]) (*connect.Response[v1.ListStatementsResponse], error)
 	GetStatement(context.Context, *connect.Request[v1.GetStatementRequest]) (*connect.Response[v1.GetStatementResponse], error)
@@ -76,6 +84,12 @@ func NewStatementServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			httpClient,
 			baseURL+StatementServicePreviewStatementImportProcedure,
 			connect.WithSchema(statementServiceMethods.ByName("PreviewStatementImport")),
+			connect.WithClientOptions(opts...),
+		),
+		planStatementImport: connect.NewClient[v1.PlanStatementImportRequest, v1.PlanStatementImportResponse](
+			httpClient,
+			baseURL+StatementServicePlanStatementImportProcedure,
+			connect.WithSchema(statementServiceMethods.ByName("PlanStatementImport")),
 			connect.WithClientOptions(opts...),
 		),
 		commitStatementImport: connect.NewClient[v1.CommitStatementImportRequest, v1.CommitStatementImportResponse](
@@ -108,6 +122,7 @@ func NewStatementServiceClient(httpClient connect.HTTPClient, baseURL string, op
 // statementServiceClient implements StatementServiceClient.
 type statementServiceClient struct {
 	previewStatementImport *connect.Client[v1.PreviewStatementImportRequest, v1.PreviewStatementImportResponse]
+	planStatementImport    *connect.Client[v1.PlanStatementImportRequest, v1.PlanStatementImportResponse]
 	commitStatementImport  *connect.Client[v1.CommitStatementImportRequest, v1.CommitStatementImportResponse]
 	listStatements         *connect.Client[v1.ListStatementsRequest, v1.ListStatementsResponse]
 	getStatement           *connect.Client[v1.GetStatementRequest, v1.GetStatementResponse]
@@ -117,6 +132,11 @@ type statementServiceClient struct {
 // PreviewStatementImport calls nagomi.v1.StatementService.PreviewStatementImport.
 func (c *statementServiceClient) PreviewStatementImport(ctx context.Context, req *connect.Request[v1.PreviewStatementImportRequest]) (*connect.Response[v1.PreviewStatementImportResponse], error) {
 	return c.previewStatementImport.CallUnary(ctx, req)
+}
+
+// PlanStatementImport calls nagomi.v1.StatementService.PlanStatementImport.
+func (c *statementServiceClient) PlanStatementImport(ctx context.Context, req *connect.Request[v1.PlanStatementImportRequest]) (*connect.Response[v1.PlanStatementImportResponse], error) {
+	return c.planStatementImport.CallUnary(ctx, req)
 }
 
 // CommitStatementImport calls nagomi.v1.StatementService.CommitStatementImport.
@@ -144,6 +164,11 @@ type StatementServiceHandler interface {
 	// parses and stores the file as a pending statement. uploading a file that is
 	// already pending returns that preview; one already imported is ALREADY_EXISTS.
 	PreviewStatementImport(context.Context, *connect.Request[v1.PreviewStatementImportRequest]) (*connect.Response[v1.PreviewStatementImportResponse], error)
+	// what committing a pending statement into this account would do, for when the
+	// user picks an account other than the matched one
+	PlanStatementImport(context.Context, *connect.Request[v1.PlanStatementImportRequest]) (*connect.Response[v1.PlanStatementImportResponse], error)
+	// reconciles the account against the statement: confirms matched transactions,
+	// creates the missing ones and deletes provisional ones it doesn't contain
 	CommitStatementImport(context.Context, *connect.Request[v1.CommitStatementImportRequest]) (*connect.Response[v1.CommitStatementImportResponse], error)
 	ListStatements(context.Context, *connect.Request[v1.ListStatementsRequest]) (*connect.Response[v1.ListStatementsResponse], error)
 	GetStatement(context.Context, *connect.Request[v1.GetStatementRequest]) (*connect.Response[v1.GetStatementResponse], error)
@@ -161,6 +186,12 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 		StatementServicePreviewStatementImportProcedure,
 		svc.PreviewStatementImport,
 		connect.WithSchema(statementServiceMethods.ByName("PreviewStatementImport")),
+		connect.WithHandlerOptions(opts...),
+	)
+	statementServicePlanStatementImportHandler := connect.NewUnaryHandler(
+		StatementServicePlanStatementImportProcedure,
+		svc.PlanStatementImport,
+		connect.WithSchema(statementServiceMethods.ByName("PlanStatementImport")),
 		connect.WithHandlerOptions(opts...),
 	)
 	statementServiceCommitStatementImportHandler := connect.NewUnaryHandler(
@@ -191,6 +222,8 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 		switch r.URL.Path {
 		case StatementServicePreviewStatementImportProcedure:
 			statementServicePreviewStatementImportHandler.ServeHTTP(w, r)
+		case StatementServicePlanStatementImportProcedure:
+			statementServicePlanStatementImportHandler.ServeHTTP(w, r)
 		case StatementServiceCommitStatementImportProcedure:
 			statementServiceCommitStatementImportHandler.ServeHTTP(w, r)
 		case StatementServiceListStatementsProcedure:
@@ -210,6 +243,10 @@ type UnimplementedStatementServiceHandler struct{}
 
 func (UnimplementedStatementServiceHandler) PreviewStatementImport(context.Context, *connect.Request[v1.PreviewStatementImportRequest]) (*connect.Response[v1.PreviewStatementImportResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.PreviewStatementImport is not implemented"))
+}
+
+func (UnimplementedStatementServiceHandler) PlanStatementImport(context.Context, *connect.Request[v1.PlanStatementImportRequest]) (*connect.Response[v1.PlanStatementImportResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.PlanStatementImport is not implemented"))
 }
 
 func (UnimplementedStatementServiceHandler) CommitStatementImport(context.Context, *connect.Request[v1.CommitStatementImportRequest]) (*connect.Response[v1.CommitStatementImportResponse], error) {

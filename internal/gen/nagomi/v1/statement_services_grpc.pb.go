@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	StatementService_PreviewStatementImport_FullMethodName = "/nagomi.v1.StatementService/PreviewStatementImport"
+	StatementService_PlanStatementImport_FullMethodName    = "/nagomi.v1.StatementService/PlanStatementImport"
 	StatementService_CommitStatementImport_FullMethodName  = "/nagomi.v1.StatementService/CommitStatementImport"
 	StatementService_ListStatements_FullMethodName         = "/nagomi.v1.StatementService/ListStatements"
 	StatementService_GetStatement_FullMethodName           = "/nagomi.v1.StatementService/GetStatement"
@@ -33,6 +34,11 @@ type StatementServiceClient interface {
 	// parses and stores the file as a pending statement. uploading a file that is
 	// already pending returns that preview; one already imported is ALREADY_EXISTS.
 	PreviewStatementImport(ctx context.Context, in *PreviewStatementImportRequest, opts ...grpc.CallOption) (*PreviewStatementImportResponse, error)
+	// what committing a pending statement into this account would do, for when the
+	// user picks an account other than the matched one
+	PlanStatementImport(ctx context.Context, in *PlanStatementImportRequest, opts ...grpc.CallOption) (*PlanStatementImportResponse, error)
+	// reconciles the account against the statement: confirms matched transactions,
+	// creates the missing ones and deletes provisional ones it doesn't contain
 	CommitStatementImport(ctx context.Context, in *CommitStatementImportRequest, opts ...grpc.CallOption) (*CommitStatementImportResponse, error)
 	ListStatements(ctx context.Context, in *ListStatementsRequest, opts ...grpc.CallOption) (*ListStatementsResponse, error)
 	GetStatement(ctx context.Context, in *GetStatementRequest, opts ...grpc.CallOption) (*GetStatementResponse, error)
@@ -51,6 +57,16 @@ func (c *statementServiceClient) PreviewStatementImport(ctx context.Context, in 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PreviewStatementImportResponse)
 	err := c.cc.Invoke(ctx, StatementService_PreviewStatementImport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statementServiceClient) PlanStatementImport(ctx context.Context, in *PlanStatementImportRequest, opts ...grpc.CallOption) (*PlanStatementImportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanStatementImportResponse)
+	err := c.cc.Invoke(ctx, StatementService_PlanStatementImport_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +120,11 @@ type StatementServiceServer interface {
 	// parses and stores the file as a pending statement. uploading a file that is
 	// already pending returns that preview; one already imported is ALREADY_EXISTS.
 	PreviewStatementImport(context.Context, *PreviewStatementImportRequest) (*PreviewStatementImportResponse, error)
+	// what committing a pending statement into this account would do, for when the
+	// user picks an account other than the matched one
+	PlanStatementImport(context.Context, *PlanStatementImportRequest) (*PlanStatementImportResponse, error)
+	// reconciles the account against the statement: confirms matched transactions,
+	// creates the missing ones and deletes provisional ones it doesn't contain
 	CommitStatementImport(context.Context, *CommitStatementImportRequest) (*CommitStatementImportResponse, error)
 	ListStatements(context.Context, *ListStatementsRequest) (*ListStatementsResponse, error)
 	GetStatement(context.Context, *GetStatementRequest) (*GetStatementResponse, error)
@@ -120,6 +141,9 @@ type UnimplementedStatementServiceServer struct{}
 
 func (UnimplementedStatementServiceServer) PreviewStatementImport(context.Context, *PreviewStatementImportRequest) (*PreviewStatementImportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PreviewStatementImport not implemented")
+}
+func (UnimplementedStatementServiceServer) PlanStatementImport(context.Context, *PlanStatementImportRequest) (*PlanStatementImportResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PlanStatementImport not implemented")
 }
 func (UnimplementedStatementServiceServer) CommitStatementImport(context.Context, *CommitStatementImportRequest) (*CommitStatementImportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CommitStatementImport not implemented")
@@ -168,6 +192,24 @@ func _StatementService_PreviewStatementImport_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StatementServiceServer).PreviewStatementImport(ctx, req.(*PreviewStatementImportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StatementService_PlanStatementImport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanStatementImportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatementServiceServer).PlanStatementImport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StatementService_PlanStatementImport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatementServiceServer).PlanStatementImport(ctx, req.(*PlanStatementImportRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -254,6 +296,10 @@ var StatementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PreviewStatementImport",
 			Handler:    _StatementService_PreviewStatementImport_Handler,
+		},
+		{
+			MethodName: "PlanStatementImport",
+			Handler:    _StatementService_PlanStatementImport_Handler,
 		},
 		{
 			MethodName: "CommitStatementImport",

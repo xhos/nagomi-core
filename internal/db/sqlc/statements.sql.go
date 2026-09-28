@@ -12,26 +12,46 @@ import (
 	"github.com/google/uuid"
 )
 
-const countExistingExternalIDs = `-- name: CountExistingExternalIDs :one
-select
-  count(*)
-from
-  transactions
+const confirmStatementTransaction = `-- name: ConfirmStatementTransaction :exec
+update transactions
+set
+  tx_date = $1::timestamptz,
+  tx_amount_cents = $2::bigint,
+  tx_desc = $3::text,
+  exchange_rate = coalesce($4::double precision, exchange_rate),
+  external_id = $5::text,
+  statement_id = $6::bigint,
+  source = $7::smallint
 where
-  account_id = $1::bigint
-  and external_id = any($2::text[])
+  id = $8::bigint
+  and account_id = $9::bigint
 `
 
-type CountExistingExternalIDsParams struct {
-	AccountID   int64    `db:"account_id" json:"account_id"`
-	ExternalIds []string `db:"external_ids" json:"external_ids"`
+type ConfirmStatementTransactionParams struct {
+	TxDate        time.Time `db:"tx_date" json:"tx_date"`
+	TxAmountCents int64     `db:"tx_amount_cents" json:"tx_amount_cents"`
+	TxDesc        string    `db:"tx_desc" json:"tx_desc"`
+	ExchangeRate  *float64  `db:"exchange_rate" json:"exchange_rate"`
+	ExternalID    string    `db:"external_id" json:"external_id"`
+	StatementID   int64     `db:"statement_id" json:"statement_id"`
+	Source        int16     `db:"source" json:"source"`
+	ID            int64     `db:"id" json:"id"`
+	AccountID     int64     `db:"account_id" json:"account_id"`
 }
 
-func (q *Queries) CountExistingExternalIDs(ctx context.Context, arg CountExistingExternalIDsParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countExistingExternalIDs, arg.AccountID, arg.ExternalIds)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
+func (q *Queries) ConfirmStatementTransaction(ctx context.Context, arg ConfirmStatementTransactionParams) error {
+	_, err := q.db.Exec(ctx, confirmStatementTransaction,
+		arg.TxDate,
+		arg.TxAmountCents,
+		arg.TxDesc,
+		arg.ExchangeRate,
+		arg.ExternalID,
+		arg.StatementID,
+		arg.Source,
+		arg.ID,
+		arg.AccountID,
+	)
+	return err
 }
 
 const createStatement = `-- name: CreateStatement :one
@@ -312,6 +332,144 @@ func (q *Queries) GetStatementByHash(ctx context.Context, arg GetStatementByHash
 		&i.BalanceOk,
 	)
 	return i, err
+}
+
+const linkStatementTransactions = `-- name: LinkStatementTransactions :exec
+update transactions
+set statement_id = $1::bigint
+where
+  account_id = $2::bigint
+  and external_id = any($3::text[])
+  and statement_id is null
+`
+
+type LinkStatementTransactionsParams struct {
+	StatementID int64    `db:"statement_id" json:"statement_id"`
+	AccountID   int64    `db:"account_id" json:"account_id"`
+	ExternalIds []string `db:"external_ids" json:"external_ids"`
+}
+
+// lines kept from a statement that was deleted without its transactions
+func (q *Queries) LinkStatementTransactions(ctx context.Context, arg LinkStatementTransactionsParams) error {
+	_, err := q.db.Exec(ctx, linkStatementTransactions, arg.StatementID, arg.AccountID, arg.ExternalIds)
+	return err
+}
+
+const listExistingExternalIDs = `-- name: ListExistingExternalIDs :many
+select
+  external_id::text
+from
+  transactions
+where
+  account_id = $1::bigint
+  and external_id = any($2::text[])
+`
+
+type ListExistingExternalIDsParams struct {
+	AccountID   int64    `db:"account_id" json:"account_id"`
+	ExternalIds []string `db:"external_ids" json:"external_ids"`
+}
+
+func (q *Queries) ListExistingExternalIDs(ctx context.Context, arg ListExistingExternalIDsParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, listExistingExternalIDs, arg.AccountID, arg.ExternalIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var external_id string
+		if err := rows.Scan(&external_id); err != nil {
+			return nil, err
+		}
+		items = append(items, external_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listReconcileCandidates = `-- name: ListReconcileCandidates :many
+select
+  t.id, t.account_id, t.external_id, t.tx_date, t.tx_amount_cents, t.tx_currency, t.tx_direction, t.tx_desc, t.balance_after_cents, t.balance_currency, t.merchant, t.category_id, t.category_manually_set, t.merchant_manually_set, t.suggestions, t.user_notes, t.foreign_amount_cents, t.foreign_currency, t.exchange_rate, t.created_at, t.updated_at, t.split_from_id, t.forgiven, t.source, t.statement_id,
+  (
+    coalesce(t.user_notes, '') <> ''
+    or exists(select 1 from receipts r where r.transaction_id = t.id)
+    or exists(select 1 from transactions s where s.split_from_id = t.id)
+  )::boolean as has_user_data,
+  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits
+from
+  transactions t
+where
+  t.account_id = $1::bigint
+  and t.statement_id is null
+  and t.split_from_id is null
+  and t.tx_date >= $2::timestamptz
+  and t.tx_date < $3::timestamptz
+order by
+  t.tx_date,
+  t.id
+`
+
+type ListReconcileCandidatesParams struct {
+	AccountID int64     `db:"account_id" json:"account_id"`
+	FromDate  time.Time `db:"from_date" json:"from_date"`
+	ToDate    time.Time `db:"to_date" json:"to_date"`
+}
+
+type ListReconcileCandidatesRow struct {
+	Transaction Transaction `db:"transaction" json:"transaction"`
+	HasUserData bool        `db:"has_user_data" json:"has_user_data"`
+	HasSplits   bool        `db:"has_splits" json:"has_splits"`
+}
+
+func (q *Queries) ListReconcileCandidates(ctx context.Context, arg ListReconcileCandidatesParams) ([]ListReconcileCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, listReconcileCandidates, arg.AccountID, arg.FromDate, arg.ToDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListReconcileCandidatesRow
+	for rows.Next() {
+		var i ListReconcileCandidatesRow
+		if err := rows.Scan(
+			&i.Transaction.ID,
+			&i.Transaction.AccountID,
+			&i.Transaction.ExternalID,
+			&i.Transaction.TxDate,
+			&i.Transaction.TxAmountCents,
+			&i.Transaction.TxCurrency,
+			&i.Transaction.TxDirection,
+			&i.Transaction.TxDesc,
+			&i.Transaction.BalanceAfterCents,
+			&i.Transaction.BalanceCurrency,
+			&i.Transaction.Merchant,
+			&i.Transaction.CategoryID,
+			&i.Transaction.CategoryManuallySet,
+			&i.Transaction.MerchantManuallySet,
+			&i.Transaction.Suggestions,
+			&i.Transaction.UserNotes,
+			&i.Transaction.ForeignAmountCents,
+			&i.Transaction.ForeignCurrency,
+			&i.Transaction.ExchangeRate,
+			&i.Transaction.CreatedAt,
+			&i.Transaction.UpdatedAt,
+			&i.Transaction.SplitFromID,
+			&i.Transaction.Forgiven,
+			&i.Transaction.Source,
+			&i.Transaction.StatementID,
+			&i.HasUserData,
+			&i.HasSplits,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listStatements = `-- name: ListStatements :many

@@ -31,6 +31,7 @@ const pendingStatementTTL = 24 * time.Hour
 
 type StatementService interface {
 	Preview(ctx context.Context, userID uuid.UUID, pdfData []byte, fileName string) (*pb.PreviewStatementImportResponse, error)
+	Plan(ctx context.Context, userID uuid.UUID, statementID, accountID int64) (*pb.StatementReconciliation, error)
 	Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitStatementImportRequest) (*pb.CommitStatementImportResponse, error)
 	List(ctx context.Context, userID uuid.UUID, req *pb.ListStatementsRequest) ([]*pb.Statement, error)
 	Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Statement, []byte, error)
@@ -204,35 +205,13 @@ func (s *stmtSvc) Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitSt
 		}
 	}
 
-	externalIDs := lineExternalIDs(parsed.GetLines())
-	source := int16(pb.TransactionSource_TRANSACTION_SOURCE_STATEMENT)
-	notManual := false
-	createdIDs := make([]int64, 0, len(parsed.GetLines()))
-	var duplicates int32
-
-	for i, line := range parsed.GetLines() {
-		created, err := q.CreateTransaction(ctx, sqlc.CreateTransactionParams{
-			UserID:              userID,
-			AccountID:           account.ID,
-			ExternalID:          &externalIDs[i],
-			TxDate:              dateIn(line.GetDate(), loc),
-			TxAmountCents:       line.GetAmountCents(),
-			TxCurrency:          stmt.Currency,
-			TxDirection:         int16(line.GetDirection()),
-			TxDesc:              &line.Description,
-			CategoryManuallySet: &notManual,
-			MerchantManuallySet: &notManual,
-			Source:              source,
-			StatementID:         &stmt.ID,
-		})
-		if errors.Is(err, pgx.ErrNoRows) {
-			duplicates++
-			continue
-		}
-		if err != nil {
-			return nil, wrapErr("StatementService.Commit.CreateTransaction", err)
-		}
-		createdIDs = append(createdIDs, created.ID)
+	recon, err := reconcileAccount(ctx, q, parsed, account.ID, loc)
+	if err != nil {
+		return nil, err
+	}
+	result, err := recon.apply(ctx, q, userID, &stmt, loc)
+	if err != nil {
+		return nil, err
 	}
 
 	imported, err := q.MarkStatementImported(ctx, sqlc.MarkStatementImportedParams{ID: stmt.ID, UserID: userID, AccountID: account.ID})
@@ -244,16 +223,47 @@ func (s *stmtSvc) Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitSt
 		return nil, fmt.Errorf("StatementService.Commit: %w", err)
 	}
 
-	if err := s.queries.SyncAccountBalances(ctx, account.ID); err != nil {
-		s.log.Warn("failed to sync account balances", "account_id", account.ID, "error", err)
+	result.touchedAccounts[account.ID] = true
+	for accountID := range result.touchedAccounts {
+		if err := s.queries.SyncAccountBalances(ctx, accountID); err != nil {
+			s.log.Warn("failed to sync account balances", "account_id", accountID, "error", err)
+		}
 	}
-	s.txnSvc.ApplyRules(ctx, userID, createdIDs)
+	s.txnSvc.ApplyRules(ctx, userID, result.createdIDs)
 
 	return &pb.CommitStatementImportResponse{
 		Statement:      statementToPb(&imported, &account.Name),
-		CreatedCount:   int32(len(createdIDs)),
-		DuplicateCount: duplicates,
+		CreatedCount:   int32(len(result.createdIDs)),
+		DuplicateCount: result.duplicates,
+		ConfirmedCount: int32(len(recon.plan.Matches)) - result.updated,
+		UpdatedCount:   result.updated,
+		DeletedCount:   result.deleted,
+		KeptCount:      int32(len(recon.plan.Keep)),
 	}, nil
+}
+
+func (s *stmtSvc) Plan(ctx context.Context, userID uuid.UUID, statementID, accountID int64) (*pb.StatementReconciliation, error) {
+	row, err := s.queries.GetStatement(ctx, sqlc.GetStatementParams{ID: statementID, UserID: userID})
+	if err != nil {
+		return nil, wrapErr("StatementService.Plan.Get", err)
+	}
+	if pb.StatementStatus(row.Statement.Status) != pb.StatementStatus_STATEMENT_STATUS_PENDING {
+		return nil, fmt.Errorf("StatementService.Plan: statement %d is already imported: %w", statementID, ErrValidation)
+	}
+	if _, err := s.queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: accountID}); err != nil {
+		return nil, wrapErr("StatementService.Plan.GetAccount", err)
+	}
+
+	parsed, err := unmarshalParsed(row.Statement.Parsed)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Plan: %w", err)
+	}
+
+	recon, err := reconcileAccount(ctx, s.queries, parsed, accountID, s.userLocation(ctx, userID))
+	if err != nil {
+		return nil, err
+	}
+	return recon.toPb(), nil
 }
 
 func (s *stmtSvc) List(ctx context.Context, userID uuid.UUID, req *pb.ListStatementsRequest) ([]*pb.Statement, error) {
@@ -386,14 +396,11 @@ func (s *stmtSvc) buildPreview(ctx context.Context, userID uuid.UUID, row sqlc.S
 	}
 	resp.MatchedAccountId = &match.Account.ID
 
-	duplicates, err := s.queries.CountExistingExternalIDs(ctx, sqlc.CountExistingExternalIDsParams{
-		AccountID:   match.Account.ID,
-		ExternalIds: lineExternalIDs(parsed.GetLines()),
-	})
+	recon, err := reconcileAccount(ctx, s.queries, parsed, match.Account.ID, s.userLocation(ctx, userID))
 	if err != nil {
-		return nil, wrapErr("StatementService.Preview.CountDuplicates", err)
+		return nil, err
 	}
-	resp.DuplicateCount = int32(duplicates)
+	resp.Reconciliation = recon.toPb()
 
 	return resp, nil
 }

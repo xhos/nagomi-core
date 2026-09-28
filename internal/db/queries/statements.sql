@@ -120,11 +120,55 @@ where
 returning
   file_path;
 
--- name: CountExistingExternalIDs :one
+-- name: ListExistingExternalIDs :many
 select
-  count(*)
+  external_id::text
 from
   transactions
 where
   account_id = @account_id::bigint
   and external_id = any(@external_ids::text[]);
+
+-- name: ListReconcileCandidates :many
+select
+  sqlc.embed(t),
+  (
+    coalesce(t.user_notes, '') <> ''
+    or exists(select 1 from receipts r where r.transaction_id = t.id)
+    or exists(select 1 from transactions s where s.split_from_id = t.id)
+  )::boolean as has_user_data,
+  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits
+from
+  transactions t
+where
+  t.account_id = @account_id::bigint
+  and t.statement_id is null
+  and t.split_from_id is null
+  and t.tx_date >= @from_date::timestamptz
+  and t.tx_date < @to_date::timestamptz
+order by
+  t.tx_date,
+  t.id;
+
+-- name: ConfirmStatementTransaction :exec
+update transactions
+set
+  tx_date = @tx_date::timestamptz,
+  tx_amount_cents = @tx_amount_cents::bigint,
+  tx_desc = @tx_desc::text,
+  exchange_rate = coalesce(sqlc.narg('exchange_rate')::double precision, exchange_rate),
+  external_id = @external_id::text,
+  statement_id = @statement_id::bigint,
+  source = @source::smallint
+where
+  id = @id::bigint
+  and account_id = @account_id::bigint;
+
+-- name: LinkStatementTransactions :exec
+-- lines kept from a statement that was deleted without its transactions
+update transactions
+set statement_id = @statement_id::bigint
+where
+  account_id = @account_id::bigint
+  and external_id = any(@external_ids::text[])
+  and statement_id is null;

@@ -22,6 +22,128 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ReconciliationAction int32
+
+const (
+	ReconciliationAction_RECONCILIATION_ACTION_UNSPECIFIED ReconciliationAction = 0
+	// a statement line confirms this transaction
+	ReconciliationAction_RECONCILIATION_ACTION_CONFIRM ReconciliationAction = 1
+	// confirms it, and the statement's amount replaces the provisional one (tips, fx)
+	ReconciliationAction_RECONCILIATION_ACTION_UPDATE_AMOUNT ReconciliationAction = 2
+	// a statement line with nothing to confirm; becomes a new transaction
+	ReconciliationAction_RECONCILIATION_ACTION_CREATE ReconciliationAction = 3
+	// a line this or an overlapping statement already imported
+	ReconciliationAction_RECONCILIATION_ACTION_ALREADY_IMPORTED ReconciliationAction = 4
+	// a provisional transaction in the period the statement doesn't contain
+	ReconciliationAction_RECONCILIATION_ACTION_DELETE ReconciliationAction = 5
+	// not on the statement either, but left alone; see keep_reason
+	ReconciliationAction_RECONCILIATION_ACTION_KEEP ReconciliationAction = 6
+)
+
+// Enum value maps for ReconciliationAction.
+var (
+	ReconciliationAction_name = map[int32]string{
+		0: "RECONCILIATION_ACTION_UNSPECIFIED",
+		1: "RECONCILIATION_ACTION_CONFIRM",
+		2: "RECONCILIATION_ACTION_UPDATE_AMOUNT",
+		3: "RECONCILIATION_ACTION_CREATE",
+		4: "RECONCILIATION_ACTION_ALREADY_IMPORTED",
+		5: "RECONCILIATION_ACTION_DELETE",
+		6: "RECONCILIATION_ACTION_KEEP",
+	}
+	ReconciliationAction_value = map[string]int32{
+		"RECONCILIATION_ACTION_UNSPECIFIED":      0,
+		"RECONCILIATION_ACTION_CONFIRM":          1,
+		"RECONCILIATION_ACTION_UPDATE_AMOUNT":    2,
+		"RECONCILIATION_ACTION_CREATE":           3,
+		"RECONCILIATION_ACTION_ALREADY_IMPORTED": 4,
+		"RECONCILIATION_ACTION_DELETE":           5,
+		"RECONCILIATION_ACTION_KEEP":             6,
+	}
+)
+
+func (x ReconciliationAction) Enum() *ReconciliationAction {
+	p := new(ReconciliationAction)
+	*p = x
+	return p
+}
+
+func (x ReconciliationAction) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ReconciliationAction) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_statement_services_proto_enumTypes[0].Descriptor()
+}
+
+func (ReconciliationAction) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_statement_services_proto_enumTypes[0]
+}
+
+func (x ReconciliationAction) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ReconciliationAction.Descriptor instead.
+func (ReconciliationAction) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{0}
+}
+
+type ReconciliationKeepReason int32
+
+const (
+	ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_UNSPECIFIED ReconciliationKeepReason = 0
+	// entered by hand, or from a statement since deleted
+	ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_MANUAL ReconciliationKeepReason = 1
+	// has notes, a receipt or splits
+	ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_USER_DATA ReconciliationKeepReason = 2
+	// near the period end, so it may post on the next statement
+	ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_GRACE ReconciliationKeepReason = 3
+)
+
+// Enum value maps for ReconciliationKeepReason.
+var (
+	ReconciliationKeepReason_name = map[int32]string{
+		0: "RECONCILIATION_KEEP_REASON_UNSPECIFIED",
+		1: "RECONCILIATION_KEEP_REASON_MANUAL",
+		2: "RECONCILIATION_KEEP_REASON_USER_DATA",
+		3: "RECONCILIATION_KEEP_REASON_GRACE",
+	}
+	ReconciliationKeepReason_value = map[string]int32{
+		"RECONCILIATION_KEEP_REASON_UNSPECIFIED": 0,
+		"RECONCILIATION_KEEP_REASON_MANUAL":      1,
+		"RECONCILIATION_KEEP_REASON_USER_DATA":   2,
+		"RECONCILIATION_KEEP_REASON_GRACE":       3,
+	}
+)
+
+func (x ReconciliationKeepReason) Enum() *ReconciliationKeepReason {
+	p := new(ReconciliationKeepReason)
+	*p = x
+	return p
+}
+
+func (x ReconciliationKeepReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ReconciliationKeepReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_statement_services_proto_enumTypes[1].Descriptor()
+}
+
+func (ReconciliationKeepReason) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_statement_services_proto_enumTypes[1]
+}
+
+func (x ReconciliationKeepReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ReconciliationKeepReason.Descriptor instead.
+func (ReconciliationKeepReason) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{1}
+}
+
 type PreviewStatementImportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -88,8 +210,8 @@ type PreviewStatementImportResponse struct {
 	Lines     []*ParsedStatementLine `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
 	// account whose aliases contain the statement's account number
 	MatchedAccountId *int64 `protobuf:"varint,3,opt,name=matched_account_id,json=matchedAccountId,proto3,oneof" json:"matched_account_id,omitempty"`
-	// lines already present on the matched account (same external_id)
-	DuplicateCount int32 `protobuf:"varint,4,opt,name=duplicate_count,json=duplicateCount,proto3" json:"duplicate_count,omitempty"`
+	// against the matched account, when there is one
+	Reconciliation *StatementReconciliation `protobuf:"bytes,5,opt,name=reconciliation,proto3,oneof" json:"reconciliation,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -145,11 +267,237 @@ func (x *PreviewStatementImportResponse) GetMatchedAccountId() int64 {
 	return 0
 }
 
-func (x *PreviewStatementImportResponse) GetDuplicateCount() int32 {
+func (x *PreviewStatementImportResponse) GetReconciliation() *StatementReconciliation {
 	if x != nil {
-		return x.DuplicateCount
+		return x.Reconciliation
+	}
+	return nil
+}
+
+type PlanStatementImportRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	StatementId   int64                  `protobuf:"varint,2,opt,name=statement_id,json=statementId,proto3" json:"statement_id,omitempty"`
+	AccountId     int64                  `protobuf:"varint,3,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlanStatementImportRequest) Reset() {
+	*x = PlanStatementImportRequest{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanStatementImportRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanStatementImportRequest) ProtoMessage() {}
+
+func (x *PlanStatementImportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanStatementImportRequest.ProtoReflect.Descriptor instead.
+func (*PlanStatementImportRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PlanStatementImportRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *PlanStatementImportRequest) GetStatementId() int64 {
+	if x != nil {
+		return x.StatementId
 	}
 	return 0
+}
+
+func (x *PlanStatementImportRequest) GetAccountId() int64 {
+	if x != nil {
+		return x.AccountId
+	}
+	return 0
+}
+
+type PlanStatementImportResponse struct {
+	state          protoimpl.MessageState   `protogen:"open.v1"`
+	Reconciliation *StatementReconciliation `protobuf:"bytes,1,opt,name=reconciliation,proto3" json:"reconciliation,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *PlanStatementImportResponse) Reset() {
+	*x = PlanStatementImportResponse{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanStatementImportResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanStatementImportResponse) ProtoMessage() {}
+
+func (x *PlanStatementImportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanStatementImportResponse.ProtoReflect.Descriptor instead.
+func (*PlanStatementImportResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *PlanStatementImportResponse) GetReconciliation() *StatementReconciliation {
+	if x != nil {
+		return x.Reconciliation
+	}
+	return nil
+}
+
+type ReconciliationItem struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Action ReconciliationAction   `protobuf:"varint,1,opt,name=action,proto3,enum=nagomi.v1.ReconciliationAction" json:"action,omitempty"`
+	// into the preview's lines; set for every action but DELETE and KEEP
+	LineIndex *int32 `protobuf:"varint,2,opt,name=line_index,json=lineIndex,proto3,oneof" json:"line_index,omitempty"`
+	// the existing transaction; set for CONFIRM, UPDATE_AMOUNT, DELETE and KEEP
+	Transaction   *Transaction             `protobuf:"bytes,3,opt,name=transaction,proto3,oneof" json:"transaction,omitempty"`
+	KeepReason    ReconciliationKeepReason `protobuf:"varint,4,opt,name=keep_reason,json=keepReason,proto3,enum=nagomi.v1.ReconciliationKeepReason" json:"keep_reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReconciliationItem) Reset() {
+	*x = ReconciliationItem{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReconciliationItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReconciliationItem) ProtoMessage() {}
+
+func (x *ReconciliationItem) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReconciliationItem.ProtoReflect.Descriptor instead.
+func (*ReconciliationItem) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ReconciliationItem) GetAction() ReconciliationAction {
+	if x != nil {
+		return x.Action
+	}
+	return ReconciliationAction_RECONCILIATION_ACTION_UNSPECIFIED
+}
+
+func (x *ReconciliationItem) GetLineIndex() int32 {
+	if x != nil && x.LineIndex != nil {
+		return *x.LineIndex
+	}
+	return 0
+}
+
+func (x *ReconciliationItem) GetTransaction() *Transaction {
+	if x != nil {
+		return x.Transaction
+	}
+	return nil
+}
+
+func (x *ReconciliationItem) GetKeepReason() ReconciliationKeepReason {
+	if x != nil {
+		return x.KeepReason
+	}
+	return ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_UNSPECIFIED
+}
+
+type StatementReconciliation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccountId     int64                  `protobuf:"varint,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	Items         []*ReconciliationItem  `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatementReconciliation) Reset() {
+	*x = StatementReconciliation{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatementReconciliation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatementReconciliation) ProtoMessage() {}
+
+func (x *StatementReconciliation) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatementReconciliation.ProtoReflect.Descriptor instead.
+func (*StatementReconciliation) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *StatementReconciliation) GetAccountId() int64 {
+	if x != nil {
+		return x.AccountId
+	}
+	return 0
+}
+
+func (x *StatementReconciliation) GetItems() []*ReconciliationItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
 }
 
 type CommitStatementImportRequest struct {
@@ -167,7 +515,7 @@ type CommitStatementImportRequest struct {
 
 func (x *CommitStatementImportRequest) Reset() {
 	*x = CommitStatementImportRequest{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[2]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -179,7 +527,7 @@ func (x *CommitStatementImportRequest) String() string {
 func (*CommitStatementImportRequest) ProtoMessage() {}
 
 func (x *CommitStatementImportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[2]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -192,7 +540,7 @@ func (x *CommitStatementImportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommitStatementImportRequest.ProtoReflect.Descriptor instead.
 func (*CommitStatementImportRequest) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{2}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CommitStatementImportRequest) GetUserId() string {
@@ -256,13 +604,18 @@ type CommitStatementImportResponse struct {
 	Statement      *Statement             `protobuf:"bytes,1,opt,name=statement,proto3" json:"statement,omitempty"`
 	CreatedCount   int32                  `protobuf:"varint,2,opt,name=created_count,json=createdCount,proto3" json:"created_count,omitempty"`
 	DuplicateCount int32                  `protobuf:"varint,3,opt,name=duplicate_count,json=duplicateCount,proto3" json:"duplicate_count,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	ConfirmedCount int32                  `protobuf:"varint,4,opt,name=confirmed_count,json=confirmedCount,proto3" json:"confirmed_count,omitempty"`
+	// confirmed with the statement's amount
+	UpdatedCount  int32 `protobuf:"varint,5,opt,name=updated_count,json=updatedCount,proto3" json:"updated_count,omitempty"`
+	DeletedCount  int32 `protobuf:"varint,6,opt,name=deleted_count,json=deletedCount,proto3" json:"deleted_count,omitempty"`
+	KeptCount     int32 `protobuf:"varint,7,opt,name=kept_count,json=keptCount,proto3" json:"kept_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CommitStatementImportResponse) Reset() {
 	*x = CommitStatementImportResponse{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[3]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +627,7 @@ func (x *CommitStatementImportResponse) String() string {
 func (*CommitStatementImportResponse) ProtoMessage() {}
 
 func (x *CommitStatementImportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[3]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +640,7 @@ func (x *CommitStatementImportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommitStatementImportResponse.ProtoReflect.Descriptor instead.
 func (*CommitStatementImportResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{3}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CommitStatementImportResponse) GetStatement() *Statement {
@@ -311,6 +664,34 @@ func (x *CommitStatementImportResponse) GetDuplicateCount() int32 {
 	return 0
 }
 
+func (x *CommitStatementImportResponse) GetConfirmedCount() int32 {
+	if x != nil {
+		return x.ConfirmedCount
+	}
+	return 0
+}
+
+func (x *CommitStatementImportResponse) GetUpdatedCount() int32 {
+	if x != nil {
+		return x.UpdatedCount
+	}
+	return 0
+}
+
+func (x *CommitStatementImportResponse) GetDeletedCount() int32 {
+	if x != nil {
+		return x.DeletedCount
+	}
+	return 0
+}
+
+func (x *CommitStatementImportResponse) GetKeptCount() int32 {
+	if x != nil {
+		return x.KeptCount
+	}
+	return 0
+}
+
 type ListStatementsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -322,7 +703,7 @@ type ListStatementsRequest struct {
 
 func (x *ListStatementsRequest) Reset() {
 	*x = ListStatementsRequest{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[4]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -334,7 +715,7 @@ func (x *ListStatementsRequest) String() string {
 func (*ListStatementsRequest) ProtoMessage() {}
 
 func (x *ListStatementsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[4]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -347,7 +728,7 @@ func (x *ListStatementsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStatementsRequest.ProtoReflect.Descriptor instead.
 func (*ListStatementsRequest) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{4}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListStatementsRequest) GetUserId() string {
@@ -380,7 +761,7 @@ type ListStatementsResponse struct {
 
 func (x *ListStatementsResponse) Reset() {
 	*x = ListStatementsResponse{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[5]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -392,7 +773,7 @@ func (x *ListStatementsResponse) String() string {
 func (*ListStatementsResponse) ProtoMessage() {}
 
 func (x *ListStatementsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[5]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -405,7 +786,7 @@ func (x *ListStatementsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListStatementsResponse.ProtoReflect.Descriptor instead.
 func (*ListStatementsResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{5}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListStatementsResponse) GetStatements() []*Statement {
@@ -425,7 +806,7 @@ type GetStatementRequest struct {
 
 func (x *GetStatementRequest) Reset() {
 	*x = GetStatementRequest{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[6]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -437,7 +818,7 @@ func (x *GetStatementRequest) String() string {
 func (*GetStatementRequest) ProtoMessage() {}
 
 func (x *GetStatementRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[6]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -450,7 +831,7 @@ func (x *GetStatementRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatementRequest.ProtoReflect.Descriptor instead.
 func (*GetStatementRequest) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{6}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetStatementRequest) GetUserId() string {
@@ -477,7 +858,7 @@ type GetStatementResponse struct {
 
 func (x *GetStatementResponse) Reset() {
 	*x = GetStatementResponse{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[7]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -489,7 +870,7 @@ func (x *GetStatementResponse) String() string {
 func (*GetStatementResponse) ProtoMessage() {}
 
 func (x *GetStatementResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[7]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -502,7 +883,7 @@ func (x *GetStatementResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatementResponse.ProtoReflect.Descriptor instead.
 func (*GetStatementResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{7}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetStatementResponse) GetStatement() *Statement {
@@ -531,7 +912,7 @@ type DeleteStatementRequest struct {
 
 func (x *DeleteStatementRequest) Reset() {
 	*x = DeleteStatementRequest{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[8]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -543,7 +924,7 @@ func (x *DeleteStatementRequest) String() string {
 func (*DeleteStatementRequest) ProtoMessage() {}
 
 func (x *DeleteStatementRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[8]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -556,7 +937,7 @@ func (x *DeleteStatementRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteStatementRequest.ProtoReflect.Descriptor instead.
 func (*DeleteStatementRequest) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{8}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteStatementRequest) GetUserId() string {
@@ -589,7 +970,7 @@ type DeleteStatementResponse struct {
 
 func (x *DeleteStatementResponse) Reset() {
 	*x = DeleteStatementResponse{}
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[9]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -601,7 +982,7 @@ func (x *DeleteStatementResponse) String() string {
 func (*DeleteStatementResponse) ProtoMessage() {}
 
 func (x *DeleteStatementResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_statement_services_proto_msgTypes[9]
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -614,7 +995,7 @@ func (x *DeleteStatementResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteStatementResponse.ProtoReflect.Descriptor instead.
 func (*DeleteStatementResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{9}
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteStatementResponse) GetDeletedTransactions() int32 {
@@ -628,29 +1009,55 @@ var File_nagomi_v1_statement_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"\n" +
-	"\"nagomi/v1/statement_services.proto\x12\tnagomi.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19nagomi/v1/statement.proto\x1a nagomi/v1/statement_parser.proto\"\x92\x01\n" +
+	"\"nagomi/v1/statement_services.proto\x12\tnagomi.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19nagomi/v1/statement.proto\x1a nagomi/v1/statement_parser.proto\x1a\x1bnagomi/v1/transaction.proto\"\x92\x01\n" +
 	"\x1dPreviewStatementImportRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12'\n" +
 	"\bpdf_data\x18\x02 \x01(\fB\f\xbaH\tz\a\x10\x01\x18\x80\x80\x80\n" +
 	"R\apdfData\x12%\n" +
-	"\tfile_name\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\bfileName\"\xfd\x01\n" +
+	"\tfile_name\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\bfileName\"\xbe\x02\n" +
 	"\x1ePreviewStatementImportResponse\x122\n" +
 	"\tstatement\x18\x01 \x01(\v2\x14.nagomi.v1.StatementR\tstatement\x124\n" +
 	"\x05lines\x18\x02 \x03(\v2\x1e.nagomi.v1.ParsedStatementLineR\x05lines\x121\n" +
-	"\x12matched_account_id\x18\x03 \x01(\x03H\x00R\x10matchedAccountId\x88\x01\x01\x12'\n" +
-	"\x0fduplicate_count\x18\x04 \x01(\x05R\x0eduplicateCountB\x15\n" +
-	"\x13_matched_account_id\"\xe0\x01\n" +
+	"\x12matched_account_id\x18\x03 \x01(\x03H\x00R\x10matchedAccountId\x88\x01\x01\x12O\n" +
+	"\x0ereconciliation\x18\x05 \x01(\v2\".nagomi.v1.StatementReconciliationH\x01R\x0ereconciliation\x88\x01\x01B\x15\n" +
+	"\x13_matched_account_idB\x11\n" +
+	"\x0f_reconciliationJ\x04\b\x04\x10\x05\"\x93\x01\n" +
+	"\x1aPlanStatementImportRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12*\n" +
+	"\fstatement_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vstatementId\x12&\n" +
+	"\n" +
+	"account_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\"i\n" +
+	"\x1bPlanStatementImportResponse\x12J\n" +
+	"\x0ereconciliation\x18\x01 \x01(\v2\".nagomi.v1.StatementReconciliationR\x0ereconciliation\"\x95\x02\n" +
+	"\x12ReconciliationItem\x127\n" +
+	"\x06action\x18\x01 \x01(\x0e2\x1f.nagomi.v1.ReconciliationActionR\x06action\x12\"\n" +
+	"\n" +
+	"line_index\x18\x02 \x01(\x05H\x00R\tlineIndex\x88\x01\x01\x12=\n" +
+	"\vtransaction\x18\x03 \x01(\v2\x16.nagomi.v1.TransactionH\x01R\vtransaction\x88\x01\x01\x12D\n" +
+	"\vkeep_reason\x18\x04 \x01(\x0e2#.nagomi.v1.ReconciliationKeepReasonR\n" +
+	"keepReasonB\r\n" +
+	"\v_line_indexB\x0e\n" +
+	"\f_transaction\"m\n" +
+	"\x17StatementReconciliation\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\x03R\taccountId\x123\n" +
+	"\x05items\x18\x02 \x03(\v2\x1d.nagomi.v1.ReconciliationItemR\x05items\"\xe0\x01\n" +
 	"\x1cCommitStatementImportRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12*\n" +
 	"\fstatement_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vstatementId\x12(\n" +
 	"\n" +
 	"account_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00H\x00R\taccountId\x125\n" +
 	"\x10new_account_name\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dH\x00R\x0enewAccountNameB\x10\n" +
-	"\aaccount\x12\x05\xbaH\x02\b\x01\"\xa1\x01\n" +
+	"\aaccount\x12\x05\xbaH\x02\b\x01\"\xb3\x02\n" +
 	"\x1dCommitStatementImportResponse\x122\n" +
 	"\tstatement\x18\x01 \x01(\v2\x14.nagomi.v1.StatementR\tstatement\x12#\n" +
 	"\rcreated_count\x18\x02 \x01(\x05R\fcreatedCount\x12'\n" +
-	"\x0fduplicate_count\x18\x03 \x01(\x05R\x0eduplicateCount\"\xb1\x01\n" +
+	"\x0fduplicate_count\x18\x03 \x01(\x05R\x0eduplicateCount\x12'\n" +
+	"\x0fconfirmed_count\x18\x04 \x01(\x05R\x0econfirmedCount\x12#\n" +
+	"\rupdated_count\x18\x05 \x01(\x05R\fupdatedCount\x12#\n" +
+	"\rdeleted_count\x18\x06 \x01(\x05R\fdeletedCount\x12\x1d\n" +
+	"\n" +
+	"kept_count\x18\a \x01(\x05R\tkeptCount\"\xb1\x01\n" +
 	"\x15ListStatementsRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\"\n" +
 	"\n" +
@@ -673,9 +1080,23 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12/\n" +
 	"\x13delete_transactions\x18\x03 \x01(\bR\x12deleteTransactions\"L\n" +
 	"\x17DeleteStatementResponse\x121\n" +
-	"\x14deleted_transactions\x18\x01 \x01(\x05R\x13deletedTransactions2\xef\x03\n" +
+	"\x14deleted_transactions\x18\x01 \x01(\x05R\x13deletedTransactions*\x99\x02\n" +
+	"\x14ReconciliationAction\x12%\n" +
+	"!RECONCILIATION_ACTION_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dRECONCILIATION_ACTION_CONFIRM\x10\x01\x12'\n" +
+	"#RECONCILIATION_ACTION_UPDATE_AMOUNT\x10\x02\x12 \n" +
+	"\x1cRECONCILIATION_ACTION_CREATE\x10\x03\x12*\n" +
+	"&RECONCILIATION_ACTION_ALREADY_IMPORTED\x10\x04\x12 \n" +
+	"\x1cRECONCILIATION_ACTION_DELETE\x10\x05\x12\x1e\n" +
+	"\x1aRECONCILIATION_ACTION_KEEP\x10\x06*\xbd\x01\n" +
+	"\x18ReconciliationKeepReason\x12*\n" +
+	"&RECONCILIATION_KEEP_REASON_UNSPECIFIED\x10\x00\x12%\n" +
+	"!RECONCILIATION_KEEP_REASON_MANUAL\x10\x01\x12(\n" +
+	"$RECONCILIATION_KEEP_REASON_USER_DATA\x10\x02\x12$\n" +
+	" RECONCILIATION_KEEP_REASON_GRACE\x10\x032\xd5\x04\n" +
 	"\x10StatementService\x12m\n" +
-	"\x16PreviewStatementImport\x12(.nagomi.v1.PreviewStatementImportRequest\x1a).nagomi.v1.PreviewStatementImportResponse\x12j\n" +
+	"\x16PreviewStatementImport\x12(.nagomi.v1.PreviewStatementImportRequest\x1a).nagomi.v1.PreviewStatementImportResponse\x12d\n" +
+	"\x13PlanStatementImport\x12%.nagomi.v1.PlanStatementImportRequest\x1a&.nagomi.v1.PlanStatementImportResponse\x12j\n" +
 	"\x15CommitStatementImport\x12'.nagomi.v1.CommitStatementImportRequest\x1a(.nagomi.v1.CommitStatementImportResponse\x12U\n" +
 	"\x0eListStatements\x12 .nagomi.v1.ListStatementsRequest\x1a!.nagomi.v1.ListStatementsResponse\x12O\n" +
 	"\fGetStatement\x12\x1e.nagomi.v1.GetStatementRequest\x1a\x1f.nagomi.v1.GetStatementResponse\x12X\n" +
@@ -695,44 +1116,60 @@ func file_nagomi_v1_statement_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_statement_services_proto_rawDescData
 }
 
-var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_nagomi_v1_statement_services_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_nagomi_v1_statement_services_proto_goTypes = []any{
-	(*PreviewStatementImportRequest)(nil),  // 0: nagomi.v1.PreviewStatementImportRequest
-	(*PreviewStatementImportResponse)(nil), // 1: nagomi.v1.PreviewStatementImportResponse
-	(*CommitStatementImportRequest)(nil),   // 2: nagomi.v1.CommitStatementImportRequest
-	(*CommitStatementImportResponse)(nil),  // 3: nagomi.v1.CommitStatementImportResponse
-	(*ListStatementsRequest)(nil),          // 4: nagomi.v1.ListStatementsRequest
-	(*ListStatementsResponse)(nil),         // 5: nagomi.v1.ListStatementsResponse
-	(*GetStatementRequest)(nil),            // 6: nagomi.v1.GetStatementRequest
-	(*GetStatementResponse)(nil),           // 7: nagomi.v1.GetStatementResponse
-	(*DeleteStatementRequest)(nil),         // 8: nagomi.v1.DeleteStatementRequest
-	(*DeleteStatementResponse)(nil),        // 9: nagomi.v1.DeleteStatementResponse
-	(*Statement)(nil),                      // 10: nagomi.v1.Statement
-	(*ParsedStatementLine)(nil),            // 11: nagomi.v1.ParsedStatementLine
-	(StatementStatus)(0),                   // 12: nagomi.v1.StatementStatus
+	(ReconciliationAction)(0),              // 0: nagomi.v1.ReconciliationAction
+	(ReconciliationKeepReason)(0),          // 1: nagomi.v1.ReconciliationKeepReason
+	(*PreviewStatementImportRequest)(nil),  // 2: nagomi.v1.PreviewStatementImportRequest
+	(*PreviewStatementImportResponse)(nil), // 3: nagomi.v1.PreviewStatementImportResponse
+	(*PlanStatementImportRequest)(nil),     // 4: nagomi.v1.PlanStatementImportRequest
+	(*PlanStatementImportResponse)(nil),    // 5: nagomi.v1.PlanStatementImportResponse
+	(*ReconciliationItem)(nil),             // 6: nagomi.v1.ReconciliationItem
+	(*StatementReconciliation)(nil),        // 7: nagomi.v1.StatementReconciliation
+	(*CommitStatementImportRequest)(nil),   // 8: nagomi.v1.CommitStatementImportRequest
+	(*CommitStatementImportResponse)(nil),  // 9: nagomi.v1.CommitStatementImportResponse
+	(*ListStatementsRequest)(nil),          // 10: nagomi.v1.ListStatementsRequest
+	(*ListStatementsResponse)(nil),         // 11: nagomi.v1.ListStatementsResponse
+	(*GetStatementRequest)(nil),            // 12: nagomi.v1.GetStatementRequest
+	(*GetStatementResponse)(nil),           // 13: nagomi.v1.GetStatementResponse
+	(*DeleteStatementRequest)(nil),         // 14: nagomi.v1.DeleteStatementRequest
+	(*DeleteStatementResponse)(nil),        // 15: nagomi.v1.DeleteStatementResponse
+	(*Statement)(nil),                      // 16: nagomi.v1.Statement
+	(*ParsedStatementLine)(nil),            // 17: nagomi.v1.ParsedStatementLine
+	(*Transaction)(nil),                    // 18: nagomi.v1.Transaction
+	(StatementStatus)(0),                   // 19: nagomi.v1.StatementStatus
 }
 var file_nagomi_v1_statement_services_proto_depIdxs = []int32{
-	10, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	11, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
-	10, // 2: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	12, // 3: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
-	10, // 4: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
-	10, // 5: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
-	0,  // 6: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
-	2,  // 7: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
-	4,  // 8: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
-	6,  // 9: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
-	8,  // 10: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
-	1,  // 11: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
-	3,  // 12: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
-	5,  // 13: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
-	7,  // 14: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
-	9,  // 15: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	16, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	17, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
+	7,  // 2: nagomi.v1.PreviewStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
+	7,  // 3: nagomi.v1.PlanStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
+	0,  // 4: nagomi.v1.ReconciliationItem.action:type_name -> nagomi.v1.ReconciliationAction
+	18, // 5: nagomi.v1.ReconciliationItem.transaction:type_name -> nagomi.v1.Transaction
+	1,  // 6: nagomi.v1.ReconciliationItem.keep_reason:type_name -> nagomi.v1.ReconciliationKeepReason
+	6,  // 7: nagomi.v1.StatementReconciliation.items:type_name -> nagomi.v1.ReconciliationItem
+	16, // 8: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	19, // 9: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
+	16, // 10: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
+	16, // 11: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
+	2,  // 12: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
+	4,  // 13: nagomi.v1.StatementService.PlanStatementImport:input_type -> nagomi.v1.PlanStatementImportRequest
+	8,  // 14: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
+	10, // 15: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
+	12, // 16: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
+	14, // 17: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
+	3,  // 18: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
+	5,  // 19: nagomi.v1.StatementService.PlanStatementImport:output_type -> nagomi.v1.PlanStatementImportResponse
+	9,  // 20: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
+	11, // 21: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
+	13, // 22: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
+	15, // 23: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
+	18, // [18:24] is the sub-list for method output_type
+	12, // [12:18] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_statement_services_proto_init() }
@@ -742,24 +1179,27 @@ func file_nagomi_v1_statement_services_proto_init() {
 	}
 	file_nagomi_v1_statement_proto_init()
 	file_nagomi_v1_statement_parser_proto_init()
+	file_nagomi_v1_transaction_proto_init()
 	file_nagomi_v1_statement_services_proto_msgTypes[1].OneofWrappers = []any{}
-	file_nagomi_v1_statement_services_proto_msgTypes[2].OneofWrappers = []any{
+	file_nagomi_v1_statement_services_proto_msgTypes[4].OneofWrappers = []any{}
+	file_nagomi_v1_statement_services_proto_msgTypes[6].OneofWrappers = []any{
 		(*CommitStatementImportRequest_AccountId)(nil),
 		(*CommitStatementImportRequest_NewAccountName)(nil),
 	}
-	file_nagomi_v1_statement_services_proto_msgTypes[4].OneofWrappers = []any{}
+	file_nagomi_v1_statement_services_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_statement_services_proto_rawDesc), len(file_nagomi_v1_statement_services_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   10,
+			NumEnums:      2,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_nagomi_v1_statement_services_proto_goTypes,
 		DependencyIndexes: file_nagomi_v1_statement_services_proto_depIdxs,
+		EnumInfos:         file_nagomi_v1_statement_services_proto_enumTypes,
 		MessageInfos:      file_nagomi_v1_statement_services_proto_msgTypes,
 	}.Build()
 	File_nagomi_v1_statement_services_proto = out.File

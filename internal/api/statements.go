@@ -32,6 +32,20 @@ func (s *Server) PreviewStatementImport(ctx context.Context, req *connect.Reques
 	return connect.NewResponse(preview), nil
 }
 
+func (s *Server) PlanStatementImport(ctx context.Context, req *connect.Request[pb.PlanStatementImportRequest]) (*connect.Response[pb.PlanStatementImportResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	reconciliation, err := s.services.Statements.Plan(ctx, userID, req.Msg.GetStatementId(), req.Msg.GetAccountId())
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.PlanStatementImportResponse{Reconciliation: reconciliation}), nil
+}
+
 func (s *Server) CommitStatementImport(ctx context.Context, req *connect.Request[pb.CommitStatementImportRequest]) (*connect.Response[pb.CommitStatementImportResponse], error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
