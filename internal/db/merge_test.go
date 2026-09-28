@@ -209,4 +209,44 @@ func TestMergeAccounts(t *testing.T) {
 			t.Errorf("secondary tx not moved, still on account %d", got)
 		}
 	})
+
+	t.Run("statements move to primary and survive the secondary's deletion", func(t *testing.T) {
+		userID := tdb.CreateTestUser(ctx)
+		primary := makeAccount(userID, "1234", nil)
+		secondary := makeAccount(userID, "1235", nil)
+
+		var statementID int64
+		err := tdb.Pool().QueryRow(ctx, `
+			INSERT INTO statements (user_id, account_id, status, file_path, file_hash, parser, bank,
+				account_type, account_number, period_start, period_end, currency, line_count, parsed)
+			VALUES ($1, $2, 2, 'statements/x.pdf', 'hash', 'rbc-chequing', 'RBC', 1, '1235',
+				'2026-01-01', '2026-01-31', 'CAD', 0, '{}')
+			RETURNING id
+		`, userID, secondary.ID).Scan(&statementID)
+		if err != nil {
+			t.Fatalf("failed to create statement: %v", err)
+		}
+
+		moved, err := tdb.MoveAccountStatements(ctx, sqlc.MoveAccountStatementsParams{
+			PrimaryID:   primary.ID,
+			SecondaryID: secondary.ID,
+		})
+		if err != nil {
+			t.Fatalf("MoveAccountStatements: %v", err)
+		}
+		if moved != 1 {
+			t.Errorf("moved %d statements, want 1", moved)
+		}
+		if _, err := tdb.DeleteAccount(ctx, sqlc.DeleteAccountParams{UserID: userID, ID: secondary.ID}); err != nil {
+			t.Fatalf("DeleteAccount: %v", err)
+		}
+
+		var accountID int64
+		if err := tdb.Pool().QueryRow(ctx, `SELECT account_id FROM statements WHERE id = $1`, statementID).Scan(&accountID); err != nil {
+			t.Fatalf("statement gone after deleting secondary: %v", err)
+		}
+		if accountID != primary.ID {
+			t.Errorf("statement account_id = %d, want %d", accountID, primary.ID)
+		}
+	})
 }

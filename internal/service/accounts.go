@@ -235,6 +235,24 @@ func (s *acctSvc) MergeAccounts(ctx context.Context, userID uuid.UUID, primaryID
 		return nil, 0, wrapErr("AccountService.MergeAccounts", fmt.Errorf("moving transactions: %w", err))
 	}
 
+	// statements would otherwise go with the secondary when it's deleted
+	if _, err := s.queries.MoveAccountStatements(ctx, sqlc.MoveAccountStatementsParams{
+		PrimaryID:   primaryID,
+		SecondaryID: secondaryID,
+	}); err != nil {
+		return nil, 0, wrapErr("AccountService.MergeAccounts", fmt.Errorf("moving statements: %w", err))
+	}
+	if secondary.Account.StatementDriven && !primary.Account.StatementDriven {
+		statementDriven := true
+		if err := s.queries.UpdateAccount(ctx, sqlc.UpdateAccountParams{
+			ID:              primaryID,
+			UserID:          userID,
+			StatementDriven: &statementDriven,
+		}); err != nil {
+			return nil, 0, wrapErr("AccountService.MergeAccounts", fmt.Errorf("carrying over statement_driven: %w", err))
+		}
+	}
+
 	// build merged alias list: existing primary aliases + secondary name + secondary aliases
 	merged := buildMergedAliases(primary.Account.Aliases, secondary.Account.Name, secondary.Account.Aliases)
 

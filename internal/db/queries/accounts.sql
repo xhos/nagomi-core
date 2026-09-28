@@ -203,6 +203,11 @@ update transactions
 set account_id = @primary_id::bigint
 where account_id = @secondary_id::bigint;
 
+-- name: MoveAccountStatements :execrows
+update statements
+set account_id = @primary_id::bigint
+where account_id = @secondary_id::bigint;
+
 -- name: SyncAccountBalances :exec
 with anchor_transactions as (
   select

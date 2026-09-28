@@ -487,6 +487,25 @@ func (q *Queries) ListAccounts(ctx context.Context, userID uuid.UUID) ([]ListAcc
 	return items, nil
 }
 
+const moveAccountStatements = `-- name: MoveAccountStatements :execrows
+update statements
+set account_id = $1::bigint
+where account_id = $2::bigint
+`
+
+type MoveAccountStatementsParams struct {
+	PrimaryID   int64 `db:"primary_id" json:"primary_id"`
+	SecondaryID int64 `db:"secondary_id" json:"secondary_id"`
+}
+
+func (q *Queries) MoveAccountStatements(ctx context.Context, arg MoveAccountStatementsParams) (int64, error) {
+	result, err := q.db.Exec(ctx, moveAccountStatements, arg.PrimaryID, arg.SecondaryID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const moveAccountTransactions = `-- name: MoveAccountTransactions :execrows
 update transactions
 set account_id = $1::bigint
