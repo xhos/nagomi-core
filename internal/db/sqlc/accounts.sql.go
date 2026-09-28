@@ -55,7 +55,8 @@ insert into
     anchor_balance_cents,
     anchor_currency,
     main_currency,
-    colors
+    colors,
+    statement_driven
   )
 values
   (
@@ -67,10 +68,11 @@ values
     $6::bigint,
     $7::char(3),
     $8::char(3),
-    $9::text []
+    $9::text [],
+    $10::boolean
   )
 returning
-  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, colors, created_at, updated_at, aliases
+  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, colors, created_at, updated_at, aliases, statement_driven
 `
 
 type CreateAccountParams struct {
@@ -83,6 +85,7 @@ type CreateAccountParams struct {
 	AnchorCurrency     string    `db:"anchor_currency" json:"anchor_currency"`
 	MainCurrency       string    `db:"main_currency" json:"main_currency"`
 	Colors             []string  `db:"colors" json:"colors"`
+	StatementDriven    bool      `db:"statement_driven" json:"statement_driven"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
@@ -96,6 +99,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		arg.AnchorCurrency,
 		arg.MainCurrency,
 		arg.Colors,
+		arg.StatementDriven,
 	)
 	var i Account
 	err := row.Scan(
@@ -113,6 +117,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Aliases,
+		&i.StatementDriven,
 	)
 	return i, err
 }
@@ -139,7 +144,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, arg DeleteAccountParams) (i
 }
 
 const findAccountByAlias = `-- name: FindAccountByAlias :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven
 from accounts a
   left join account_users au on au.account_id = a.id and au.user_id = $1::uuid
 where (a.owner_id = $1::uuid or au.user_id is not null)
@@ -174,12 +179,13 @@ func (q *Queries) FindAccountByAlias(ctx context.Context, arg FindAccountByAlias
 		&i.Account.CreatedAt,
 		&i.Account.UpdatedAt,
 		&i.Account.Aliases,
+		&i.Account.StatementDriven,
 	)
 	return i, err
 }
 
 const findAccountByName = `-- name: FindAccountByName :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven
 from accounts a
   left join account_users au on au.account_id = a.id and au.user_id = $1::uuid
 where (a.owner_id = $1::uuid or au.user_id is not null)
@@ -214,13 +220,14 @@ func (q *Queries) FindAccountByName(ctx context.Context, arg FindAccountByNamePa
 		&i.Account.CreatedAt,
 		&i.Account.UpdatedAt,
 		&i.Account.Aliases,
+		&i.Account.StatementDriven,
 	)
 	return i, err
 }
 
 const getAccount = `-- name: GetAccount :one
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -278,6 +285,7 @@ func (q *Queries) GetAccount(ctx context.Context, arg GetAccountParams) (GetAcco
 		&i.Account.CreatedAt,
 		&i.Account.UpdatedAt,
 		&i.Account.Aliases,
+		&i.Account.StatementDriven,
 		&i.BalanceCents,
 		&i.BalanceCurrency,
 	)
@@ -406,7 +414,7 @@ func (q *Queries) GetUserAccountsCount(ctx context.Context, userID uuid.UUID) (i
 
 const listAccounts = `-- name: ListAccounts :many
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -465,6 +473,7 @@ func (q *Queries) ListAccounts(ctx context.Context, userID uuid.UUID) ([]ListAcc
 			&i.Account.CreatedAt,
 			&i.Account.UpdatedAt,
 			&i.Account.Aliases,
+			&i.Account.StatementDriven,
 			&i.BalanceCents,
 			&i.BalanceCurrency,
 		); err != nil {
@@ -650,10 +659,11 @@ set
   anchor_balance_cents = coalesce($6::bigint, anchor_balance_cents),
   anchor_currency = coalesce($7::char(3), anchor_currency),
   main_currency = coalesce($8::char(3), main_currency),
-  colors = coalesce($9::text [], colors)
+  colors = coalesce($9::text [], colors),
+  statement_driven = coalesce($10::boolean, statement_driven)
 where
-  id = $10::bigint
-  and owner_id = $11::uuid
+  id = $11::bigint
+  and owner_id = $12::uuid
 `
 
 type UpdateAccountParams struct {
@@ -666,6 +676,7 @@ type UpdateAccountParams struct {
 	AnchorCurrency     *string    `db:"anchor_currency" json:"anchor_currency"`
 	MainCurrency       *string    `db:"main_currency" json:"main_currency"`
 	Colors             []string   `db:"colors" json:"colors"`
+	StatementDriven    *bool      `db:"statement_driven" json:"statement_driven"`
 	ID                 int64      `db:"id" json:"id"`
 	UserID             uuid.UUID  `db:"user_id" json:"user_id"`
 }
@@ -681,6 +692,7 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) er
 		arg.AnchorCurrency,
 		arg.MainCurrency,
 		arg.Colors,
+		arg.StatementDriven,
 		arg.ID,
 		arg.UserID,
 	)

@@ -210,17 +210,18 @@ func (x *GetAccountResponse) GetAccount() *Account {
 }
 
 type CreateAccountRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Bank          string                 `protobuf:"bytes,3,opt,name=bank,proto3" json:"bank,omitempty"`
-	Type          AccountType            `protobuf:"varint,4,opt,name=type,proto3,enum=nagomi.v1.AccountType" json:"type,omitempty"`
-	FriendlyName  *string                `protobuf:"bytes,5,opt,name=friendly_name,json=friendlyName,proto3,oneof" json:"friendly_name,omitempty"`
-	AnchorBalance *money.Money           `protobuf:"bytes,6,opt,name=anchor_balance,json=anchorBalance,proto3" json:"anchor_balance,omitempty"`
-	MainCurrency  string                 `protobuf:"bytes,7,opt,name=main_currency,json=mainCurrency,proto3" json:"main_currency,omitempty"`
-	Colors        []string               `protobuf:"bytes,8,rep,name=colors,proto3" json:"colors,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Bank            string                 `protobuf:"bytes,3,opt,name=bank,proto3" json:"bank,omitempty"`
+	Type            AccountType            `protobuf:"varint,4,opt,name=type,proto3,enum=nagomi.v1.AccountType" json:"type,omitempty"`
+	FriendlyName    *string                `protobuf:"bytes,5,opt,name=friendly_name,json=friendlyName,proto3,oneof" json:"friendly_name,omitempty"`
+	AnchorBalance   *money.Money           `protobuf:"bytes,6,opt,name=anchor_balance,json=anchorBalance,proto3" json:"anchor_balance,omitempty"`
+	MainCurrency    string                 `protobuf:"bytes,7,opt,name=main_currency,json=mainCurrency,proto3" json:"main_currency,omitempty"`
+	Colors          []string               `protobuf:"bytes,8,rep,name=colors,proto3" json:"colors,omitempty"`
+	StatementDriven bool                   `protobuf:"varint,9,opt,name=statement_driven,json=statementDriven,proto3" json:"statement_driven,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateAccountRequest) Reset() {
@@ -309,6 +310,13 @@ func (x *CreateAccountRequest) GetColors() []string {
 	return nil
 }
 
+func (x *CreateAccountRequest) GetStatementDriven() bool {
+	if x != nil {
+		return x.StatementDriven
+	}
+	return false
+}
+
 type CreateAccountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Account       *Account               `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
@@ -359,16 +367,17 @@ type UpdateAccountRequest struct {
 	Id         int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
 	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	// fields that can be updated
-	Name          *string                `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Bank          *string                `protobuf:"bytes,5,opt,name=bank,proto3,oneof" json:"bank,omitempty"`
-	AccountType   *AccountType           `protobuf:"varint,6,opt,name=account_type,json=accountType,proto3,enum=nagomi.v1.AccountType,oneof" json:"account_type,omitempty"`
-	FriendlyName  *string                `protobuf:"bytes,7,opt,name=friendly_name,json=friendlyName,proto3,oneof" json:"friendly_name,omitempty"`
-	AnchorDate    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=anchor_date,json=anchorDate,proto3,oneof" json:"anchor_date,omitempty"`
-	AnchorBalance *money.Money           `protobuf:"bytes,9,opt,name=anchor_balance,json=anchorBalance,proto3,oneof" json:"anchor_balance,omitempty"`
-	MainCurrency  *string                `protobuf:"bytes,10,opt,name=main_currency,json=mainCurrency,proto3,oneof" json:"main_currency,omitempty"`
-	Colors        []string               `protobuf:"bytes,11,rep,name=colors,proto3" json:"colors,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Name            *string                `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Bank            *string                `protobuf:"bytes,5,opt,name=bank,proto3,oneof" json:"bank,omitempty"`
+	AccountType     *AccountType           `protobuf:"varint,6,opt,name=account_type,json=accountType,proto3,enum=nagomi.v1.AccountType,oneof" json:"account_type,omitempty"`
+	FriendlyName    *string                `protobuf:"bytes,7,opt,name=friendly_name,json=friendlyName,proto3,oneof" json:"friendly_name,omitempty"`
+	AnchorDate      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=anchor_date,json=anchorDate,proto3,oneof" json:"anchor_date,omitempty"`
+	AnchorBalance   *money.Money           `protobuf:"bytes,9,opt,name=anchor_balance,json=anchorBalance,proto3,oneof" json:"anchor_balance,omitempty"`
+	MainCurrency    *string                `protobuf:"bytes,10,opt,name=main_currency,json=mainCurrency,proto3,oneof" json:"main_currency,omitempty"`
+	Colors          []string               `protobuf:"bytes,11,rep,name=colors,proto3" json:"colors,omitempty"`
+	StatementDriven *bool                  `protobuf:"varint,12,opt,name=statement_driven,json=statementDriven,proto3,oneof" json:"statement_driven,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *UpdateAccountRequest) Reset() {
@@ -476,6 +485,13 @@ func (x *UpdateAccountRequest) GetColors() []string {
 		return x.Colors
 	}
 	return nil
+}
+
+func (x *UpdateAccountRequest) GetStatementDriven() bool {
+	if x != nil && x.StatementDriven != nil {
+		return *x.StatementDriven
+	}
+	return false
 }
 
 type UpdateAccountResponse struct {
@@ -1119,7 +1135,7 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"B\n" +
 	"\x12GetAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xc1\x02\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xec\x02\n" +
 	"\x14CreateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -1128,10 +1144,11 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\rfriendly_name\x18\x05 \x01(\tH\x00R\ffriendlyName\x88\x01\x01\x129\n" +
 	"\x0eanchor_balance\x18\x06 \x01(\v2\x12.google.type.MoneyR\ranchorBalance\x12#\n" +
 	"\rmain_currency\x18\a \x01(\tR\fmainCurrency\x12\x16\n" +
-	"\x06colors\x18\b \x03(\tR\x06colorsB\x10\n" +
+	"\x06colors\x18\b \x03(\tR\x06colors\x12)\n" +
+	"\x10statement_driven\x18\t \x01(\bR\x0fstatementDrivenB\x10\n" +
 	"\x0e_friendly_name\"E\n" +
 	"\x15CreateAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xd9\x04\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\x9e\x05\n" +
 	"\x14UpdateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12;\n" +
@@ -1146,14 +1163,16 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x0eanchor_balance\x18\t \x01(\v2\x12.google.type.MoneyH\x05R\ranchorBalance\x88\x01\x01\x12(\n" +
 	"\rmain_currency\x18\n" +
 	" \x01(\tH\x06R\fmainCurrency\x88\x01\x01\x12\x16\n" +
-	"\x06colors\x18\v \x03(\tR\x06colorsB\a\n" +
+	"\x06colors\x18\v \x03(\tR\x06colors\x12.\n" +
+	"\x10statement_driven\x18\f \x01(\bH\aR\x0fstatementDriven\x88\x01\x01B\a\n" +
 	"\x05_nameB\a\n" +
 	"\x05_bankB\x0f\n" +
 	"\r_account_typeB\x10\n" +
 	"\x0e_friendly_nameB\x0e\n" +
 	"\f_anchor_dateB\x11\n" +
 	"\x0f_anchor_balanceB\x10\n" +
-	"\x0e_main_currency\"\x17\n" +
+	"\x0e_main_currencyB\x13\n" +
+	"\x11_statement_driven\"\x17\n" +
 	"\x15UpdateAccountResponse\"R\n" +
 	"\x14DeleteAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +

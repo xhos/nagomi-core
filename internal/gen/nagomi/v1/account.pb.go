@@ -40,8 +40,11 @@ type Account struct {
 	MainCurrency  string                 `protobuf:"bytes,11,opt,name=main_currency,json=mainCurrency,proto3" json:"main_currency,omitempty"`
 	Colors        []string               `protobuf:"bytes,12,rep,name=colors,proto3" json:"colors,omitempty"`
 	Balance       *money.Money           `protobuf:"bytes,13,opt,name=balance,proto3" json:"balance,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// balance comes from imported bank statements, which reconcile the
+	// provisional email and connector transactions. only these accept statements
+	StatementDriven bool `protobuf:"varint,15,opt,name=statement_driven,json=statementDriven,proto3" json:"statement_driven,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Account) Reset() {
@@ -172,6 +175,13 @@ func (x *Account) GetBalance() *money.Money {
 	return nil
 }
 
+func (x *Account) GetStatementDriven() bool {
+	if x != nil {
+		return x.StatementDriven
+	}
+	return false
+}
+
 type AccountBalance struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -252,7 +262,7 @@ var File_nagomi_v1_account_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa8\x05\n" +
+	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd3\x05\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x1d\n" +
@@ -272,7 +282,8 @@ const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\rmain_currency\x18\v \x01(\tB\x14\xbaH\x11r\x0f2\n" +
 	"^[A-Z]{3}$\x98\x01\x03R\fmainCurrency\x12<\n" +
 	"\x06colors\x18\f \x03(\tB$\xbaH!\x92\x01\x1e\b\x03\x10\x03\"\x18r\x162\x11^#[0-9a-fA-F]{6}$\x98\x01\aR\x06colors\x12,\n" +
-	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalanceB\x10\n" +
+	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalance\x12)\n" +
+	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDrivenB\x10\n" +
 	"\x0e_friendly_name\"\xc8\x01\n" +
 	"\x0eAccountBalance\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +

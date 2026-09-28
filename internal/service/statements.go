@@ -410,6 +410,9 @@ func resolveStatementAccount(
 		if err != nil {
 			return sqlc.Account{}, wrapErr("StatementService.Commit.GetAccount", err)
 		}
+		if !row.Account.StatementDriven {
+			return sqlc.Account{}, fmt.Errorf("StatementService.Commit: account %q isn't statement-driven: %w", row.Account.Name, ErrValidation)
+		}
 		return row.Account, nil
 
 	case *pb.CommitStatementImportRequest_NewAccountName:
@@ -422,13 +425,14 @@ func resolveStatementAccount(
 		}
 
 		account, err := q.CreateAccount(ctx, sqlc.CreateAccountParams{
-			OwnerID:        userID,
-			Name:           target.NewAccountName,
-			Bank:           stmt.Bank,
-			AccountType:    stmt.AccountType,
-			AnchorCurrency: stmt.Currency,
-			MainCurrency:   stmt.Currency,
-			Colors:         defaultAccountColors,
+			OwnerID:         userID,
+			Name:            target.NewAccountName,
+			Bank:            stmt.Bank,
+			AccountType:     stmt.AccountType,
+			AnchorCurrency:  stmt.Currency,
+			MainCurrency:    stmt.Currency,
+			Colors:          defaultAccountColors,
+			StatementDriven: true,
 		})
 		if err != nil {
 			return sqlc.Account{}, wrapErr("StatementService.Commit.CreateAccount", err)

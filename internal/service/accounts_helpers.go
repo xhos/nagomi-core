@@ -40,6 +40,7 @@ func buildCreateAccountParams(req *pb.CreateAccountRequest) (sqlc.CreateAccountP
 		AnchorCurrency:     anchorBalance.GetCurrencyCode(),
 		MainCurrency:       req.GetMainCurrency(),
 		Colors:             colors,
+		StatementDriven:    req.GetStatementDriven(),
 	}, nil
 }
 
@@ -76,6 +77,9 @@ func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sq
 	}
 	if len(req.Colors) > 0 {
 		params.Colors = req.Colors
+	}
+	if req.StatementDriven != nil {
+		params.StatementDriven = req.StatementDriven
 	}
 
 	return params
@@ -136,19 +140,20 @@ func buildMergedAliases(primaryAliases []string, secondaryName string, secondary
 
 func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) *pb.Account {
 	return &pb.Account{
-		Id:            a.ID,
-		OwnerId:       a.OwnerID.String(),
-		Name:          a.Name,
-		Bank:          a.Bank,
-		Type:          pb.AccountType(a.AccountType),
-		FriendlyName:  a.FriendlyName,
-		AnchorDate:    timestamppb.New(a.AnchorDate),
-		AnchorBalance: centsToMoney(a.AnchorBalanceCents, a.AnchorCurrency),
-		MainCurrency:  a.MainCurrency,
-		Colors:        a.Colors,
-		Aliases:       a.Aliases,
-		CreatedAt:     timestamppb.New(a.CreatedAt),
-		UpdatedAt:     timestamppb.New(a.UpdatedAt),
-		Balance:       centsToMoney(balanceCents, balanceCurrency),
+		Id:              a.ID,
+		OwnerId:         a.OwnerID.String(),
+		Name:            a.Name,
+		Bank:            a.Bank,
+		Type:            pb.AccountType(a.AccountType),
+		FriendlyName:    a.FriendlyName,
+		AnchorDate:      timestamppb.New(a.AnchorDate),
+		AnchorBalance:   centsToMoney(a.AnchorBalanceCents, a.AnchorCurrency),
+		MainCurrency:    a.MainCurrency,
+		Colors:          a.Colors,
+		Aliases:         a.Aliases,
+		CreatedAt:       timestamppb.New(a.CreatedAt),
+		UpdatedAt:       timestamppb.New(a.UpdatedAt),
+		Balance:         centsToMoney(balanceCents, balanceCurrency),
+		StatementDriven: a.StatementDriven,
 	}
 }

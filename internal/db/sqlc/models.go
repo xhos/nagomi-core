@@ -26,6 +26,7 @@ type Account struct {
 	CreatedAt          time.Time          `db:"created_at" json:"created_at"`
 	UpdatedAt          time.Time          `db:"updated_at" json:"updated_at"`
 	Aliases            []string           `db:"aliases" json:"aliases"`
+	StatementDriven    bool               `db:"statement_driven" json:"statement_driven"`
 }
 
 type AccountUser struct {
