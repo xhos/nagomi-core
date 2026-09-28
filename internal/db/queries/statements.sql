@@ -15,6 +15,7 @@ insert into
     currency,
     opening_balance_cents,
     closing_balance_cents,
+    balance_ok,
     line_count,
     parsed
   )
@@ -34,6 +35,7 @@ values
     @currency::char(3),
     sqlc.narg('opening_balance_cents')::bigint,
     sqlc.narg('closing_balance_cents')::bigint,
+    sqlc.narg('balance_ok')::boolean,
     @line_count::int,
     @parsed::jsonb
   )

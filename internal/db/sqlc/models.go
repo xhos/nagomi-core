@@ -111,6 +111,7 @@ type Statement struct {
 	Parsed              []byte     `db:"parsed" json:"parsed"`
 	CreatedAt           time.Time  `db:"created_at" json:"created_at"`
 	ImportedAt          *time.Time `db:"imported_at" json:"imported_at"`
+	BalanceOk           *bool      `db:"balance_ok" json:"balance_ok"`
 }
 
 type Transaction struct {

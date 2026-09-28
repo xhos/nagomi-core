@@ -51,6 +51,7 @@ insert into
     currency,
     opening_balance_cents,
     closing_balance_cents,
+    balance_ok,
     line_count,
     parsed
   )
@@ -70,11 +71,12 @@ values
     $12::char(3),
     $13::bigint,
     $14::bigint,
-    $15::int,
-    $16::jsonb
+    $15::boolean,
+    $16::int,
+    $17::jsonb
   )
 returning
-  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at
+  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at, balance_ok
 `
 
 type CreateStatementParams struct {
@@ -92,6 +94,7 @@ type CreateStatementParams struct {
 	Currency            string    `db:"currency" json:"currency"`
 	OpeningBalanceCents *int64    `db:"opening_balance_cents" json:"opening_balance_cents"`
 	ClosingBalanceCents *int64    `db:"closing_balance_cents" json:"closing_balance_cents"`
+	BalanceOk           *bool     `db:"balance_ok" json:"balance_ok"`
 	LineCount           int32     `db:"line_count" json:"line_count"`
 	Parsed              []byte    `db:"parsed" json:"parsed"`
 }
@@ -112,6 +115,7 @@ func (q *Queries) CreateStatement(ctx context.Context, arg CreateStatementParams
 		arg.Currency,
 		arg.OpeningBalanceCents,
 		arg.ClosingBalanceCents,
+		arg.BalanceOk,
 		arg.LineCount,
 		arg.Parsed,
 	)
@@ -137,6 +141,7 @@ func (q *Queries) CreateStatement(ctx context.Context, arg CreateStatementParams
 		&i.Parsed,
 		&i.CreatedAt,
 		&i.ImportedAt,
+		&i.BalanceOk,
 	)
 	return i, err
 }
@@ -215,7 +220,7 @@ func (q *Queries) DeleteStatementTransactions(ctx context.Context, arg DeleteSta
 
 const getStatement = `-- name: GetStatement :one
 select
-  s.id, s.user_id, s.account_id, s.status, s.file_path, s.file_hash, s.file_name, s.parser, s.bank, s.account_type, s.account_number, s.period_start, s.period_end, s.currency, s.opening_balance_cents, s.closing_balance_cents, s.line_count, s.parsed, s.created_at, s.imported_at,
+  s.id, s.user_id, s.account_id, s.status, s.file_path, s.file_hash, s.file_name, s.parser, s.bank, s.account_type, s.account_number, s.period_start, s.period_end, s.currency, s.opening_balance_cents, s.closing_balance_cents, s.line_count, s.parsed, s.created_at, s.imported_at, s.balance_ok,
   a.name as account_name
 from
   statements s
@@ -259,6 +264,7 @@ func (q *Queries) GetStatement(ctx context.Context, arg GetStatementParams) (Get
 		&i.Statement.Parsed,
 		&i.Statement.CreatedAt,
 		&i.Statement.ImportedAt,
+		&i.Statement.BalanceOk,
 		&i.AccountName,
 	)
 	return i, err
@@ -266,7 +272,7 @@ func (q *Queries) GetStatement(ctx context.Context, arg GetStatementParams) (Get
 
 const getStatementByHash = `-- name: GetStatementByHash :one
 select
-  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at
+  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at, balance_ok
 from
   statements
 where
@@ -303,13 +309,14 @@ func (q *Queries) GetStatementByHash(ctx context.Context, arg GetStatementByHash
 		&i.Parsed,
 		&i.CreatedAt,
 		&i.ImportedAt,
+		&i.BalanceOk,
 	)
 	return i, err
 }
 
 const listStatements = `-- name: ListStatements :many
 select
-  s.id, s.user_id, s.account_id, s.status, s.file_path, s.file_hash, s.file_name, s.parser, s.bank, s.account_type, s.account_number, s.period_start, s.period_end, s.currency, s.opening_balance_cents, s.closing_balance_cents, s.line_count, s.parsed, s.created_at, s.imported_at,
+  s.id, s.user_id, s.account_id, s.status, s.file_path, s.file_hash, s.file_name, s.parser, s.bank, s.account_type, s.account_number, s.period_start, s.period_end, s.currency, s.opening_balance_cents, s.closing_balance_cents, s.line_count, s.parsed, s.created_at, s.imported_at, s.balance_ok,
   a.name as account_name
 from
   statements s
@@ -370,6 +377,7 @@ func (q *Queries) ListStatements(ctx context.Context, arg ListStatementsParams) 
 			&i.Statement.Parsed,
 			&i.Statement.CreatedAt,
 			&i.Statement.ImportedAt,
+			&i.Statement.BalanceOk,
 			&i.AccountName,
 		); err != nil {
 			return nil, err
@@ -393,7 +401,7 @@ where
   and user_id = $3::uuid
   and status = 1
 returning
-  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at
+  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at, balance_ok
 `
 
 type MarkStatementImportedParams struct {
@@ -426,6 +434,7 @@ func (q *Queries) MarkStatementImported(ctx context.Context, arg MarkStatementIm
 		&i.Parsed,
 		&i.CreatedAt,
 		&i.ImportedAt,
+		&i.BalanceOk,
 	)
 	return i, err
 }

@@ -148,6 +148,7 @@ func (s *stmtSvc) Preview(ctx context.Context, userID uuid.UUID, pdfData []byte,
 		Currency:            currency,
 		OpeningBalanceCents: parsed.OpeningBalanceCents,
 		ClosingBalanceCents: parsed.ClosingBalanceCents,
+		BalanceOk:           balanceAddsUp(parsed),
 		LineCount:           int32(len(parsed.GetLines())),
 		Parsed:              parsedJSON,
 	})
@@ -457,6 +458,24 @@ func (s *stmtSvc) userLocation(ctx context.Context, userID uuid.UUID) *time.Loca
 	return loc
 }
 
+// balanceAddsUp checks the lines against the statement's own balances, which
+// catches lines the parser missed or misread. nil when either balance is missing.
+func balanceAddsUp(parsed *pb.ParsedStatement) *bool {
+	if parsed.OpeningBalanceCents == nil || parsed.ClosingBalanceCents == nil {
+		return nil
+	}
+	balance := parsed.GetOpeningBalanceCents()
+	for _, line := range parsed.GetLines() {
+		if line.GetDirection() == pb.TransactionDirection_DIRECTION_OUTGOING {
+			balance -= line.GetAmountCents()
+		} else {
+			balance += line.GetAmountCents()
+		}
+	}
+	ok := balance == parsed.GetClosingBalanceCents()
+	return &ok
+}
+
 // lineExternalIDs derives a stable id per line, so importing the same statement
 // again, or one that overlaps it, adds nothing. identical lines (two coffees on
 // the same day) are told apart by the order they appear in.
@@ -509,6 +528,7 @@ func statementToPb(s *sqlc.Statement, accountName *string) *pb.Statement {
 		Currency:            s.Currency,
 		OpeningBalanceCents: s.OpeningBalanceCents,
 		ClosingBalanceCents: s.ClosingBalanceCents,
+		BalanceOk:           s.BalanceOk,
 		LineCount:           s.LineCount,
 		CreatedAt:           toProtoTimestamp(&s.CreatedAt),
 		ImportedAt:          toProtoTimestamp(s.ImportedAt),

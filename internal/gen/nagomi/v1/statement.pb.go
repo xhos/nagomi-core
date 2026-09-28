@@ -91,8 +91,11 @@ type Statement struct {
 	LineCount           int32                  `protobuf:"varint,15,opt,name=line_count,json=lineCount,proto3" json:"line_count,omitempty"`
 	CreatedAt           *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	ImportedAt          *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=imported_at,json=importedAt,proto3,oneof" json:"imported_at,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// opening balance plus the lines equals the closing balance; unset when the
+	// statement's balances couldn't be read
+	BalanceOk     *bool `protobuf:"varint,18,opt,name=balance_ok,json=balanceOk,proto3,oneof" json:"balance_ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Statement) Reset() {
@@ -244,11 +247,18 @@ func (x *Statement) GetImportedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Statement) GetBalanceOk() bool {
+	if x != nil && x.BalanceOk != nil {
+		return *x.BalanceOk
+	}
+	return false
+}
+
 var File_nagomi_v1_statement_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_proto_rawDesc = "" +
 	"\n" +
-	"\x19nagomi/v1/statement.proto\x12\tnagomi.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\x1a\x15nagomi/v1/enums.proto\"\xbc\x06\n" +
+	"\x19nagomi/v1/statement.proto\x12\tnagomi.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\x1a\x15nagomi/v1/enums.proto\"\xef\x06\n" +
 	"\tStatement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x122\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x1a.nagomi.v1.StatementStatusR\x06status\x12\"\n" +
@@ -272,12 +282,15 @@ const file_nagomi_v1_statement_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12@\n" +
 	"\vimported_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampH\x04R\n" +
-	"importedAt\x88\x01\x01B\r\n" +
+	"importedAt\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"balance_ok\x18\x12 \x01(\bH\x05R\tbalanceOk\x88\x01\x01B\r\n" +
 	"\v_account_idB\x0f\n" +
 	"\r_account_nameB\x18\n" +
 	"\x16_opening_balance_centsB\x18\n" +
 	"\x16_closing_balance_centsB\x0e\n" +
-	"\f_imported_at*p\n" +
+	"\f_imported_atB\r\n" +
+	"\v_balance_ok*p\n" +
 	"\x0fStatementStatus\x12 \n" +
 	"\x1cSTATEMENT_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18STATEMENT_STATUS_PENDING\x10\x01\x12\x1d\n" +
