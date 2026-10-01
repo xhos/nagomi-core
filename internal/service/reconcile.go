@@ -151,6 +151,8 @@ func planReconcile(lines []reconcileLine, candidates []reconcileCandidate, perio
 		if cand.Day.Before(periodStart) || cand.Day.After(periodEnd) {
 			continue
 		}
+		// TODO: connector accounts are never statement-driven, so CONNECTOR can't show up
+		// here; drop it once core enforces that (see buildUpdateAccountParams)
 		provisional := cand.Source == pb.TransactionSource_TRANSACTION_SOURCE_EMAIL ||
 			cand.Source == pb.TransactionSource_TRANSACTION_SOURCE_CONNECTOR
 		switch {

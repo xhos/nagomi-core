@@ -81,6 +81,8 @@ func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sq
 	if len(req.Colors) > 0 {
 		params.Colors = req.Colors
 	}
+	// TODO: connector accounts must never be statement-driven, but core can't refuse
+	// it: they're plain accounts the connector creates and finds by alias
 	if req.StatementDriven != nil {
 		params.StatementDriven = req.StatementDriven
 	}
