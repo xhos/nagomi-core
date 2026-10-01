@@ -239,8 +239,8 @@ func reconcileAccount(
 	}
 
 	rows, err := q.ListReconcileCandidates(ctx, sqlc.ListReconcileCandidatesParams{
-		AccountID: accountID,
-		FromDate:  dateIn(parsed.GetPeriodStart(), loc).AddDate(0, 0, -reconcileDateWindow),
+		AccountID:   accountID,
+		FromDate:    dateIn(parsed.GetPeriodStart(), loc).AddDate(0, 0, -reconcileDateWindow),
 		ToDate:      dateIn(parsed.GetPeriodEnd(), loc).AddDate(0, 0, reconcileDateWindow+1),
 		StatementID: reparsing,
 	})
@@ -255,11 +255,11 @@ func reconcileAccount(
 		}
 		r.candidates[row.Transaction.ID] = row
 		candidates = append(candidates, reconcileCandidate{
-			ID:          row.Transaction.ID,
-			Day:         calendarDay(row.Transaction.TxDate, loc),
-			AmountCents: row.Transaction.TxAmountCents,
-			Direction:   row.Transaction.TxDirection,
-			Source:      pb.TransactionSource(row.Transaction.Source),
+			ID:            row.Transaction.ID,
+			Day:           calendarDay(row.Transaction.TxDate, loc),
+			AmountCents:   row.Transaction.TxAmountCents,
+			Direction:     row.Transaction.TxDirection,
+			Source:        pb.TransactionSource(row.Transaction.Source),
 			HasUserData:   row.HasUserData,
 			FromStatement: row.FromStatement,
 		})
@@ -319,10 +319,10 @@ func (r *reconciliation) transactionPb(id int64) *pb.Transaction {
 }
 
 type reconcileResult struct {
-	createdIDs     []int64
-	duplicates     int32
-	updated        int32
-	deleted        int32
+	createdIDs      []int64
+	duplicates      int32
+	updated         int32
+	deleted         int32
 	touchedAccounts map[int64]bool
 }
 
