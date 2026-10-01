@@ -45,8 +45,7 @@ select
   t.*
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = @user_id::uuid
-where (a.owner_id = @user_id::uuid or au.user_id is not null)
+where a.owner_id = @user_id::uuid
   and (sqlc.narg('transaction_ids')::bigint[] is null or t.id = ANY(sqlc.narg('transaction_ids')::bigint[]))
   and (sqlc.narg('include_manually_set')::boolean = true or (t.category_manually_set = false and t.merchant_manually_set = false));
 
@@ -67,8 +66,7 @@ where id = ANY(@transaction_ids::bigint[])
   and account_id in (
     select a.id
     from accounts a
-    left join account_users au on a.id = au.account_id and au.user_id = @user_id::uuid
-    where a.owner_id = @user_id::uuid or au.user_id is not null
+    where a.owner_id = @user_id::uuid
   )
   and (
     (@category_id::bigint > 0 and category_manually_set = false) or

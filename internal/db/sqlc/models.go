@@ -32,12 +32,6 @@ type Account struct {
 	ClosedAt            *time.Time         `db:"closed_at" json:"closed_at"`
 }
 
-type AccountUser struct {
-	AccountID int64     `db:"account_id" json:"account_id"`
-	UserID    uuid.UUID `db:"user_id" json:"user_id"`
-	AddedAt   time.Time `db:"added_at" json:"added_at"`
-}
-
 type Category struct {
 	ID        int64     `db:"id" json:"id"`
 	UserID    uuid.UUID `db:"user_id" json:"user_id"`

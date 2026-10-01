@@ -53,29 +53,6 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (int64, error) {
 	return result.RowsAffected(), nil
 }
 
-const deleteUserWithCascade = `-- name: DeleteUserWithCascade :execrows
-with removed_from_accounts as (
-  delete from
-    account_users
-  where
-    user_id = $1::uuid
-  returning
-    user_id
-)
-delete from
-  users
-where
-  id = $1::uuid
-`
-
-func (q *Queries) DeleteUserWithCascade(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, deleteUserWithCascade, id)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
-}
-
 const getUser = `-- name: GetUser :one
 select id, email, display_name, primary_currency, timezone, created_at, updated_at from users
 where id = $1::uuid

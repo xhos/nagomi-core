@@ -19,13 +19,9 @@ select
   ) as balance_currency
 from
   accounts a
-  left join account_users au on au.account_id = a.id
-  and au.user_id = @user_id::uuid
 where
   a.owner_id = @user_id::uuid
-  or au.user_id is not null
 order by
-  (a.owner_id = @user_id::uuid) desc,
   a.created_at;
 
 -- name: GetAccount :one
@@ -49,14 +45,9 @@ select
   ) as balance_currency
 from
   accounts a
-  left join account_users au on au.account_id = a.id
-  and au.user_id = @user_id::uuid
 where
   a.id = @id::bigint
-  and (
-    a.owner_id = @user_id::uuid
-    or au.user_id is not null
-  );
+  and a.owner_id = @user_id::uuid;
 
 -- name: CreateAccount :one
 insert into
@@ -169,10 +160,8 @@ select
   COUNT(*) as account_count
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = @user_id::uuid
 where
-  (a.owner_id = @user_id::uuid or au.user_id is not null)
+  a.owner_id = @user_id::uuid
   and a.account_type != 6;
 
 -- name: AddAccountAlias :exec
@@ -197,16 +186,14 @@ where id = @id::bigint
 -- name: FindAccountByAlias :one
 select sqlc.embed(a)
 from accounts a
-  left join account_users au on au.account_id = a.id and au.user_id = @user_id::uuid
-where (a.owner_id = @user_id::uuid or au.user_id is not null)
+where a.owner_id = @user_id::uuid
   and a.aliases @> array[@alias::text]
 limit 1;
 
 -- name: FindAccountByName :one
 select sqlc.embed(a)
 from accounts a
-  left join account_users au on au.account_id = a.id and au.user_id = @user_id::uuid
-where (a.owner_id = @user_id::uuid or au.user_id is not null)
+where a.owner_id = @user_id::uuid
   and a.name = @name::text
 limit 1;
 
@@ -301,7 +288,6 @@ select
     a.anchor_balance_cents
   ) as balance_cents
 from accounts a
-left join account_users au on a.id = au.account_id and au.user_id = @user_id::uuid
-where (a.owner_id = @user_id::uuid or au.user_id is not null)
+where a.owner_id = @user_id::uuid
   and a.account_type = 6
 order by a.name;

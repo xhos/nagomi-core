@@ -191,7 +191,6 @@ func (s *stmtSvc) Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitSt
 		)
 	}
 
-	// no-op on accounts shared with the user, which only the owner can alias
 	if stmt.AccountNumber != "" {
 		if err := q.AddAccountAlias(ctx, sqlc.AddAccountAliasParams{ID: account.ID, UserID: userID, Alias: stmt.AccountNumber}); err != nil {
 			return nil, wrapErr("StatementService.Commit.AddAlias", err)

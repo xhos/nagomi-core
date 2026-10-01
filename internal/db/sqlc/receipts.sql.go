@@ -245,8 +245,7 @@ SELECT
   END AS date_diff_days
 FROM transactions t
 JOIN accounts a ON t.account_id = a.id
-LEFT JOIN account_users au ON a.id = au.account_id AND au.user_id = $2::uuid
-WHERE (a.owner_id = $2::uuid OR au.user_id IS NOT NULL)
+WHERE a.owner_id = $2::uuid
   AND t.tx_amount_cents BETWEEN $3::bigint - 5 AND $3::bigint + 5
   AND t.tx_currency = $4::char(3)
   AND t.tx_direction = 2::smallint

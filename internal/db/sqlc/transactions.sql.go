@@ -26,11 +26,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = $3::uuid
     where
       a.owner_id = $3::uuid
-      or au.user_id is not null
   )
 `
 
@@ -165,11 +162,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = $2::uuid
     where
       a.owner_id = $2::uuid
-      or au.user_id is not null
   )
 `
 
@@ -201,11 +195,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = $5::uuid
     where
       a.owner_id = $5::uuid
-      or au.user_id is not null
   )
 returning
   id,
@@ -243,14 +234,9 @@ select count(*)
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
   left join categories c on t.category_id = c.id
 where
-  (
-    a.owner_id = $1::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = $1::uuid
   and (
     $2::timestamptz is null
     or t.tx_date >= $2::timestamptz
@@ -398,14 +384,9 @@ select
   $22::bigint
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $23::uuid
 where
   a.id = $2::bigint
-  and (
-    a.owner_id = $23::uuid
-    or au.user_id is not null
-  )
+  and a.owner_id = $23::uuid
 on conflict (account_id, external_id) where external_id is not null do nothing
 returning
   id, account_id, external_id, tx_date, tx_amount_cents, tx_currency, tx_direction, tx_desc, balance_after_cents, balance_currency, merchant, category_id, category_manually_set, merchant_manually_set, suggestions, user_notes, foreign_amount_cents, foreign_currency, exchange_rate, created_at, updated_at, split_from_id, forgiven, source, statement_id
@@ -504,11 +485,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = $2::uuid
     where
       a.owner_id = $2::uuid
-      or au.user_id is not null
   )
 `
 
@@ -532,13 +510,8 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $2::uuid
 where
-  (
-    a.owner_id = $2::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = $2::uuid
   and t.tx_direction = 2
   and t.tx_date >= ($3::date - interval '60 days')
   and t.tx_amount_cents between $4::bigint and ($4::bigint * 120 / 100)
@@ -727,23 +700,18 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
 where
-  t.id = $2::bigint
-  and (
-    a.owner_id = $1::uuid
-    or au.user_id is not null
-  )
+  t.id = $1::bigint
+  and a.owner_id = $2::uuid
 `
 
 type GetTransactionParams struct {
-	UserID uuid.UUID `db:"user_id" json:"user_id"`
 	ID     int64     `db:"id" json:"id"`
+	UserID uuid.UUID `db:"user_id" json:"user_id"`
 }
 
 func (q *Queries) GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error) {
-	row := q.db.QueryRow(ctx, getTransaction, arg.UserID, arg.ID)
+	row := q.db.QueryRow(ctx, getTransaction, arg.ID, arg.UserID)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,
@@ -782,11 +750,9 @@ select
   COUNT(t.id) as transaction_count
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
   left join transactions t on a.id = t.account_id
 where
-  (a.owner_id = $1::uuid or au.user_id is not null)
+  a.owner_id = $1::uuid
   and a.account_type != 6
 group by
   a.id,
@@ -827,13 +793,8 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
 where
-  (
-    a.owner_id = $1::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = $1::uuid
 order by
   t.tx_date desc,
   t.id desc
@@ -892,14 +853,9 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
   left join categories c on t.category_id = c.id
 where
-  (
-    a.owner_id = $1::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = $1::uuid
   and (
     $2::timestamptz is null
     or $3::bigint is null
@@ -1088,11 +1044,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = $20::uuid
     where
       a.owner_id = $20::uuid
-      or au.user_id is not null
   )
 `
 
@@ -1152,8 +1105,7 @@ where id = $2::bigint
   and account_id in (
     select a.id
     from accounts a
-    left join account_users au on a.id = au.account_id and au.user_id = $3::uuid
-    where a.owner_id = $3::uuid or au.user_id is not null
+    where a.owner_id = $3::uuid
   )
 `
 

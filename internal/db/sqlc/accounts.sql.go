@@ -149,8 +149,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, arg DeleteAccountParams) (i
 const findAccountByAlias = `-- name: FindAccountByAlias :one
 select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at
 from accounts a
-  left join account_users au on au.account_id = a.id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.aliases @> array[$2::text]
 limit 1
 `
@@ -193,8 +192,7 @@ func (q *Queries) FindAccountByAlias(ctx context.Context, arg FindAccountByAlias
 const findAccountByName = `-- name: FindAccountByName :one
 select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.colors, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at
 from accounts a
-  left join account_users au on au.account_id = a.id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.name = $2::text
 limit 1
 `
@@ -255,19 +253,14 @@ select
   ) as balance_currency
 from
   accounts a
-  left join account_users au on au.account_id = a.id
-  and au.user_id = $1::uuid
 where
-  a.id = $2::bigint
-  and (
-    a.owner_id = $1::uuid
-    or au.user_id is not null
-  )
+  a.id = $1::bigint
+  and a.owner_id = $2::uuid
 `
 
 type GetAccountParams struct {
-	UserID uuid.UUID `db:"user_id" json:"user_id"`
 	ID     int64     `db:"id" json:"id"`
+	UserID uuid.UUID `db:"user_id" json:"user_id"`
 }
 
 type GetAccountRow struct {
@@ -277,7 +270,7 @@ type GetAccountRow struct {
 }
 
 func (q *Queries) GetAccount(ctx context.Context, arg GetAccountParams) (GetAccountRow, error) {
-	row := q.db.QueryRow(ctx, getAccount, arg.UserID, arg.ID)
+	row := q.db.QueryRow(ctx, getAccount, arg.ID, arg.UserID)
 	var i GetAccountRow
 	err := row.Scan(
 		&i.Account.ID,
@@ -367,8 +360,7 @@ select
     a.anchor_balance_cents
   ) as balance_cents
 from accounts a
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type = 6
 order by a.name
 `
@@ -410,10 +402,8 @@ select
   COUNT(*) as account_count
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = $1::uuid
 where
-  (a.owner_id = $1::uuid or au.user_id is not null)
+  a.owner_id = $1::uuid
   and a.account_type != 6
 `
 
@@ -445,13 +435,9 @@ select
   ) as balance_currency
 from
   accounts a
-  left join account_users au on au.account_id = a.id
-  and au.user_id = $1::uuid
 where
   a.owner_id = $1::uuid
-  or au.user_id is not null
 order by
-  (a.owner_id = $1::uuid) desc,
   a.created_at
 `
 

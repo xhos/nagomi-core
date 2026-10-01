@@ -30,20 +30,6 @@ delete from
 where
   id = @id::uuid;
 
--- name: DeleteUserWithCascade :execrows
-with removed_from_accounts as (
-  delete from
-    account_users
-  where
-    user_id = @id::uuid
-  returning
-    user_id
-)
-delete from
-  users
-where
-  id = @id::uuid;
-
 -- name: UpsertUser :one
 insert into users (id, email, display_name)
 values (@id::uuid, @email::text, sqlc.narg('display_name')::text)

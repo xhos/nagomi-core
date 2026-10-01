@@ -28,8 +28,7 @@ select
     a.anchor_balance_cents
   ) as balance_cents
 from accounts a
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
 order by
   case a.account_type
@@ -86,9 +85,8 @@ select
   COUNT(distinct case when t.tx_date >= CURRENT_DATE - interval '30 days' then t.id end)::bigint as transactions_last_30_days,
   COUNT(distinct case when t.category_id is null then t.id end)::bigint as uncategorized_transactions
 from accounts a
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
 left join transactions t on a.id = t.account_id
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
   and ($2::timestamptz is null or t.tx_date >= $2::timestamptz)
   and ($3::timestamptz is null or t.tx_date <= $3::timestamptz)
@@ -130,8 +128,7 @@ select
   SUM(case when t.tx_direction = 2 then t.tx_amount_cents else 0 end)::bigint as expense_cents
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
   and ($2::timestamptz is null or t.tx_date >= $2::timestamptz)
   and ($3::timestamptz is null or t.tx_date <= $3::timestamptz)
@@ -175,8 +172,7 @@ const getEarliestTransactionDate = `-- name: GetEarliestTransactionDate :one
 select MIN(t.tx_date)::date as earliest_date
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
 `
 
@@ -195,8 +191,7 @@ select
   SUM(case when t.tx_direction = 1 then t.tx_amount_cents else -t.tx_amount_cents end)::bigint as net_cents
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
   and t.tx_date >= COALESCE($2::timestamptz, CURRENT_DATE - interval '12 months')
   and t.tx_date <= COALESCE($3::timestamptz, CURRENT_DATE)
@@ -280,8 +275,7 @@ account_balances_at_date as (
     END as balance_cents
   from date_series ds
   cross join accounts a
-  left join account_users au on a.id = au.account_id and au.user_id = $4::uuid
-  where (a.owner_id = $4::uuid or au.user_id is not null)
+  where a.owner_id = $4::uuid
     and a.account_type != 6
 )
 select
@@ -338,8 +332,7 @@ select
 from transactions t
 join categories c on t.category_id = c.id
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
   and t.tx_direction = 2
   and ($2::timestamptz is null or t.tx_date >= $2::timestamptz)
@@ -401,8 +394,7 @@ select
   AVG(t.tx_amount_cents)::bigint as avg_amount_cents
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and a.account_type != 6
   and t.merchant is not null
   and t.tx_direction = 2

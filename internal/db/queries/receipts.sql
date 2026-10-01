@@ -205,8 +205,7 @@ SELECT
   END AS date_diff_days
 FROM transactions t
 JOIN accounts a ON t.account_id = a.id
-LEFT JOIN account_users au ON a.id = au.account_id AND au.user_id = sqlc.arg(user_id)::uuid
-WHERE (a.owner_id = sqlc.arg(user_id)::uuid OR au.user_id IS NOT NULL)
+WHERE a.owner_id = sqlc.arg(user_id)::uuid
   AND t.tx_amount_cents BETWEEN sqlc.arg(amount_cents)::bigint - 5 AND sqlc.arg(amount_cents)::bigint + 5
   AND t.tx_currency = sqlc.arg(currency)::char(3)
   AND t.tx_direction = 2::smallint

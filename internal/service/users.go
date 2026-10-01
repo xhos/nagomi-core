@@ -108,7 +108,7 @@ func (s *userSvc) Delete(ctx context.Context, id string) error {
 		return wrapErr("UserService.Delete", err)
 	}
 
-	rowsAffected, err := s.queries.DeleteUserWithCascade(ctx, userID)
+	rowsAffected, err := s.queries.DeleteUser(ctx, userID)
 	if err != nil {
 		return wrapErr("UserService.Delete", err)
 	}

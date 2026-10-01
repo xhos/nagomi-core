@@ -28,8 +28,7 @@ where id = ANY($3::bigint[])
   and account_id in (
     select a.id
     from accounts a
-    left join account_users au on a.id = au.account_id and au.user_id = $4::uuid
-    where a.owner_id = $4::uuid or au.user_id is not null
+    where a.owner_id = $4::uuid
   )
   and (
     ($1::bigint > 0 and category_manually_set = false) or
@@ -200,8 +199,7 @@ select
   t.id, t.account_id, t.external_id, t.tx_date, t.tx_amount_cents, t.tx_currency, t.tx_direction, t.tx_desc, t.balance_after_cents, t.balance_currency, t.merchant, t.category_id, t.category_manually_set, t.merchant_manually_set, t.suggestions, t.user_notes, t.foreign_amount_cents, t.foreign_currency, t.exchange_rate, t.created_at, t.updated_at, t.split_from_id, t.forgiven, t.source, t.statement_id
 from transactions t
 join accounts a on t.account_id = a.id
-left join account_users au on a.id = au.account_id and au.user_id = $1::uuid
-where (a.owner_id = $1::uuid or au.user_id is not null)
+where a.owner_id = $1::uuid
   and ($2::bigint[] is null or t.id = ANY($2::bigint[]))
   and ($3::boolean = true or (t.category_manually_set = false and t.merchant_manually_set = false))
 `

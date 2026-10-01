@@ -5,14 +5,9 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
   left join categories c on t.category_id = c.id
 where
-  (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = sqlc.arg(user_id)::uuid
   and (
     sqlc.narg('cursor_date')::timestamptz is null
     or sqlc.narg('cursor_id')::bigint is null
@@ -87,14 +82,9 @@ select count(*)
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
   left join categories c on t.category_id = c.id
 where
-  (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = sqlc.arg(user_id)::uuid
   and (
     sqlc.narg('start')::timestamptz is null
     or t.tx_date >= sqlc.narg('start')::timestamptz
@@ -157,14 +147,9 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
 where
   t.id = sqlc.arg(id)::bigint
-  and (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  );
+  and a.owner_id = sqlc.arg(user_id)::uuid;
 
 -- name: CreateTransaction :one
 insert into
@@ -217,14 +202,9 @@ select
   sqlc.narg('statement_id')::bigint
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
 where
   a.id = sqlc.arg(account_id)::bigint
-  and (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  )
+  and a.owner_id = sqlc.arg(user_id)::uuid
 on conflict (account_id, external_id) where external_id is not null do nothing
 returning
   *;
@@ -289,11 +269,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = sqlc.arg(user_id)::uuid
     where
       a.owner_id = sqlc.arg(user_id)::uuid
-      or au.user_id is not null
   );
 
 -- name: DeleteTransaction :execrows
@@ -306,11 +283,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = sqlc.arg(user_id)::uuid
     where
       a.owner_id = sqlc.arg(user_id)::uuid
-      or au.user_id is not null
   );
 
 -- name: CategorizeTransactionAtomic :one
@@ -328,11 +302,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = sqlc.arg(user_id)::uuid
     where
       a.owner_id = sqlc.arg(user_id)::uuid
-      or au.user_id is not null
   )
 returning
   id,
@@ -351,11 +322,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = sqlc.arg(user_id)::uuid
     where
       a.owner_id = sqlc.arg(user_id)::uuid
-      or au.user_id is not null
   );
 
 -- name: BulkDeleteTransactions :execrows
@@ -368,11 +336,8 @@ where
       a.id
     from
       accounts a
-      left join account_users au on a.id = au.account_id
-      and au.user_id = sqlc.arg(user_id)::uuid
     where
       a.owner_id = sqlc.arg(user_id)::uuid
-      or au.user_id is not null
   );
 
 -- name: GetTransactionCountByAccount :many
@@ -382,11 +347,9 @@ select
   COUNT(t.id) as transaction_count
 from
   accounts a
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
   left join transactions t on a.id = t.account_id
 where
-  (a.owner_id = sqlc.arg(user_id)::uuid or au.user_id is not null)
+  a.owner_id = sqlc.arg(user_id)::uuid
   and a.account_type != 6
 group by
   a.id,
@@ -401,13 +364,8 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
 where
-  (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = sqlc.arg(user_id)::uuid
   and t.tx_direction = 2
   and t.tx_date >= (sqlc.arg(date)::date - interval '60 days')
   and t.tx_amount_cents between sqlc.arg(total_cents)::bigint and (sqlc.arg(total_cents)::bigint * 120 / 100)
@@ -431,13 +389,8 @@ select
 from
   transactions t
   join accounts a on t.account_id = a.id
-  left join account_users au on a.id = au.account_id
-  and au.user_id = sqlc.arg(user_id)::uuid
 where
-  (
-    a.owner_id = sqlc.arg(user_id)::uuid
-    or au.user_id is not null
-  )
+  a.owner_id = sqlc.arg(user_id)::uuid
 order by
   t.tx_date desc,
   t.id desc;
@@ -455,8 +408,7 @@ where id = @id::bigint
   and account_id in (
     select a.id
     from accounts a
-    left join account_users au on a.id = au.account_id and au.user_id = @user_id::uuid
-    where a.owner_id = @user_id::uuid or au.user_id is not null
+    where a.owner_id = @user_id::uuid
   );
 
 -- name: GetFriendAccountIDsFromSplits :many
