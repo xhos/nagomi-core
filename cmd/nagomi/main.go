@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"io"
-	"net/http"
 	api "nagomi-core/internal/api"
 	"nagomi-core/internal/api/middleware"
 	"nagomi-core/internal/config"
 	"nagomi-core/internal/db"
 	"nagomi-core/internal/service"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"

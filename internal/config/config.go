@@ -13,11 +13,11 @@ type Config struct {
 
 	CredentialsKey string
 
-	DatabaseURL     string
-	NagomiGatewayURL  string
-	NagomiReceiptsURL string
+	DatabaseURL         string
+	NagomiGatewayURL    string
+	NagomiReceiptsURL   string
 	NagomiStatementsURL string
-	ExchangeAPIURL  string
+	ExchangeAPIURL      string
 
 	S3Endpoint  string
 	S3Bucket    string
@@ -118,20 +118,20 @@ func Load() Config {
 	}
 
 	return Config{
-		ListenAddress:   parseAddress(listenAddr),
-		APIKey:          apiKey,
-		CredentialsKey:  credentialsKey,
-		DatabaseURL:     databaseURL,
-		NagomiGatewayURL:  nagomiGatewayURL,
-		NagomiReceiptsURL: nagomiReceiptsURL,
+		ListenAddress:       parseAddress(listenAddr),
+		APIKey:              apiKey,
+		CredentialsKey:      credentialsKey,
+		DatabaseURL:         databaseURL,
+		NagomiGatewayURL:    nagomiGatewayURL,
+		NagomiReceiptsURL:   nagomiReceiptsURL,
 		NagomiStatementsURL: nagomiStatementsURL,
-		ExchangeAPIURL:  exchangeAPIURL,
-		S3Endpoint:      s3Endpoint,
-		S3Bucket:        s3Bucket,
-		S3AccessKey:     s3AccessKey,
-		S3SecretKey:     s3SecretKey,
-		S3Region:        s3Region,
-		LogLevel:        logLevel,
-		LogFormat:       logFormat,
+		ExchangeAPIURL:      exchangeAPIURL,
+		S3Endpoint:          s3Endpoint,
+		S3Bucket:            s3Bucket,
+		S3AccessKey:         s3AccessKey,
+		S3SecretKey:         s3SecretKey,
+		S3Region:            s3Region,
+		LogLevel:            logLevel,
+		LogFormat:           logFormat,
 	}
 }

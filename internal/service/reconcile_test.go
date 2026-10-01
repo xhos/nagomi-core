@@ -15,7 +15,9 @@ func TestPlanReconcile(t *testing.T) {
 	email := pb.TransactionSource_TRANSACTION_SOURCE_EMAIL
 	manual := pb.TransactionSource_TRANSACTION_SOURCE_MANUAL
 	statement := pb.TransactionSource_TRANSACTION_SOURCE_STATEMENT
-	line := func(d int, cents int64) reconcileLine { return reconcileLine{Day: day(d), AmountCents: cents, Direction: out} }
+	line := func(d int, cents int64) reconcileLine {
+		return reconcileLine{Day: day(d), AmountCents: cents, Direction: out}
+	}
 	cand := func(id int64, d int, cents int64) reconcileCandidate {
 		return reconcileCandidate{ID: id, Day: day(d), AmountCents: cents, Direction: out, Source: email}
 	}

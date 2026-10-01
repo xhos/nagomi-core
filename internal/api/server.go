@@ -1,10 +1,10 @@
 package api
 
 import (
-	"net/http"
 	"nagomi-core/internal/api/middleware"
 	"nagomi-core/internal/gen/nagomi/v1/nagomiv1connect"
 	"nagomi-core/internal/service"
+	"net/http"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
