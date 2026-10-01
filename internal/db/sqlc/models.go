@@ -12,21 +12,24 @@ import (
 )
 
 type Account struct {
-	ID                 int64              `db:"id" json:"id"`
-	OwnerID            uuid.UUID          `db:"owner_id" json:"owner_id"`
-	Name               string             `db:"name" json:"name"`
-	Bank               string             `db:"bank" json:"bank"`
-	AccountType        nagomi.AccountType `db:"account_type" json:"account_type"`
-	FriendlyName       *string            `db:"friendly_name" json:"friendly_name"`
-	AnchorDate         time.Time          `db:"anchor_date" json:"anchor_date"`
-	AnchorBalanceCents int64              `db:"anchor_balance_cents" json:"anchor_balance_cents"`
-	AnchorCurrency     string             `db:"anchor_currency" json:"anchor_currency"`
-	MainCurrency       string             `db:"main_currency" json:"main_currency"`
-	Colors             []string           `db:"colors" json:"colors"`
-	CreatedAt          time.Time          `db:"created_at" json:"created_at"`
-	UpdatedAt          time.Time          `db:"updated_at" json:"updated_at"`
-	Aliases            []string           `db:"aliases" json:"aliases"`
-	StatementDriven    bool               `db:"statement_driven" json:"statement_driven"`
+	ID                  int64              `db:"id" json:"id"`
+	OwnerID             uuid.UUID          `db:"owner_id" json:"owner_id"`
+	Name                string             `db:"name" json:"name"`
+	Bank                string             `db:"bank" json:"bank"`
+	AccountType         nagomi.AccountType `db:"account_type" json:"account_type"`
+	FriendlyName        *string            `db:"friendly_name" json:"friendly_name"`
+	AnchorDate          time.Time          `db:"anchor_date" json:"anchor_date"`
+	AnchorBalanceCents  int64              `db:"anchor_balance_cents" json:"anchor_balance_cents"`
+	AnchorCurrency      string             `db:"anchor_currency" json:"anchor_currency"`
+	MainCurrency        string             `db:"main_currency" json:"main_currency"`
+	Colors              []string           `db:"colors" json:"colors"`
+	CreatedAt           time.Time          `db:"created_at" json:"created_at"`
+	UpdatedAt           time.Time          `db:"updated_at" json:"updated_at"`
+	Aliases             []string           `db:"aliases" json:"aliases"`
+	StatementDriven     bool               `db:"statement_driven" json:"statement_driven"`
+	StatementsStart     *time.Time         `db:"statements_start" json:"statements_start"`
+	StatementReleaseDay *int16             `db:"statement_release_day" json:"statement_release_day"`
+	ClosedAt            *time.Time         `db:"closed_at" json:"closed_at"`
 }
 
 type AccountUser struct {

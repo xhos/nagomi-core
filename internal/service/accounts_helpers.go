@@ -2,12 +2,15 @@ package service
 
 import (
 	"fmt"
+	"slices"
 	"strings"
+	"time"
 
 	"nagomi-core/internal/db/sqlc"
 	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/google/uuid"
+	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -82,6 +85,26 @@ func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sq
 		params.StatementDriven = req.StatementDriven
 	}
 
+	masked := req.GetUpdateMask().GetPaths()
+	if req.StatementsStart != nil {
+		start := dateToUTC(req.StatementsStart)
+		params.StatementsStart = &start
+	} else if slices.Contains(masked, "statements_start") {
+		params.ClearStatementsStart = true
+	}
+	if req.StatementReleaseDay != nil {
+		day := int16(req.GetStatementReleaseDay())
+		params.StatementReleaseDay = &day
+	} else if slices.Contains(masked, "statement_release_day") {
+		params.ClearStatementReleaseDay = true
+	}
+	if req.ClosedAt != nil {
+		closed := dateToUTC(req.ClosedAt)
+		params.ClosedAt = &closed
+	} else if slices.Contains(masked, "closed_at") {
+		params.ClearClosedAt = true
+	}
+
 	return params
 }
 
@@ -139,7 +162,7 @@ func buildMergedAliases(primaryAliases []string, secondaryName string, secondary
 }
 
 func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) *pb.Account {
-	return &pb.Account{
+	account := &pb.Account{
 		Id:              a.ID,
 		OwnerId:         a.OwnerID.String(),
 		Name:            a.Name,
@@ -155,5 +178,19 @@ func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) 
 		UpdatedAt:       timestamppb.New(a.UpdatedAt),
 		Balance:         centsToMoney(balanceCents, balanceCurrency),
 		StatementDriven: a.StatementDriven,
+		StatementsStart: optionalDate(a.StatementsStart),
+		ClosedAt:        optionalDate(a.ClosedAt),
 	}
+	if a.StatementReleaseDay != nil {
+		day := int32(*a.StatementReleaseDay)
+		account.StatementReleaseDay = &day
+	}
+	return account
+}
+
+func optionalDate(t *time.Time) *date.Date {
+	if t == nil {
+		return nil
+	}
+	return timeToDate(*t)
 }

@@ -8,6 +8,7 @@ package nagomiv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	date "google.golang.org/genproto/googleapis/type/date"
 	money "google.golang.org/genproto/googleapis/type/money"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -376,8 +377,12 @@ type UpdateAccountRequest struct {
 	MainCurrency    *string                `protobuf:"bytes,10,opt,name=main_currency,json=mainCurrency,proto3,oneof" json:"main_currency,omitempty"`
 	Colors          []string               `protobuf:"bytes,11,rep,name=colors,proto3" json:"colors,omitempty"`
 	StatementDriven *bool                  `protobuf:"varint,12,opt,name=statement_driven,json=statementDriven,proto3,oneof" json:"statement_driven,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// these three are cleared by naming them in update_mask and leaving them unset
+	StatementsStart     *date.Date `protobuf:"bytes,13,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
+	StatementReleaseDay *int32     `protobuf:"varint,14,opt,name=statement_release_day,json=statementReleaseDay,proto3,oneof" json:"statement_release_day,omitempty"`
+	ClosedAt            *date.Date `protobuf:"bytes,15,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *UpdateAccountRequest) Reset() {
@@ -492,6 +497,27 @@ func (x *UpdateAccountRequest) GetStatementDriven() bool {
 		return *x.StatementDriven
 	}
 	return false
+}
+
+func (x *UpdateAccountRequest) GetStatementsStart() *date.Date {
+	if x != nil {
+		return x.StatementsStart
+	}
+	return nil
+}
+
+func (x *UpdateAccountRequest) GetStatementReleaseDay() int32 {
+	if x != nil && x.StatementReleaseDay != nil {
+		return *x.StatementReleaseDay
+	}
+	return 0
+}
+
+func (x *UpdateAccountRequest) GetClosedAt() *date.Date {
+	if x != nil {
+		return x.ClosedAt
+	}
+	return nil
 }
 
 type UpdateAccountResponse struct {
@@ -1126,7 +1152,7 @@ var File_nagomi_v1_account_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\n" +
-	" nagomi/v1/account_services.proto\x12\tnagomi.v1\x1a\x17nagomi/v1/account.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"8\n" +
+	" nagomi/v1/account_services.proto\x12\tnagomi.v1\x1a\x17nagomi/v1/account.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"8\n" +
 	"\x13ListAccountsRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"F\n" +
 	"\x14ListAccountsResponse\x12.\n" +
@@ -1148,7 +1174,7 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x10statement_driven\x18\t \x01(\bR\x0fstatementDrivenB\x10\n" +
 	"\x0e_friendly_name\"E\n" +
 	"\x15CreateAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\x9e\x05\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\x97\a\n" +
 	"\x14UpdateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12;\n" +
@@ -1164,7 +1190,11 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\rmain_currency\x18\n" +
 	" \x01(\tH\x06R\fmainCurrency\x88\x01\x01\x12\x16\n" +
 	"\x06colors\x18\v \x03(\tR\x06colors\x12.\n" +
-	"\x10statement_driven\x18\f \x01(\bH\aR\x0fstatementDriven\x88\x01\x01B\a\n" +
+	"\x10statement_driven\x18\f \x01(\bH\aR\x0fstatementDriven\x88\x01\x01\x12A\n" +
+	"\x10statements_start\x18\r \x01(\v2\x11.google.type.DateH\bR\x0fstatementsStart\x88\x01\x01\x12B\n" +
+	"\x15statement_release_day\x18\x0e \x01(\x05B\t\xbaH\x06\x1a\x04\x18\x1f(\x01H\tR\x13statementReleaseDay\x88\x01\x01\x123\n" +
+	"\tclosed_at\x18\x0f \x01(\v2\x11.google.type.DateH\n" +
+	"R\bclosedAt\x88\x01\x01B\a\n" +
 	"\x05_nameB\a\n" +
 	"\x05_bankB\x0f\n" +
 	"\r_account_typeB\x10\n" +
@@ -1172,7 +1202,11 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\f_anchor_dateB\x11\n" +
 	"\x0f_anchor_balanceB\x10\n" +
 	"\x0e_main_currencyB\x13\n" +
-	"\x11_statement_driven\"\x17\n" +
+	"\x11_statement_drivenB\x13\n" +
+	"\x11_statements_startB\x18\n" +
+	"\x16_statement_release_dayB\f\n" +
+	"\n" +
+	"_closed_at\"\x17\n" +
 	"\x15UpdateAccountResponse\"R\n" +
 	"\x14DeleteAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
@@ -1263,6 +1297,7 @@ var file_nagomi_v1_account_services_proto_goTypes = []any{
 	(*money.Money)(nil),                // 22: google.type.Money
 	(*fieldmaskpb.FieldMask)(nil),      // 23: google.protobuf.FieldMask
 	(*timestamppb.Timestamp)(nil),      // 24: google.protobuf.Timestamp
+	(*date.Date)(nil),                  // 25: google.type.Date
 }
 var file_nagomi_v1_account_services_proto_depIdxs = []int32{
 	20, // 0: nagomi.v1.ListAccountsResponse.accounts:type_name -> nagomi.v1.Account
@@ -1274,33 +1309,35 @@ var file_nagomi_v1_account_services_proto_depIdxs = []int32{
 	21, // 6: nagomi.v1.UpdateAccountRequest.account_type:type_name -> nagomi.v1.AccountType
 	24, // 7: nagomi.v1.UpdateAccountRequest.anchor_date:type_name -> google.protobuf.Timestamp
 	22, // 8: nagomi.v1.UpdateAccountRequest.anchor_balance:type_name -> google.type.Money
-	20, // 9: nagomi.v1.FindAccountByAliasResponse.account:type_name -> nagomi.v1.Account
-	20, // 10: nagomi.v1.MergeAccountsResponse.account:type_name -> nagomi.v1.Account
-	0,  // 11: nagomi.v1.AccountService.ListAccounts:input_type -> nagomi.v1.ListAccountsRequest
-	2,  // 12: nagomi.v1.AccountService.GetAccount:input_type -> nagomi.v1.GetAccountRequest
-	4,  // 13: nagomi.v1.AccountService.CreateAccount:input_type -> nagomi.v1.CreateAccountRequest
-	6,  // 14: nagomi.v1.AccountService.UpdateAccount:input_type -> nagomi.v1.UpdateAccountRequest
-	8,  // 15: nagomi.v1.AccountService.DeleteAccount:input_type -> nagomi.v1.DeleteAccountRequest
-	10, // 16: nagomi.v1.AccountService.AddAccountAlias:input_type -> nagomi.v1.AddAccountAliasRequest
-	12, // 17: nagomi.v1.AccountService.RemoveAccountAlias:input_type -> nagomi.v1.RemoveAccountAliasRequest
-	14, // 18: nagomi.v1.AccountService.SetAccountAliases:input_type -> nagomi.v1.SetAccountAliasesRequest
-	16, // 19: nagomi.v1.AccountService.FindAccountByAlias:input_type -> nagomi.v1.FindAccountByAliasRequest
-	18, // 20: nagomi.v1.AccountService.MergeAccounts:input_type -> nagomi.v1.MergeAccountsRequest
-	1,  // 21: nagomi.v1.AccountService.ListAccounts:output_type -> nagomi.v1.ListAccountsResponse
-	3,  // 22: nagomi.v1.AccountService.GetAccount:output_type -> nagomi.v1.GetAccountResponse
-	5,  // 23: nagomi.v1.AccountService.CreateAccount:output_type -> nagomi.v1.CreateAccountResponse
-	7,  // 24: nagomi.v1.AccountService.UpdateAccount:output_type -> nagomi.v1.UpdateAccountResponse
-	9,  // 25: nagomi.v1.AccountService.DeleteAccount:output_type -> nagomi.v1.DeleteAccountResponse
-	11, // 26: nagomi.v1.AccountService.AddAccountAlias:output_type -> nagomi.v1.AddAccountAliasResponse
-	13, // 27: nagomi.v1.AccountService.RemoveAccountAlias:output_type -> nagomi.v1.RemoveAccountAliasResponse
-	15, // 28: nagomi.v1.AccountService.SetAccountAliases:output_type -> nagomi.v1.SetAccountAliasesResponse
-	17, // 29: nagomi.v1.AccountService.FindAccountByAlias:output_type -> nagomi.v1.FindAccountByAliasResponse
-	19, // 30: nagomi.v1.AccountService.MergeAccounts:output_type -> nagomi.v1.MergeAccountsResponse
-	21, // [21:31] is the sub-list for method output_type
-	11, // [11:21] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	25, // 9: nagomi.v1.UpdateAccountRequest.statements_start:type_name -> google.type.Date
+	25, // 10: nagomi.v1.UpdateAccountRequest.closed_at:type_name -> google.type.Date
+	20, // 11: nagomi.v1.FindAccountByAliasResponse.account:type_name -> nagomi.v1.Account
+	20, // 12: nagomi.v1.MergeAccountsResponse.account:type_name -> nagomi.v1.Account
+	0,  // 13: nagomi.v1.AccountService.ListAccounts:input_type -> nagomi.v1.ListAccountsRequest
+	2,  // 14: nagomi.v1.AccountService.GetAccount:input_type -> nagomi.v1.GetAccountRequest
+	4,  // 15: nagomi.v1.AccountService.CreateAccount:input_type -> nagomi.v1.CreateAccountRequest
+	6,  // 16: nagomi.v1.AccountService.UpdateAccount:input_type -> nagomi.v1.UpdateAccountRequest
+	8,  // 17: nagomi.v1.AccountService.DeleteAccount:input_type -> nagomi.v1.DeleteAccountRequest
+	10, // 18: nagomi.v1.AccountService.AddAccountAlias:input_type -> nagomi.v1.AddAccountAliasRequest
+	12, // 19: nagomi.v1.AccountService.RemoveAccountAlias:input_type -> nagomi.v1.RemoveAccountAliasRequest
+	14, // 20: nagomi.v1.AccountService.SetAccountAliases:input_type -> nagomi.v1.SetAccountAliasesRequest
+	16, // 21: nagomi.v1.AccountService.FindAccountByAlias:input_type -> nagomi.v1.FindAccountByAliasRequest
+	18, // 22: nagomi.v1.AccountService.MergeAccounts:input_type -> nagomi.v1.MergeAccountsRequest
+	1,  // 23: nagomi.v1.AccountService.ListAccounts:output_type -> nagomi.v1.ListAccountsResponse
+	3,  // 24: nagomi.v1.AccountService.GetAccount:output_type -> nagomi.v1.GetAccountResponse
+	5,  // 25: nagomi.v1.AccountService.CreateAccount:output_type -> nagomi.v1.CreateAccountResponse
+	7,  // 26: nagomi.v1.AccountService.UpdateAccount:output_type -> nagomi.v1.UpdateAccountResponse
+	9,  // 27: nagomi.v1.AccountService.DeleteAccount:output_type -> nagomi.v1.DeleteAccountResponse
+	11, // 28: nagomi.v1.AccountService.AddAccountAlias:output_type -> nagomi.v1.AddAccountAliasResponse
+	13, // 29: nagomi.v1.AccountService.RemoveAccountAlias:output_type -> nagomi.v1.RemoveAccountAliasResponse
+	15, // 30: nagomi.v1.AccountService.SetAccountAliases:output_type -> nagomi.v1.SetAccountAliasesResponse
+	17, // 31: nagomi.v1.AccountService.FindAccountByAlias:output_type -> nagomi.v1.FindAccountByAliasResponse
+	19, // 32: nagomi.v1.AccountService.MergeAccounts:output_type -> nagomi.v1.MergeAccountsResponse
+	23, // [23:33] is the sub-list for method output_type
+	13, // [13:23] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_account_services_proto_init() }

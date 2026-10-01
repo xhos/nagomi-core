@@ -8,6 +8,7 @@ package nagomiv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	date "google.golang.org/genproto/googleapis/type/date"
 	money "google.golang.org/genproto/googleapis/type/money"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -43,8 +44,14 @@ type Account struct {
 	// balance comes from imported bank statements, which reconcile the
 	// provisional email and connector transactions. only these accept statements
 	StatementDriven bool `protobuf:"varint,15,opt,name=statement_driven,json=statementDriven,proto3" json:"statement_driven,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// the first statement the bank has; earlier periods aren't expected
+	StatementsStart *date.Date `protobuf:"bytes,16,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
+	// day of the month new statements come out; inferred from past statements when unset
+	StatementReleaseDay *int32 `protobuf:"varint,17,opt,name=statement_release_day,json=statementReleaseDay,proto3,oneof" json:"statement_release_day,omitempty"`
+	// no statements are expected after this
+	ClosedAt      *date.Date `protobuf:"bytes,18,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Account) Reset() {
@@ -182,6 +189,27 @@ func (x *Account) GetStatementDriven() bool {
 	return false
 }
 
+func (x *Account) GetStatementsStart() *date.Date {
+	if x != nil {
+		return x.StatementsStart
+	}
+	return nil
+}
+
+func (x *Account) GetStatementReleaseDay() int32 {
+	if x != nil && x.StatementReleaseDay != nil {
+		return *x.StatementReleaseDay
+	}
+	return 0
+}
+
+func (x *Account) GetClosedAt() *date.Date {
+	if x != nil {
+		return x.ClosedAt
+	}
+	return nil
+}
+
 type AccountBalance struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -262,7 +290,7 @@ var File_nagomi_v1_account_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd3\x05\n" +
+	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xc1\a\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x1d\n" +
@@ -283,8 +311,15 @@ const file_nagomi_v1_account_proto_rawDesc = "" +
 	"^[A-Z]{3}$\x98\x01\x03R\fmainCurrency\x12<\n" +
 	"\x06colors\x18\f \x03(\tB$\xbaH!\x92\x01\x1e\b\x03\x10\x03\"\x18r\x162\x11^#[0-9a-fA-F]{6}$\x98\x01\aR\x06colors\x12,\n" +
 	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalance\x12)\n" +
-	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDrivenB\x10\n" +
-	"\x0e_friendly_name\"\xc8\x01\n" +
+	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDriven\x12A\n" +
+	"\x10statements_start\x18\x10 \x01(\v2\x11.google.type.DateH\x01R\x0fstatementsStart\x88\x01\x01\x127\n" +
+	"\x15statement_release_day\x18\x11 \x01(\x05H\x02R\x13statementReleaseDay\x88\x01\x01\x123\n" +
+	"\tclosed_at\x18\x12 \x01(\v2\x11.google.type.DateH\x03R\bclosedAt\x88\x01\x01B\x10\n" +
+	"\x0e_friendly_nameB\x13\n" +
+	"\x11_statements_startB\x18\n" +
+	"\x16_statement_release_dayB\f\n" +
+	"\n" +
+	"_closed_at\"\xc8\x01\n" +
 	"\x0eAccountBalance\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
@@ -313,21 +348,24 @@ var file_nagomi_v1_account_proto_goTypes = []any{
 	(AccountType)(0),              // 2: nagomi.v1.AccountType
 	(*money.Money)(nil),           // 3: google.type.Money
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*date.Date)(nil),             // 5: google.type.Date
 }
 var file_nagomi_v1_account_proto_depIdxs = []int32{
-	2, // 0: nagomi.v1.Account.type:type_name -> nagomi.v1.AccountType
-	3, // 1: nagomi.v1.Account.anchor_balance:type_name -> google.type.Money
-	4, // 2: nagomi.v1.Account.anchor_date:type_name -> google.protobuf.Timestamp
-	4, // 3: nagomi.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	4, // 4: nagomi.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
-	3, // 5: nagomi.v1.Account.balance:type_name -> google.type.Money
-	2, // 6: nagomi.v1.AccountBalance.account_type:type_name -> nagomi.v1.AccountType
-	3, // 7: nagomi.v1.AccountBalance.current_balance:type_name -> google.type.Money
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	2,  // 0: nagomi.v1.Account.type:type_name -> nagomi.v1.AccountType
+	3,  // 1: nagomi.v1.Account.anchor_balance:type_name -> google.type.Money
+	4,  // 2: nagomi.v1.Account.anchor_date:type_name -> google.protobuf.Timestamp
+	4,  // 3: nagomi.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 4: nagomi.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 5: nagomi.v1.Account.balance:type_name -> google.type.Money
+	5,  // 6: nagomi.v1.Account.statements_start:type_name -> google.type.Date
+	5,  // 7: nagomi.v1.Account.closed_at:type_name -> google.type.Date
+	2,  // 8: nagomi.v1.AccountBalance.account_type:type_name -> nagomi.v1.AccountType
+	3,  // 9: nagomi.v1.AccountBalance.current_balance:type_name -> google.type.Money
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_account_proto_init() }

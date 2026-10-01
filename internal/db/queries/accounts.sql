@@ -101,7 +101,19 @@ set
   anchor_currency = coalesce(sqlc.narg('anchor_currency')::char(3), anchor_currency),
   main_currency = coalesce(sqlc.narg('main_currency')::char(3), main_currency),
   colors = coalesce(sqlc.narg('colors')::text [], colors),
-  statement_driven = coalesce(sqlc.narg('statement_driven')::boolean, statement_driven)
+  statement_driven = coalesce(sqlc.narg('statement_driven')::boolean, statement_driven),
+  statements_start = case
+    when @clear_statements_start::boolean then null
+    else coalesce(sqlc.narg('statements_start')::date, statements_start)
+  end,
+  statement_release_day = case
+    when @clear_statement_release_day::boolean then null
+    else coalesce(sqlc.narg('statement_release_day')::smallint, statement_release_day)
+  end,
+  closed_at = case
+    when @clear_closed_at::boolean then null
+    else coalesce(sqlc.narg('closed_at')::date, closed_at)
+  end
 where
   id = @id::bigint
   and owner_id = @user_id::uuid;

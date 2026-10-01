@@ -68,6 +68,10 @@ func (s *acctSvc) Get(ctx context.Context, userID uuid.UUID, accountID int64) (*
 func (s *acctSvc) Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateAccountRequest) error {
 	params := buildUpdateAccountParams(userID, req)
 
+	if day := params.StatementReleaseDay; day != nil && (*day < 1 || *day > 31) {
+		return fmt.Errorf("AccountService.Update: statement release day must be 1-31, got %d: %w", *day, ErrValidation)
+	}
+
 	currencyChanging := params.AnchorCurrency != nil || params.MainCurrency != nil
 	if currencyChanging {
 		hasTxns, err := s.queries.AccountHasTransactions(ctx, params.ID)
