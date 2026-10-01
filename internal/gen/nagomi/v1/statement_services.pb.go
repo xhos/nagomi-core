@@ -34,7 +34,8 @@ const (
 	ReconciliationAction_RECONCILIATION_ACTION_CREATE ReconciliationAction = 3
 	// a line this or an overlapping statement already imported
 	ReconciliationAction_RECONCILIATION_ACTION_ALREADY_IMPORTED ReconciliationAction = 4
-	// a provisional transaction in the period the statement doesn't contain
+	// a provisional transaction in the period the statement doesn't contain, or,
+	// when re-parsing, one of the statement's own that it no longer lists
 	ReconciliationAction_RECONCILIATION_ACTION_DELETE ReconciliationAction = 5
 	// not on the statement either, but left alone; see keep_reason
 	ReconciliationAction_RECONCILIATION_ACTION_KEEP ReconciliationAction = 6
@@ -1005,6 +1006,128 @@ func (x *DeleteStatementResponse) GetDeletedTransactions() int32 {
 	return 0
 }
 
+type ReparseStatementRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id     int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	// otherwise only returns what re-parsing would change
+	Apply         bool `protobuf:"varint,3,opt,name=apply,proto3" json:"apply,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReparseStatementRequest) Reset() {
+	*x = ReparseStatementRequest{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReparseStatementRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReparseStatementRequest) ProtoMessage() {}
+
+func (x *ReparseStatementRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReparseStatementRequest.ProtoReflect.Descriptor instead.
+func (*ReparseStatementRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ReparseStatementRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ReparseStatementRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ReparseStatementRequest) GetApply() bool {
+	if x != nil {
+		return x.Apply
+	}
+	return false
+}
+
+type ReparseStatementResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// with the new parse's values, which are saved only when applied
+	Statement      *Statement               `protobuf:"bytes,1,opt,name=statement,proto3" json:"statement,omitempty"`
+	Lines          []*ParsedStatementLine   `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
+	Reconciliation *StatementReconciliation `protobuf:"bytes,3,opt,name=reconciliation,proto3" json:"reconciliation,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ReparseStatementResponse) Reset() {
+	*x = ReparseStatementResponse{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReparseStatementResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReparseStatementResponse) ProtoMessage() {}
+
+func (x *ReparseStatementResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReparseStatementResponse.ProtoReflect.Descriptor instead.
+func (*ReparseStatementResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ReparseStatementResponse) GetStatement() *Statement {
+	if x != nil {
+		return x.Statement
+	}
+	return nil
+}
+
+func (x *ReparseStatementResponse) GetLines() []*ParsedStatementLine {
+	if x != nil {
+		return x.Lines
+	}
+	return nil
+}
+
+func (x *ReparseStatementResponse) GetReconciliation() *StatementReconciliation {
+	if x != nil {
+		return x.Reconciliation
+	}
+	return nil
+}
+
 var File_nagomi_v1_statement_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_services_proto_rawDesc = "" +
@@ -1080,7 +1203,15 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12/\n" +
 	"\x13delete_transactions\x18\x03 \x01(\bR\x12deleteTransactions\"L\n" +
 	"\x17DeleteStatementResponse\x121\n" +
-	"\x14deleted_transactions\x18\x01 \x01(\x05R\x13deletedTransactions*\x99\x02\n" +
+	"\x14deleted_transactions\x18\x01 \x01(\x05R\x13deletedTransactions\"k\n" +
+	"\x17ReparseStatementRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
+	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x14\n" +
+	"\x05apply\x18\x03 \x01(\bR\x05apply\"\xd0\x01\n" +
+	"\x18ReparseStatementResponse\x122\n" +
+	"\tstatement\x18\x01 \x01(\v2\x14.nagomi.v1.StatementR\tstatement\x124\n" +
+	"\x05lines\x18\x02 \x03(\v2\x1e.nagomi.v1.ParsedStatementLineR\x05lines\x12J\n" +
+	"\x0ereconciliation\x18\x03 \x01(\v2\".nagomi.v1.StatementReconciliationR\x0ereconciliation*\x99\x02\n" +
 	"\x14ReconciliationAction\x12%\n" +
 	"!RECONCILIATION_ACTION_UNSPECIFIED\x10\x00\x12!\n" +
 	"\x1dRECONCILIATION_ACTION_CONFIRM\x10\x01\x12'\n" +
@@ -1093,14 +1224,15 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"&RECONCILIATION_KEEP_REASON_UNSPECIFIED\x10\x00\x12%\n" +
 	"!RECONCILIATION_KEEP_REASON_MANUAL\x10\x01\x12(\n" +
 	"$RECONCILIATION_KEEP_REASON_USER_DATA\x10\x02\x12$\n" +
-	" RECONCILIATION_KEEP_REASON_GRACE\x10\x032\xd5\x04\n" +
+	" RECONCILIATION_KEEP_REASON_GRACE\x10\x032\xb2\x05\n" +
 	"\x10StatementService\x12m\n" +
 	"\x16PreviewStatementImport\x12(.nagomi.v1.PreviewStatementImportRequest\x1a).nagomi.v1.PreviewStatementImportResponse\x12d\n" +
 	"\x13PlanStatementImport\x12%.nagomi.v1.PlanStatementImportRequest\x1a&.nagomi.v1.PlanStatementImportResponse\x12j\n" +
 	"\x15CommitStatementImport\x12'.nagomi.v1.CommitStatementImportRequest\x1a(.nagomi.v1.CommitStatementImportResponse\x12U\n" +
 	"\x0eListStatements\x12 .nagomi.v1.ListStatementsRequest\x1a!.nagomi.v1.ListStatementsResponse\x12O\n" +
 	"\fGetStatement\x12\x1e.nagomi.v1.GetStatementRequest\x1a\x1f.nagomi.v1.GetStatementResponse\x12X\n" +
-	"\x0fDeleteStatement\x12!.nagomi.v1.DeleteStatementRequest\x1a\".nagomi.v1.DeleteStatementResponseB\x99\x01\n" +
+	"\x0fDeleteStatement\x12!.nagomi.v1.DeleteStatementRequest\x1a\".nagomi.v1.DeleteStatementResponse\x12[\n" +
+	"\x10ReparseStatement\x12\".nagomi.v1.ReparseStatementRequest\x1a#.nagomi.v1.ReparseStatementResponseB\x99\x01\n" +
 	"\rcom.nagomi.v1B\x16StatementServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -1117,7 +1249,7 @@ func file_nagomi_v1_statement_services_proto_rawDescGZIP() []byte {
 }
 
 var file_nagomi_v1_statement_services_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_nagomi_v1_statement_services_proto_goTypes = []any{
 	(ReconciliationAction)(0),              // 0: nagomi.v1.ReconciliationAction
 	(ReconciliationKeepReason)(0),          // 1: nagomi.v1.ReconciliationKeepReason
@@ -1135,41 +1267,48 @@ var file_nagomi_v1_statement_services_proto_goTypes = []any{
 	(*GetStatementResponse)(nil),           // 13: nagomi.v1.GetStatementResponse
 	(*DeleteStatementRequest)(nil),         // 14: nagomi.v1.DeleteStatementRequest
 	(*DeleteStatementResponse)(nil),        // 15: nagomi.v1.DeleteStatementResponse
-	(*Statement)(nil),                      // 16: nagomi.v1.Statement
-	(*ParsedStatementLine)(nil),            // 17: nagomi.v1.ParsedStatementLine
-	(*Transaction)(nil),                    // 18: nagomi.v1.Transaction
-	(StatementStatus)(0),                   // 19: nagomi.v1.StatementStatus
+	(*ReparseStatementRequest)(nil),        // 16: nagomi.v1.ReparseStatementRequest
+	(*ReparseStatementResponse)(nil),       // 17: nagomi.v1.ReparseStatementResponse
+	(*Statement)(nil),                      // 18: nagomi.v1.Statement
+	(*ParsedStatementLine)(nil),            // 19: nagomi.v1.ParsedStatementLine
+	(*Transaction)(nil),                    // 20: nagomi.v1.Transaction
+	(StatementStatus)(0),                   // 21: nagomi.v1.StatementStatus
 }
 var file_nagomi_v1_statement_services_proto_depIdxs = []int32{
-	16, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	17, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
+	18, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	19, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
 	7,  // 2: nagomi.v1.PreviewStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
 	7,  // 3: nagomi.v1.PlanStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
 	0,  // 4: nagomi.v1.ReconciliationItem.action:type_name -> nagomi.v1.ReconciliationAction
-	18, // 5: nagomi.v1.ReconciliationItem.transaction:type_name -> nagomi.v1.Transaction
+	20, // 5: nagomi.v1.ReconciliationItem.transaction:type_name -> nagomi.v1.Transaction
 	1,  // 6: nagomi.v1.ReconciliationItem.keep_reason:type_name -> nagomi.v1.ReconciliationKeepReason
 	6,  // 7: nagomi.v1.StatementReconciliation.items:type_name -> nagomi.v1.ReconciliationItem
-	16, // 8: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	19, // 9: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
-	16, // 10: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
-	16, // 11: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
-	2,  // 12: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
-	4,  // 13: nagomi.v1.StatementService.PlanStatementImport:input_type -> nagomi.v1.PlanStatementImportRequest
-	8,  // 14: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
-	10, // 15: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
-	12, // 16: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
-	14, // 17: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
-	3,  // 18: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
-	5,  // 19: nagomi.v1.StatementService.PlanStatementImport:output_type -> nagomi.v1.PlanStatementImportResponse
-	9,  // 20: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
-	11, // 21: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
-	13, // 22: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
-	15, // 23: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
-	18, // [18:24] is the sub-list for method output_type
-	12, // [12:18] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	18, // 8: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	21, // 9: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
+	18, // 10: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
+	18, // 11: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
+	18, // 12: nagomi.v1.ReparseStatementResponse.statement:type_name -> nagomi.v1.Statement
+	19, // 13: nagomi.v1.ReparseStatementResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
+	7,  // 14: nagomi.v1.ReparseStatementResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
+	2,  // 15: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
+	4,  // 16: nagomi.v1.StatementService.PlanStatementImport:input_type -> nagomi.v1.PlanStatementImportRequest
+	8,  // 17: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
+	10, // 18: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
+	12, // 19: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
+	14, // 20: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
+	16, // 21: nagomi.v1.StatementService.ReparseStatement:input_type -> nagomi.v1.ReparseStatementRequest
+	3,  // 22: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
+	5,  // 23: nagomi.v1.StatementService.PlanStatementImport:output_type -> nagomi.v1.PlanStatementImportResponse
+	9,  // 24: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
+	11, // 25: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
+	13, // 26: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
+	15, // 27: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
+	17, // 28: nagomi.v1.StatementService.ReparseStatement:output_type -> nagomi.v1.ReparseStatementResponse
+	22, // [22:29] is the sub-list for method output_type
+	15, // [15:22] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_statement_services_proto_init() }
@@ -1193,7 +1332,7 @@ func file_nagomi_v1_statement_services_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_statement_services_proto_rawDesc), len(file_nagomi_v1_statement_services_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

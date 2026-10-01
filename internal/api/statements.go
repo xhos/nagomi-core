@@ -101,3 +101,17 @@ func (s *Server) DeleteStatement(ctx context.Context, req *connect.Request[pb.De
 
 	return connect.NewResponse(&pb.DeleteStatementResponse{DeletedTransactions: deleted}), nil
 }
+
+func (s *Server) ReparseStatement(ctx context.Context, req *connect.Request[pb.ReparseStatementRequest]) (*connect.Response[pb.ReparseStatementResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := s.services.Statements.Reparse(ctx, userID, req.Msg.GetId(), req.Msg.GetApply())
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(result), nil
+}

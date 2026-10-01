@@ -96,6 +96,27 @@ where
 returning
   *;
 
+-- name: UpdateStatementParse :one
+update statements
+set
+  parser = @parser::text,
+  bank = @bank::text,
+  account_type = @account_type::smallint,
+  account_number = @account_number::text,
+  period_start = @period_start::date,
+  period_end = @period_end::date,
+  currency = @currency::char(3),
+  opening_balance_cents = sqlc.narg('opening_balance_cents')::bigint,
+  closing_balance_cents = sqlc.narg('closing_balance_cents')::bigint,
+  balance_ok = sqlc.narg('balance_ok')::boolean,
+  line_count = @line_count::int,
+  parsed = @parsed::jsonb
+where
+  id = @id::bigint
+  and user_id = @user_id::uuid
+returning
+  *;
+
 -- name: DeleteStatementTransactions :execrows
 delete from transactions t
 using statements s
@@ -137,15 +158,22 @@ select
     or exists(select 1 from receipts r where r.transaction_id = t.id)
     or exists(select 1 from transactions s where s.split_from_id = t.id)
   )::boolean as has_user_data,
-  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits
+  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits,
+  (t.statement_id is not null)::boolean as from_statement
 from
   transactions t
 where
   t.account_id = @account_id::bigint
-  and t.statement_id is null
   and t.split_from_id is null
-  and t.tx_date >= @from_date::timestamptz
-  and t.tx_date < @to_date::timestamptz
+  and (
+    (
+      t.statement_id is null
+      and t.tx_date >= @from_date::timestamptz
+      and t.tx_date < @to_date::timestamptz
+    )
+    -- when re-parsing, the statement's own transactions, whatever their date
+    or t.statement_id = sqlc.narg('statement_id')::bigint
+  )
 order by
   t.tx_date,
   t.id;

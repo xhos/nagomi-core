@@ -25,6 +25,7 @@ const (
 	StatementService_ListStatements_FullMethodName         = "/nagomi.v1.StatementService/ListStatements"
 	StatementService_GetStatement_FullMethodName           = "/nagomi.v1.StatementService/GetStatement"
 	StatementService_DeleteStatement_FullMethodName        = "/nagomi.v1.StatementService/DeleteStatement"
+	StatementService_ReparseStatement_FullMethodName       = "/nagomi.v1.StatementService/ReparseStatement"
 )
 
 // StatementServiceClient is the client API for StatementService service.
@@ -43,6 +44,11 @@ type StatementServiceClient interface {
 	ListStatements(ctx context.Context, in *ListStatementsRequest, opts ...grpc.CallOption) (*ListStatementsResponse, error)
 	GetStatement(ctx context.Context, in *GetStatementRequest, opts ...grpc.CallOption) (*GetStatementResponse, error)
 	DeleteStatement(ctx context.Context, in *DeleteStatementRequest, opts ...grpc.CallOption) (*DeleteStatementResponse, error)
+	// runs an imported statement's stored file through the parser again, after a
+	// parser fix, and reconciles its account against the new lines. its own
+	// transactions the statement no longer lists are deleted, unless they carry
+	// notes, a receipt or splits.
+	ReparseStatement(ctx context.Context, in *ReparseStatementRequest, opts ...grpc.CallOption) (*ReparseStatementResponse, error)
 }
 
 type statementServiceClient struct {
@@ -113,6 +119,16 @@ func (c *statementServiceClient) DeleteStatement(ctx context.Context, in *Delete
 	return out, nil
 }
 
+func (c *statementServiceClient) ReparseStatement(ctx context.Context, in *ReparseStatementRequest, opts ...grpc.CallOption) (*ReparseStatementResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReparseStatementResponse)
+	err := c.cc.Invoke(ctx, StatementService_ReparseStatement_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StatementServiceServer is the server API for StatementService service.
 // All implementations must embed UnimplementedStatementServiceServer
 // for forward compatibility.
@@ -129,6 +145,11 @@ type StatementServiceServer interface {
 	ListStatements(context.Context, *ListStatementsRequest) (*ListStatementsResponse, error)
 	GetStatement(context.Context, *GetStatementRequest) (*GetStatementResponse, error)
 	DeleteStatement(context.Context, *DeleteStatementRequest) (*DeleteStatementResponse, error)
+	// runs an imported statement's stored file through the parser again, after a
+	// parser fix, and reconciles its account against the new lines. its own
+	// transactions the statement no longer lists are deleted, unless they carry
+	// notes, a receipt or splits.
+	ReparseStatement(context.Context, *ReparseStatementRequest) (*ReparseStatementResponse, error)
 	mustEmbedUnimplementedStatementServiceServer()
 }
 
@@ -156,6 +177,9 @@ func (UnimplementedStatementServiceServer) GetStatement(context.Context, *GetSta
 }
 func (UnimplementedStatementServiceServer) DeleteStatement(context.Context, *DeleteStatementRequest) (*DeleteStatementResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteStatement not implemented")
+}
+func (UnimplementedStatementServiceServer) ReparseStatement(context.Context, *ReparseStatementRequest) (*ReparseStatementResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReparseStatement not implemented")
 }
 func (UnimplementedStatementServiceServer) mustEmbedUnimplementedStatementServiceServer() {}
 func (UnimplementedStatementServiceServer) testEmbeddedByValue()                          {}
@@ -286,6 +310,24 @@ func _StatementService_DeleteStatement_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StatementService_ReparseStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReparseStatementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatementServiceServer).ReparseStatement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StatementService_ReparseStatement_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatementServiceServer).ReparseStatement(ctx, req.(*ReparseStatementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StatementService_ServiceDesc is the grpc.ServiceDesc for StatementService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +358,10 @@ var StatementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteStatement",
 			Handler:    _StatementService_DeleteStatement_Handler,
+		},
+		{
+			MethodName: "ReparseStatement",
+			Handler:    _StatementService_ReparseStatement_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

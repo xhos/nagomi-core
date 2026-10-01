@@ -51,6 +51,9 @@ const (
 	// StatementServiceDeleteStatementProcedure is the fully-qualified name of the StatementService's
 	// DeleteStatement RPC.
 	StatementServiceDeleteStatementProcedure = "/nagomi.v1.StatementService/DeleteStatement"
+	// StatementServiceReparseStatementProcedure is the fully-qualified name of the StatementService's
+	// ReparseStatement RPC.
+	StatementServiceReparseStatementProcedure = "/nagomi.v1.StatementService/ReparseStatement"
 )
 
 // StatementServiceClient is a client for the nagomi.v1.StatementService service.
@@ -67,6 +70,11 @@ type StatementServiceClient interface {
 	ListStatements(context.Context, *connect.Request[v1.ListStatementsRequest]) (*connect.Response[v1.ListStatementsResponse], error)
 	GetStatement(context.Context, *connect.Request[v1.GetStatementRequest]) (*connect.Response[v1.GetStatementResponse], error)
 	DeleteStatement(context.Context, *connect.Request[v1.DeleteStatementRequest]) (*connect.Response[v1.DeleteStatementResponse], error)
+	// runs an imported statement's stored file through the parser again, after a
+	// parser fix, and reconciles its account against the new lines. its own
+	// transactions the statement no longer lists are deleted, unless they carry
+	// notes, a receipt or splits.
+	ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error)
 }
 
 // NewStatementServiceClient constructs a client for the nagomi.v1.StatementService service. By
@@ -116,6 +124,12 @@ func NewStatementServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(statementServiceMethods.ByName("DeleteStatement")),
 			connect.WithClientOptions(opts...),
 		),
+		reparseStatement: connect.NewClient[v1.ReparseStatementRequest, v1.ReparseStatementResponse](
+			httpClient,
+			baseURL+StatementServiceReparseStatementProcedure,
+			connect.WithSchema(statementServiceMethods.ByName("ReparseStatement")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -127,6 +141,7 @@ type statementServiceClient struct {
 	listStatements         *connect.Client[v1.ListStatementsRequest, v1.ListStatementsResponse]
 	getStatement           *connect.Client[v1.GetStatementRequest, v1.GetStatementResponse]
 	deleteStatement        *connect.Client[v1.DeleteStatementRequest, v1.DeleteStatementResponse]
+	reparseStatement       *connect.Client[v1.ReparseStatementRequest, v1.ReparseStatementResponse]
 }
 
 // PreviewStatementImport calls nagomi.v1.StatementService.PreviewStatementImport.
@@ -159,6 +174,11 @@ func (c *statementServiceClient) DeleteStatement(ctx context.Context, req *conne
 	return c.deleteStatement.CallUnary(ctx, req)
 }
 
+// ReparseStatement calls nagomi.v1.StatementService.ReparseStatement.
+func (c *statementServiceClient) ReparseStatement(ctx context.Context, req *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error) {
+	return c.reparseStatement.CallUnary(ctx, req)
+}
+
 // StatementServiceHandler is an implementation of the nagomi.v1.StatementService service.
 type StatementServiceHandler interface {
 	// parses and stores the file as a pending statement. uploading a file that is
@@ -173,6 +193,11 @@ type StatementServiceHandler interface {
 	ListStatements(context.Context, *connect.Request[v1.ListStatementsRequest]) (*connect.Response[v1.ListStatementsResponse], error)
 	GetStatement(context.Context, *connect.Request[v1.GetStatementRequest]) (*connect.Response[v1.GetStatementResponse], error)
 	DeleteStatement(context.Context, *connect.Request[v1.DeleteStatementRequest]) (*connect.Response[v1.DeleteStatementResponse], error)
+	// runs an imported statement's stored file through the parser again, after a
+	// parser fix, and reconciles its account against the new lines. its own
+	// transactions the statement no longer lists are deleted, unless they carry
+	// notes, a receipt or splits.
+	ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error)
 }
 
 // NewStatementServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -218,6 +243,12 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 		connect.WithSchema(statementServiceMethods.ByName("DeleteStatement")),
 		connect.WithHandlerOptions(opts...),
 	)
+	statementServiceReparseStatementHandler := connect.NewUnaryHandler(
+		StatementServiceReparseStatementProcedure,
+		svc.ReparseStatement,
+		connect.WithSchema(statementServiceMethods.ByName("ReparseStatement")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/nagomi.v1.StatementService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case StatementServicePreviewStatementImportProcedure:
@@ -232,6 +263,8 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 			statementServiceGetStatementHandler.ServeHTTP(w, r)
 		case StatementServiceDeleteStatementProcedure:
 			statementServiceDeleteStatementHandler.ServeHTTP(w, r)
+		case StatementServiceReparseStatementProcedure:
+			statementServiceReparseStatementHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -263,4 +296,8 @@ func (UnimplementedStatementServiceHandler) GetStatement(context.Context, *conne
 
 func (UnimplementedStatementServiceHandler) DeleteStatement(context.Context, *connect.Request[v1.DeleteStatementRequest]) (*connect.Response[v1.DeleteStatementResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.DeleteStatement is not implemented"))
+}
+
+func (UnimplementedStatementServiceHandler) ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.ReparseStatement is not implemented"))
 }

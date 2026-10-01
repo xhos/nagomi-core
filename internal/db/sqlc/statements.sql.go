@@ -398,34 +398,48 @@ select
     or exists(select 1 from receipts r where r.transaction_id = t.id)
     or exists(select 1 from transactions s where s.split_from_id = t.id)
   )::boolean as has_user_data,
-  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits
+  exists(select 1 from transactions s where s.split_from_id = t.id)::boolean as has_splits,
+  (t.statement_id is not null)::boolean as from_statement
 from
   transactions t
 where
   t.account_id = $1::bigint
-  and t.statement_id is null
   and t.split_from_id is null
-  and t.tx_date >= $2::timestamptz
-  and t.tx_date < $3::timestamptz
+  and (
+    (
+      t.statement_id is null
+      and t.tx_date >= $2::timestamptz
+      and t.tx_date < $3::timestamptz
+    )
+    -- when re-parsing, the statement's own transactions, whatever their date
+    or t.statement_id = $4::bigint
+  )
 order by
   t.tx_date,
   t.id
 `
 
 type ListReconcileCandidatesParams struct {
-	AccountID int64     `db:"account_id" json:"account_id"`
-	FromDate  time.Time `db:"from_date" json:"from_date"`
-	ToDate    time.Time `db:"to_date" json:"to_date"`
+	AccountID   int64     `db:"account_id" json:"account_id"`
+	FromDate    time.Time `db:"from_date" json:"from_date"`
+	ToDate      time.Time `db:"to_date" json:"to_date"`
+	StatementID *int64    `db:"statement_id" json:"statement_id"`
 }
 
 type ListReconcileCandidatesRow struct {
-	Transaction Transaction `db:"transaction" json:"transaction"`
-	HasUserData bool        `db:"has_user_data" json:"has_user_data"`
-	HasSplits   bool        `db:"has_splits" json:"has_splits"`
+	Transaction   Transaction `db:"transaction" json:"transaction"`
+	HasUserData   bool        `db:"has_user_data" json:"has_user_data"`
+	HasSplits     bool        `db:"has_splits" json:"has_splits"`
+	FromStatement bool        `db:"from_statement" json:"from_statement"`
 }
 
 func (q *Queries) ListReconcileCandidates(ctx context.Context, arg ListReconcileCandidatesParams) ([]ListReconcileCandidatesRow, error) {
-	rows, err := q.db.Query(ctx, listReconcileCandidates, arg.AccountID, arg.FromDate, arg.ToDate)
+	rows, err := q.db.Query(ctx, listReconcileCandidates,
+		arg.AccountID,
+		arg.FromDate,
+		arg.ToDate,
+		arg.StatementID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -461,6 +475,7 @@ func (q *Queries) ListReconcileCandidates(ctx context.Context, arg ListReconcile
 			&i.Transaction.StatementID,
 			&i.HasUserData,
 			&i.HasSplits,
+			&i.FromStatement,
 		); err != nil {
 			return nil, err
 		}
@@ -570,6 +585,89 @@ type MarkStatementImportedParams struct {
 
 func (q *Queries) MarkStatementImported(ctx context.Context, arg MarkStatementImportedParams) (Statement, error) {
 	row := q.db.QueryRow(ctx, markStatementImported, arg.AccountID, arg.ID, arg.UserID)
+	var i Statement
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.AccountID,
+		&i.Status,
+		&i.FilePath,
+		&i.FileHash,
+		&i.FileName,
+		&i.Parser,
+		&i.Bank,
+		&i.AccountType,
+		&i.AccountNumber,
+		&i.PeriodStart,
+		&i.PeriodEnd,
+		&i.Currency,
+		&i.OpeningBalanceCents,
+		&i.ClosingBalanceCents,
+		&i.LineCount,
+		&i.Parsed,
+		&i.CreatedAt,
+		&i.ImportedAt,
+		&i.BalanceOk,
+	)
+	return i, err
+}
+
+const updateStatementParse = `-- name: UpdateStatementParse :one
+update statements
+set
+  parser = $1::text,
+  bank = $2::text,
+  account_type = $3::smallint,
+  account_number = $4::text,
+  period_start = $5::date,
+  period_end = $6::date,
+  currency = $7::char(3),
+  opening_balance_cents = $8::bigint,
+  closing_balance_cents = $9::bigint,
+  balance_ok = $10::boolean,
+  line_count = $11::int,
+  parsed = $12::jsonb
+where
+  id = $13::bigint
+  and user_id = $14::uuid
+returning
+  id, user_id, account_id, status, file_path, file_hash, file_name, parser, bank, account_type, account_number, period_start, period_end, currency, opening_balance_cents, closing_balance_cents, line_count, parsed, created_at, imported_at, balance_ok
+`
+
+type UpdateStatementParseParams struct {
+	Parser              string    `db:"parser" json:"parser"`
+	Bank                string    `db:"bank" json:"bank"`
+	AccountType         int16     `db:"account_type" json:"account_type"`
+	AccountNumber       string    `db:"account_number" json:"account_number"`
+	PeriodStart         time.Time `db:"period_start" json:"period_start"`
+	PeriodEnd           time.Time `db:"period_end" json:"period_end"`
+	Currency            string    `db:"currency" json:"currency"`
+	OpeningBalanceCents *int64    `db:"opening_balance_cents" json:"opening_balance_cents"`
+	ClosingBalanceCents *int64    `db:"closing_balance_cents" json:"closing_balance_cents"`
+	BalanceOk           *bool     `db:"balance_ok" json:"balance_ok"`
+	LineCount           int32     `db:"line_count" json:"line_count"`
+	Parsed              []byte    `db:"parsed" json:"parsed"`
+	ID                  int64     `db:"id" json:"id"`
+	UserID              uuid.UUID `db:"user_id" json:"user_id"`
+}
+
+func (q *Queries) UpdateStatementParse(ctx context.Context, arg UpdateStatementParseParams) (Statement, error) {
+	row := q.db.QueryRow(ctx, updateStatementParse,
+		arg.Parser,
+		arg.Bank,
+		arg.AccountType,
+		arg.AccountNumber,
+		arg.PeriodStart,
+		arg.PeriodEnd,
+		arg.Currency,
+		arg.OpeningBalanceCents,
+		arg.ClosingBalanceCents,
+		arg.BalanceOk,
+		arg.LineCount,
+		arg.Parsed,
+		arg.ID,
+		arg.UserID,
+	)
 	var i Statement
 	err := row.Scan(
 		&i.ID,

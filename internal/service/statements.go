@@ -36,6 +36,7 @@ type StatementService interface {
 	List(ctx context.Context, userID uuid.UUID, req *pb.ListStatementsRequest) ([]*pb.Statement, error)
 	Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Statement, []byte, error)
 	Delete(ctx context.Context, userID uuid.UUID, id int64, deleteTransactions bool) (int32, error)
+	Reparse(ctx context.Context, userID uuid.UUID, id int64, apply bool) (*pb.ReparseStatementResponse, error)
 	StartCleanup(ctx context.Context)
 }
 
@@ -109,29 +110,19 @@ func (s *stmtSvc) Preview(ctx context.Context, userID uuid.UUID, pdfData []byte,
 		return nil, wrapErr("StatementService.Preview.GetByHash", err)
 	}
 
-	resp, err := s.parser.ParseStatement(ctx, connect.NewRequest(&pb.ParseStatementRequest{PdfData: pdfData}))
+	parsed, err := s.parse(ctx, pdfData)
 	if err != nil {
-		var connectErr *connect.Error
-		if errors.As(err, &connectErr) && connectErr.Code() == connect.CodeInvalidArgument {
-			return nil, fmt.Errorf("StatementService.Preview: %s: %w", connectErr.Message(), ErrValidation)
-		}
-		return nil, fmt.Errorf("StatementService.Preview.Parse: %w", err)
-	}
-	parsed := resp.Msg.GetStatement()
-
-	parsedJSON, err := protojson.Marshal(parsed)
-	if err != nil {
-		return nil, fmt.Errorf("StatementService.Preview.Marshal: %w", err)
-	}
-
-	key := path.Join("statements", userID.String(), uuid.New().String()+".pdf")
-	if err := s.store.Put(ctx, key, pdfData, "application/pdf"); err != nil {
 		return nil, fmt.Errorf("StatementService.Preview: %w", err)
 	}
 
-	currency := parsed.GetCurrency()
-	if currency == "" {
-		currency = "CAD"
+	key := path.Join("statements", userID.String(), uuid.New().String()+".pdf")
+	stmt, err := withParsed(sqlc.Statement{FilePath: key}, parsed)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Preview: %w", err)
+	}
+
+	if err := s.store.Put(ctx, key, pdfData, "application/pdf"); err != nil {
+		return nil, fmt.Errorf("StatementService.Preview: %w", err)
 	}
 
 	row, err := s.queries.CreateStatement(ctx, sqlc.CreateStatementParams{
@@ -140,18 +131,18 @@ func (s *stmtSvc) Preview(ctx context.Context, userID uuid.UUID, pdfData []byte,
 		FilePath:            key,
 		FileHash:            fileHash,
 		FileName:            fileName,
-		Parser:              parsed.GetParser(),
-		Bank:                parsed.GetBank(),
-		AccountType:         int16(parsed.GetAccountType()),
-		AccountNumber:       parsed.GetAccountNumber(),
-		PeriodStart:         dateToUTC(parsed.GetPeriodStart()),
-		PeriodEnd:           dateToUTC(parsed.GetPeriodEnd()),
-		Currency:            currency,
-		OpeningBalanceCents: parsed.OpeningBalanceCents,
-		ClosingBalanceCents: parsed.ClosingBalanceCents,
-		BalanceOk:           balanceAddsUp(parsed),
-		LineCount:           int32(len(parsed.GetLines())),
-		Parsed:              parsedJSON,
+		Parser:              stmt.Parser,
+		Bank:                stmt.Bank,
+		AccountType:         stmt.AccountType,
+		AccountNumber:       stmt.AccountNumber,
+		PeriodStart:         stmt.PeriodStart,
+		PeriodEnd:           stmt.PeriodEnd,
+		Currency:            stmt.Currency,
+		OpeningBalanceCents: stmt.OpeningBalanceCents,
+		ClosingBalanceCents: stmt.ClosingBalanceCents,
+		BalanceOk:           stmt.BalanceOk,
+		LineCount:           stmt.LineCount,
+		Parsed:              stmt.Parsed,
 	})
 	if err != nil {
 		if delErr := s.store.Delete(ctx, key); delErr != nil {
@@ -205,7 +196,7 @@ func (s *stmtSvc) Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitSt
 		}
 	}
 
-	recon, err := reconcileAccount(ctx, q, parsed, account.ID, loc)
+	recon, err := reconcileAccount(ctx, q, parsed, account.ID, loc, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +250,7 @@ func (s *stmtSvc) Plan(ctx context.Context, userID uuid.UUID, statementID, accou
 		return nil, fmt.Errorf("StatementService.Plan: %w", err)
 	}
 
-	recon, err := reconcileAccount(ctx, s.queries, parsed, accountID, s.userLocation(ctx, userID))
+	recon, err := reconcileAccount(ctx, s.queries, parsed, accountID, s.userLocation(ctx, userID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -341,6 +332,113 @@ func (s *stmtSvc) Delete(ctx context.Context, userID uuid.UUID, id int64, delete
 	return int32(deleted), nil
 }
 
+func (s *stmtSvc) Reparse(ctx context.Context, userID uuid.UUID, id int64, apply bool) (*pb.ReparseStatementResponse, error) {
+	if s.parser == nil {
+		return nil, fmt.Errorf("StatementService.Reparse: NAGOMI_STATEMENTS_URL is not set: %w", ErrUnimplemented)
+	}
+
+	row, err := s.queries.GetStatement(ctx, sqlc.GetStatementParams{ID: id, UserID: userID})
+	if err != nil {
+		return nil, wrapErr("StatementService.Reparse.Get", err)
+	}
+	if pb.StatementStatus(row.Statement.Status) != pb.StatementStatus_STATEMENT_STATUS_IMPORTED || row.Statement.AccountID == nil {
+		return nil, fmt.Errorf("StatementService.Reparse: statement %d isn't imported: %w", id, ErrValidation)
+	}
+	accountID := *row.Statement.AccountID
+
+	pdfData, err := s.store.Get(ctx, row.Statement.FilePath)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Reparse: %w", err)
+	}
+	parsed, err := s.parse(ctx, pdfData)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Reparse: %w", err)
+	}
+	stmt, err := withParsed(row.Statement, parsed)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Reparse: %w", err)
+	}
+
+	account, err := s.queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: accountID})
+	if err != nil {
+		return nil, wrapErr("StatementService.Reparse.GetAccount", err)
+	}
+	if account.Account.MainCurrency != stmt.Currency {
+		return nil, fmt.Errorf(
+			"StatementService.Reparse: statement is now in %s but account %q is in %s: %w",
+			stmt.Currency, account.Account.Name, account.Account.MainCurrency, ErrValidation,
+		)
+	}
+
+	loc := s.userLocation(ctx, userID)
+
+	if !apply {
+		recon, err := reconcileAccount(ctx, s.queries, parsed, accountID, loc, &stmt.ID)
+		if err != nil {
+			return nil, err
+		}
+		return &pb.ReparseStatementResponse{
+			Statement:      statementToPb(&stmt, row.AccountName),
+			Lines:          parsed.GetLines(),
+			Reconciliation: recon.toPb(),
+		}, nil
+	}
+
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("StatementService.Reparse.Begin: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := s.queries.WithTx(tx)
+
+	recon, err := reconcileAccount(ctx, q, parsed, accountID, loc, &stmt.ID)
+	if err != nil {
+		return nil, err
+	}
+	result, err := recon.apply(ctx, q, userID, &stmt, loc)
+	if err != nil {
+		return nil, err
+	}
+
+	saved, err := q.UpdateStatementParse(ctx, sqlc.UpdateStatementParseParams{
+		ID:                  stmt.ID,
+		UserID:              userID,
+		Parser:              stmt.Parser,
+		Bank:                stmt.Bank,
+		AccountType:         stmt.AccountType,
+		AccountNumber:       stmt.AccountNumber,
+		PeriodStart:         stmt.PeriodStart,
+		PeriodEnd:           stmt.PeriodEnd,
+		Currency:            stmt.Currency,
+		OpeningBalanceCents: stmt.OpeningBalanceCents,
+		ClosingBalanceCents: stmt.ClosingBalanceCents,
+		BalanceOk:           stmt.BalanceOk,
+		LineCount:           stmt.LineCount,
+		Parsed:              stmt.Parsed,
+	})
+	if err != nil {
+		return nil, wrapErr("StatementService.Reparse.Update", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("StatementService.Reparse: %w", err)
+	}
+
+	result.touchedAccounts[accountID] = true
+	for touched := range result.touchedAccounts {
+		if err := s.queries.SyncAccountBalances(ctx, touched); err != nil {
+			s.log.Warn("failed to sync account balances", "account_id", touched, "error", err)
+		}
+	}
+	s.txnSvc.ApplyRules(ctx, userID, result.createdIDs)
+
+	return &pb.ReparseStatementResponse{
+		Statement:      statementToPb(&saved, row.AccountName),
+		Lines:          parsed.GetLines(),
+		Reconciliation: recon.toPb(),
+	}, nil
+}
+
 // StartCleanup drops pending statements that were previewed but never committed.
 func (s *stmtSvc) StartCleanup(ctx context.Context) {
 	ticker := time.NewTicker(time.Hour)
@@ -370,6 +468,43 @@ func (s *stmtSvc) StartCleanup(ctx context.Context) {
 
 // ----- helpers -----------------------------------------------------------------------------
 
+func (s *stmtSvc) parse(ctx context.Context, pdfData []byte) (*pb.ParsedStatement, error) {
+	resp, err := s.parser.ParseStatement(ctx, connect.NewRequest(&pb.ParseStatementRequest{PdfData: pdfData}))
+	if err != nil {
+		var connectErr *connect.Error
+		if errors.As(err, &connectErr) && connectErr.Code() == connect.CodeInvalidArgument {
+			return nil, fmt.Errorf("%s: %w", connectErr.Message(), ErrValidation)
+		}
+		return nil, fmt.Errorf("parse: %w", err)
+	}
+	return resp.Msg.GetStatement(), nil
+}
+
+// withParsed is stmt with its parsed values replaced by those of parsed.
+func withParsed(stmt sqlc.Statement, parsed *pb.ParsedStatement) (sqlc.Statement, error) {
+	parsedJSON, err := protojson.Marshal(parsed)
+	if err != nil {
+		return stmt, fmt.Errorf("encode parsed statement: %w", err)
+	}
+
+	stmt.Currency = parsed.GetCurrency()
+	if stmt.Currency == "" {
+		stmt.Currency = "CAD"
+	}
+	stmt.Parser = parsed.GetParser()
+	stmt.Bank = parsed.GetBank()
+	stmt.AccountType = int16(parsed.GetAccountType())
+	stmt.AccountNumber = parsed.GetAccountNumber()
+	stmt.PeriodStart = dateToUTC(parsed.GetPeriodStart())
+	stmt.PeriodEnd = dateToUTC(parsed.GetPeriodEnd())
+	stmt.OpeningBalanceCents = parsed.OpeningBalanceCents
+	stmt.ClosingBalanceCents = parsed.ClosingBalanceCents
+	stmt.BalanceOk = balanceAddsUp(parsed)
+	stmt.LineCount = int32(len(parsed.GetLines()))
+	stmt.Parsed = parsedJSON
+	return stmt, nil
+}
+
 // buildPreview takes parsed when the caller has it already, else reads it off the row.
 func (s *stmtSvc) buildPreview(ctx context.Context, userID uuid.UUID, row sqlc.Statement, parsed *pb.ParsedStatement) (*pb.PreviewStatementImportResponse, error) {
 	if parsed == nil {
@@ -396,7 +531,7 @@ func (s *stmtSvc) buildPreview(ctx context.Context, userID uuid.UUID, row sqlc.S
 	}
 	resp.MatchedAccountId = &match.Account.ID
 
-	recon, err := reconcileAccount(ctx, s.queries, parsed, match.Account.ID, s.userLocation(ctx, userID))
+	recon, err := reconcileAccount(ctx, s.queries, parsed, match.Account.ID, s.userLocation(ctx, userID), nil)
 	if err != nil {
 		return nil, err
 	}

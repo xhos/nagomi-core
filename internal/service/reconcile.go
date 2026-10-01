@@ -40,6 +40,9 @@ type reconcileCandidate struct {
 	Source      pb.TransactionSource
 	// notes, a receipt or splits: never deleted automatically
 	HasUserData bool
+	// already a line of the statement being re-parsed, so deleted when the new
+	// lines leave it out, whatever its source or date
+	FromStatement bool
 }
 
 type reconcileMatch struct {
@@ -66,6 +69,8 @@ type reconcilePlan struct {
 // the pairing is unambiguous. unmatched provisional transactions inside the period
 // are deleted unless they're manual, carry user data, or fall in the grace window.
 // candidates outside the period that didn't match are left alone.
+// when re-parsing, the statement's own unmatched transactions are deleted unless
+// they carry user data.
 func planReconcile(lines []reconcileLine, candidates []reconcileCandidate, periodStart, periodEnd time.Time) reconcilePlan {
 	var plan reconcilePlan
 	lineUsed := make([]bool, len(lines))
@@ -132,7 +137,18 @@ func planReconcile(lines []reconcileLine, candidates []reconcileCandidate, perio
 
 	graceFrom := periodEnd.AddDate(0, 0, -reconcileGraceDays)
 	for j, cand := range candidates {
-		if candUsed[j] || cand.Day.Before(periodStart) || cand.Day.After(periodEnd) {
+		if candUsed[j] {
+			continue
+		}
+		if cand.FromStatement {
+			if cand.HasUserData {
+				plan.Keep = append(plan.Keep, reconcileKept{cand.ID, pb.ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_USER_DATA})
+			} else {
+				plan.Delete = append(plan.Delete, cand.ID)
+			}
+			continue
+		}
+		if cand.Day.Before(periodStart) || cand.Day.After(periodEnd) {
 			continue
 		}
 		provisional := cand.Source == pb.TransactionSource_TRANSACTION_SOURCE_EMAIL ||
@@ -179,12 +195,15 @@ type reconciliation struct {
 	candidates      map[int64]sqlc.ListReconcileCandidatesRow
 }
 
+// reconcileAccount plans an import of parsed into the account. reparsing is the
+// statement being re-parsed, whose own transactions become candidates too.
 func reconcileAccount(
 	ctx context.Context,
 	q *sqlc.Queries,
 	parsed *pb.ParsedStatement,
 	accountID int64,
 	loc *time.Location,
+	reparsing *int64,
 ) (*reconciliation, error) {
 	r := &reconciliation{
 		accountID:       accountID,
@@ -222,14 +241,15 @@ func reconcileAccount(
 	rows, err := q.ListReconcileCandidates(ctx, sqlc.ListReconcileCandidatesParams{
 		AccountID: accountID,
 		FromDate:  dateIn(parsed.GetPeriodStart(), loc).AddDate(0, 0, -reconcileDateWindow),
-		ToDate:    dateIn(parsed.GetPeriodEnd(), loc).AddDate(0, 0, reconcileDateWindow+1),
+		ToDate:      dateIn(parsed.GetPeriodEnd(), loc).AddDate(0, 0, reconcileDateWindow+1),
+		StatementID: reparsing,
 	})
 	if err != nil {
 		return nil, wrapErr("StatementService.Reconcile.ListCandidates", err)
 	}
 	candidates := make([]reconcileCandidate, 0, len(rows))
 	for _, row := range rows {
-		// already this statement's line, just not linked to it
+		// already this statement's line: unchanged by a re-parse, or not linked to it yet
 		if row.Transaction.ExternalID != nil && imported[*row.Transaction.ExternalID] {
 			continue
 		}
@@ -240,7 +260,8 @@ func reconcileAccount(
 			AmountCents: row.Transaction.TxAmountCents,
 			Direction:   row.Transaction.TxDirection,
 			Source:      pb.TransactionSource(row.Transaction.Source),
-			HasUserData: row.HasUserData,
+			HasUserData:   row.HasUserData,
+			FromStatement: row.FromStatement,
 		})
 	}
 

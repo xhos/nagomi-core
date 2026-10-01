@@ -14,6 +14,7 @@ func TestPlanReconcile(t *testing.T) {
 	in := pb.TransactionDirection_DIRECTION_INCOMING
 	email := pb.TransactionSource_TRANSACTION_SOURCE_EMAIL
 	manual := pb.TransactionSource_TRANSACTION_SOURCE_MANUAL
+	statement := pb.TransactionSource_TRANSACTION_SOURCE_STATEMENT
 	line := func(d int, cents int64) reconcileLine { return reconcileLine{Day: day(d), AmountCents: cents, Direction: out} }
 	cand := func(id int64, d int, cents int64) reconcileCandidate {
 		return reconcileCandidate{ID: id, Day: day(d), AmountCents: cents, Direction: out, Source: email}
@@ -106,6 +107,27 @@ func TestPlanReconcile(t *testing.T) {
 			lines:      []reconcileLine{line(31, 999)},
 			candidates: []reconcileCandidate{{ID: 1, Day: time.Date(2026, 4, 2, 0, 0, 0, 0, time.UTC), AmountCents: 999, Direction: out, Source: email}},
 			want:       reconcilePlan{Matches: []reconcileMatch{{Line: 0, TransactionID: 1}}},
+		},
+		{
+			name:  "re-parse: own transactions match the new lines like provisional ones",
+			lines: []reconcileLine{line(10, 435)},
+			candidates: []reconcileCandidate{
+				{ID: 1, Day: day(10), AmountCents: 435, Direction: out, Source: statement, FromStatement: true},
+			},
+			want: reconcilePlan{Matches: []reconcileMatch{{Line: 0, TransactionID: 1}}},
+		},
+		{
+			name:  "re-parse: own transactions the new lines leave out are deleted, unless they carry user data",
+			lines: nil,
+			candidates: []reconcileCandidate{
+				{ID: 1, Day: day(30), AmountCents: 100, Direction: out, Source: statement, FromStatement: true},
+				{ID: 2, Day: time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC), AmountCents: 100, Direction: out, Source: statement, FromStatement: true},
+				{ID: 3, Day: day(10), AmountCents: 100, Direction: out, Source: statement, FromStatement: true, HasUserData: true},
+			},
+			want: reconcilePlan{
+				Delete: []int64{1, 2},
+				Keep:   []reconcileKept{{3, pb.ReconciliationKeepReason_RECONCILIATION_KEEP_REASON_USER_DATA}},
+			},
 		},
 	}
 
