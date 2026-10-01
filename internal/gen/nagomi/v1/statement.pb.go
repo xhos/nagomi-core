@@ -72,6 +72,64 @@ func (StatementStatus) EnumDescriptor() ([]byte, []int) {
 	return file_nagomi_v1_statement_proto_rawDescGZIP(), []int{0}
 }
 
+type StatementCoverageStatus int32
+
+const (
+	StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_UNSPECIFIED StatementCoverageStatus = 0
+	StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_IMPORTED    StatementCoverageStatus = 1
+	// imported, but its lines don't add up to its balances
+	StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_UNBALANCED StatementCoverageStatus = 2
+	// a gap before the first statement or between two
+	StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_MISSING StatementCoverageStatus = 3
+	// came out since the latest statement
+	StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_DUE StatementCoverageStatus = 4
+)
+
+// Enum value maps for StatementCoverageStatus.
+var (
+	StatementCoverageStatus_name = map[int32]string{
+		0: "STATEMENT_COVERAGE_STATUS_UNSPECIFIED",
+		1: "STATEMENT_COVERAGE_STATUS_IMPORTED",
+		2: "STATEMENT_COVERAGE_STATUS_UNBALANCED",
+		3: "STATEMENT_COVERAGE_STATUS_MISSING",
+		4: "STATEMENT_COVERAGE_STATUS_DUE",
+	}
+	StatementCoverageStatus_value = map[string]int32{
+		"STATEMENT_COVERAGE_STATUS_UNSPECIFIED": 0,
+		"STATEMENT_COVERAGE_STATUS_IMPORTED":    1,
+		"STATEMENT_COVERAGE_STATUS_UNBALANCED":  2,
+		"STATEMENT_COVERAGE_STATUS_MISSING":     3,
+		"STATEMENT_COVERAGE_STATUS_DUE":         4,
+	}
+)
+
+func (x StatementCoverageStatus) Enum() *StatementCoverageStatus {
+	p := new(StatementCoverageStatus)
+	*p = x
+	return p
+}
+
+func (x StatementCoverageStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StatementCoverageStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_statement_proto_enumTypes[1].Descriptor()
+}
+
+func (StatementCoverageStatus) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_statement_proto_enumTypes[1]
+}
+
+func (x StatementCoverageStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StatementCoverageStatus.Descriptor instead.
+func (StatementCoverageStatus) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_proto_rawDescGZIP(), []int{1}
+}
+
 type Statement struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Id                  int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -254,6 +312,77 @@ func (x *Statement) GetBalanceOk() bool {
 	return false
 }
 
+// one statement period of an account. missing and due periods are guessed as a
+// month from the neighbouring statement.
+type StatementCoveragePeriod struct {
+	state  protoimpl.MessageState  `protogen:"open.v1"`
+	Start  *date.Date              `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
+	End    *date.Date              `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
+	Status StatementCoverageStatus `protobuf:"varint,3,opt,name=status,proto3,enum=nagomi.v1.StatementCoverageStatus" json:"status,omitempty"`
+	// for imported and unbalanced periods
+	StatementId   *int64 `protobuf:"varint,4,opt,name=statement_id,json=statementId,proto3,oneof" json:"statement_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatementCoveragePeriod) Reset() {
+	*x = StatementCoveragePeriod{}
+	mi := &file_nagomi_v1_statement_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatementCoveragePeriod) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatementCoveragePeriod) ProtoMessage() {}
+
+func (x *StatementCoveragePeriod) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatementCoveragePeriod.ProtoReflect.Descriptor instead.
+func (*StatementCoveragePeriod) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *StatementCoveragePeriod) GetStart() *date.Date {
+	if x != nil {
+		return x.Start
+	}
+	return nil
+}
+
+func (x *StatementCoveragePeriod) GetEnd() *date.Date {
+	if x != nil {
+		return x.End
+	}
+	return nil
+}
+
+func (x *StatementCoveragePeriod) GetStatus() StatementCoverageStatus {
+	if x != nil {
+		return x.Status
+	}
+	return StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_UNSPECIFIED
+}
+
+func (x *StatementCoveragePeriod) GetStatementId() int64 {
+	if x != nil && x.StatementId != nil {
+		return *x.StatementId
+	}
+	return 0
+}
+
 var File_nagomi_v1_statement_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_proto_rawDesc = "" +
@@ -290,11 +419,23 @@ const file_nagomi_v1_statement_proto_rawDesc = "" +
 	"\x16_opening_balance_centsB\x18\n" +
 	"\x16_closing_balance_centsB\x0e\n" +
 	"\f_imported_atB\r\n" +
-	"\v_balance_ok*p\n" +
+	"\v_balance_ok\"\xdc\x01\n" +
+	"\x17StatementCoveragePeriod\x12'\n" +
+	"\x05start\x18\x01 \x01(\v2\x11.google.type.DateR\x05start\x12#\n" +
+	"\x03end\x18\x02 \x01(\v2\x11.google.type.DateR\x03end\x12:\n" +
+	"\x06status\x18\x03 \x01(\x0e2\".nagomi.v1.StatementCoverageStatusR\x06status\x12&\n" +
+	"\fstatement_id\x18\x04 \x01(\x03H\x00R\vstatementId\x88\x01\x01B\x0f\n" +
+	"\r_statement_id*p\n" +
 	"\x0fStatementStatus\x12 \n" +
 	"\x1cSTATEMENT_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18STATEMENT_STATUS_PENDING\x10\x01\x12\x1d\n" +
-	"\x19STATEMENT_STATUS_IMPORTED\x10\x02B\x91\x01\n" +
+	"\x19STATEMENT_STATUS_IMPORTED\x10\x02*\xe0\x01\n" +
+	"\x17StatementCoverageStatus\x12)\n" +
+	"%STATEMENT_COVERAGE_STATUS_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"STATEMENT_COVERAGE_STATUS_IMPORTED\x10\x01\x12(\n" +
+	"$STATEMENT_COVERAGE_STATUS_UNBALANCED\x10\x02\x12%\n" +
+	"!STATEMENT_COVERAGE_STATUS_MISSING\x10\x03\x12!\n" +
+	"\x1dSTATEMENT_COVERAGE_STATUS_DUE\x10\x04B\x91\x01\n" +
 	"\rcom.nagomi.v1B\x0eStatementProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -310,27 +451,32 @@ func file_nagomi_v1_statement_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_statement_proto_rawDescData
 }
 
-var file_nagomi_v1_statement_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_nagomi_v1_statement_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_nagomi_v1_statement_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_nagomi_v1_statement_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_nagomi_v1_statement_proto_goTypes = []any{
-	(StatementStatus)(0),          // 0: nagomi.v1.StatementStatus
-	(*Statement)(nil),             // 1: nagomi.v1.Statement
-	(AccountType)(0),              // 2: nagomi.v1.AccountType
-	(*date.Date)(nil),             // 3: google.type.Date
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(StatementStatus)(0),            // 0: nagomi.v1.StatementStatus
+	(StatementCoverageStatus)(0),    // 1: nagomi.v1.StatementCoverageStatus
+	(*Statement)(nil),               // 2: nagomi.v1.Statement
+	(*StatementCoveragePeriod)(nil), // 3: nagomi.v1.StatementCoveragePeriod
+	(AccountType)(0),                // 4: nagomi.v1.AccountType
+	(*date.Date)(nil),               // 5: google.type.Date
+	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
 }
 var file_nagomi_v1_statement_proto_depIdxs = []int32{
 	0, // 0: nagomi.v1.Statement.status:type_name -> nagomi.v1.StatementStatus
-	2, // 1: nagomi.v1.Statement.account_type:type_name -> nagomi.v1.AccountType
-	3, // 2: nagomi.v1.Statement.period_start:type_name -> google.type.Date
-	3, // 3: nagomi.v1.Statement.period_end:type_name -> google.type.Date
-	4, // 4: nagomi.v1.Statement.created_at:type_name -> google.protobuf.Timestamp
-	4, // 5: nagomi.v1.Statement.imported_at:type_name -> google.protobuf.Timestamp
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	4, // 1: nagomi.v1.Statement.account_type:type_name -> nagomi.v1.AccountType
+	5, // 2: nagomi.v1.Statement.period_start:type_name -> google.type.Date
+	5, // 3: nagomi.v1.Statement.period_end:type_name -> google.type.Date
+	6, // 4: nagomi.v1.Statement.created_at:type_name -> google.protobuf.Timestamp
+	6, // 5: nagomi.v1.Statement.imported_at:type_name -> google.protobuf.Timestamp
+	5, // 6: nagomi.v1.StatementCoveragePeriod.start:type_name -> google.type.Date
+	5, // 7: nagomi.v1.StatementCoveragePeriod.end:type_name -> google.type.Date
+	1, // 8: nagomi.v1.StatementCoveragePeriod.status:type_name -> nagomi.v1.StatementCoverageStatus
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_statement_proto_init() }
@@ -340,13 +486,14 @@ func file_nagomi_v1_statement_proto_init() {
 	}
 	file_nagomi_v1_enums_proto_init()
 	file_nagomi_v1_statement_proto_msgTypes[0].OneofWrappers = []any{}
+	file_nagomi_v1_statement_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_statement_proto_rawDesc), len(file_nagomi_v1_statement_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   1,
+			NumEnums:      2,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

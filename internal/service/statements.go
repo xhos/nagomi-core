@@ -37,6 +37,8 @@ type StatementService interface {
 	Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Statement, []byte, error)
 	Delete(ctx context.Context, userID uuid.UUID, id int64, deleteTransactions bool) (int32, error)
 	Reparse(ctx context.Context, userID uuid.UUID, id int64, apply bool) (*pb.ReparseStatementResponse, error)
+	Coverage(ctx context.Context, userID uuid.UUID, accountID int64) ([]*pb.StatementCoveragePeriod, error)
+	Alerts(ctx context.Context, userID uuid.UUID) ([]*pb.StatementAlert, error)
 	StartCleanup(ctx context.Context)
 }
 
@@ -439,6 +441,72 @@ func (s *stmtSvc) Reparse(ctx context.Context, userID uuid.UUID, id int64, apply
 	}, nil
 }
 
+func (s *stmtSvc) Coverage(ctx context.Context, userID uuid.UUID, accountID int64) ([]*pb.StatementCoveragePeriod, error) {
+	row, err := s.queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: accountID})
+	if err != nil {
+		return nil, wrapErr("StatementService.Coverage.GetAccount", err)
+	}
+	account := row.Account
+	if !account.StatementDriven {
+		return nil, fmt.Errorf("StatementService.Coverage: account %q isn't statement-driven: %w", account.Name, ErrValidation)
+	}
+
+	statements, err := s.queries.ListImportedStatementPeriods(ctx, sqlc.ListImportedStatementPeriodsParams{UserID: userID, AccountIds: []int64{accountID}})
+	if err != nil {
+		return nil, wrapErr("StatementService.Coverage.ListStatements", err)
+	}
+
+	settings := coverageSettings{StatementsStart: account.StatementsStart, ReleaseDay: account.StatementReleaseDay, ClosedAt: account.ClosedAt}
+	today := calendarDay(time.Now(), s.userLocation(ctx, userID))
+	periods := planCoverage(toCoverageStatements(statements), settings, today)
+
+	out := make([]*pb.StatementCoveragePeriod, len(periods))
+	for i := range periods {
+		out[i] = coveragePeriodToPb(&periods[i])
+	}
+	return out, nil
+}
+
+func (s *stmtSvc) Alerts(ctx context.Context, userID uuid.UUID) ([]*pb.StatementAlert, error) {
+	accounts, err := s.queries.ListStatementDrivenAccounts(ctx, userID)
+	if err != nil {
+		return nil, wrapErr("StatementService.Alerts.ListAccounts", err)
+	}
+	if len(accounts) == 0 {
+		return nil, nil
+	}
+
+	ids := make([]int64, len(accounts))
+	for i, account := range accounts {
+		ids[i] = account.ID
+	}
+	statements, err := s.queries.ListImportedStatementPeriods(ctx, sqlc.ListImportedStatementPeriodsParams{UserID: userID, AccountIds: ids})
+	if err != nil {
+		return nil, wrapErr("StatementService.Alerts.ListStatements", err)
+	}
+	byAccount := make(map[int64][]sqlc.ListImportedStatementPeriodsRow, len(accounts))
+	for _, stmt := range statements {
+		byAccount[stmt.AccountID] = append(byAccount[stmt.AccountID], stmt)
+	}
+
+	today := calendarDay(time.Now(), s.userLocation(ctx, userID))
+	var alerts []*pb.StatementAlert
+	for _, account := range accounts {
+		settings := coverageSettings{StatementsStart: account.StatementsStart, ReleaseDay: account.StatementReleaseDay, ClosedAt: account.ClosedAt}
+		for _, period := range planCoverage(toCoverageStatements(byAccount[account.ID]), settings, today) {
+			if period.Status == pb.StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_IMPORTED {
+				continue
+			}
+			alerts = append(alerts, &pb.StatementAlert{
+				AccountId:   account.ID,
+				AccountName: account.Name,
+				Period:      coveragePeriodToPb(&period),
+			})
+		}
+	}
+	return alerts, nil
+}
+
 // StartCleanup drops pending statements that were previewed but never committed.
 func (s *stmtSvc) StartCleanup(ctx context.Context) {
 	ticker := time.NewTicker(time.Hour)
@@ -635,6 +703,23 @@ func lineExternalIDs(lines []*pb.ParsedStatementLine) []string {
 		ids[i] = "stmt:" + hex.EncodeToString(sum[:12])
 	}
 	return ids
+}
+
+func toCoverageStatements(rows []sqlc.ListImportedStatementPeriodsRow) []coverageStatement {
+	out := make([]coverageStatement, len(rows))
+	for i, row := range rows {
+		out[i] = coverageStatement{ID: row.ID, Start: row.PeriodStart, End: row.PeriodEnd, BalanceOK: row.BalanceOk}
+	}
+	return out
+}
+
+func coveragePeriodToPb(p *coveragePeriod) *pb.StatementCoveragePeriod {
+	return &pb.StatementCoveragePeriod{
+		Start:       timeToDate(p.Start),
+		End:         timeToDate(p.End),
+		Status:      p.Status,
+		StatementId: p.StatementID,
+	}
 }
 
 func unmarshalParsed(data []byte) (*pb.ParsedStatement, error) {

@@ -1128,6 +1128,250 @@ func (x *ReparseStatementResponse) GetReconciliation() *StatementReconciliation 
 	return nil
 }
 
+type GetStatementCoverageRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	AccountId     int64                  `protobuf:"varint,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStatementCoverageRequest) Reset() {
+	*x = GetStatementCoverageRequest{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatementCoverageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatementCoverageRequest) ProtoMessage() {}
+
+func (x *GetStatementCoverageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatementCoverageRequest.ProtoReflect.Descriptor instead.
+func (*GetStatementCoverageRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetStatementCoverageRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetStatementCoverageRequest) GetAccountId() int64 {
+	if x != nil {
+		return x.AccountId
+	}
+	return 0
+}
+
+type GetStatementCoverageResponse struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Periods       []*StatementCoveragePeriod `protobuf:"bytes,1,rep,name=periods,proto3" json:"periods,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStatementCoverageResponse) Reset() {
+	*x = GetStatementCoverageResponse{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatementCoverageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatementCoverageResponse) ProtoMessage() {}
+
+func (x *GetStatementCoverageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatementCoverageResponse.ProtoReflect.Descriptor instead.
+func (*GetStatementCoverageResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetStatementCoverageResponse) GetPeriods() []*StatementCoveragePeriod {
+	if x != nil {
+		return x.Periods
+	}
+	return nil
+}
+
+type ListStatementAlertsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListStatementAlertsRequest) Reset() {
+	*x = ListStatementAlertsRequest{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListStatementAlertsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListStatementAlertsRequest) ProtoMessage() {}
+
+func (x *ListStatementAlertsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListStatementAlertsRequest.ProtoReflect.Descriptor instead.
+func (*ListStatementAlertsRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListStatementAlertsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type StatementAlert struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	AccountId     int64                    `protobuf:"varint,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	AccountName   string                   `protobuf:"bytes,2,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
+	Period        *StatementCoveragePeriod `protobuf:"bytes,3,opt,name=period,proto3" json:"period,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatementAlert) Reset() {
+	*x = StatementAlert{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatementAlert) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatementAlert) ProtoMessage() {}
+
+func (x *StatementAlert) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatementAlert.ProtoReflect.Descriptor instead.
+func (*StatementAlert) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *StatementAlert) GetAccountId() int64 {
+	if x != nil {
+		return x.AccountId
+	}
+	return 0
+}
+
+func (x *StatementAlert) GetAccountName() string {
+	if x != nil {
+		return x.AccountName
+	}
+	return ""
+}
+
+func (x *StatementAlert) GetPeriod() *StatementCoveragePeriod {
+	if x != nil {
+		return x.Period
+	}
+	return nil
+}
+
+type ListStatementAlertsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Alerts        []*StatementAlert      `protobuf:"bytes,1,rep,name=alerts,proto3" json:"alerts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListStatementAlertsResponse) Reset() {
+	*x = ListStatementAlertsResponse{}
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListStatementAlertsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListStatementAlertsResponse) ProtoMessage() {}
+
+func (x *ListStatementAlertsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_statement_services_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListStatementAlertsResponse.ProtoReflect.Descriptor instead.
+func (*ListStatementAlertsResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_statement_services_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListStatementAlertsResponse) GetAlerts() []*StatementAlert {
+	if x != nil {
+		return x.Alerts
+	}
+	return nil
+}
+
 var File_nagomi_v1_statement_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_services_proto_rawDesc = "" +
@@ -1211,7 +1455,22 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"\x18ReparseStatementResponse\x122\n" +
 	"\tstatement\x18\x01 \x01(\v2\x14.nagomi.v1.StatementR\tstatement\x124\n" +
 	"\x05lines\x18\x02 \x03(\v2\x1e.nagomi.v1.ParsedStatementLineR\x05lines\x12J\n" +
-	"\x0ereconciliation\x18\x03 \x01(\v2\".nagomi.v1.StatementReconciliationR\x0ereconciliation*\x99\x02\n" +
+	"\x0ereconciliation\x18\x03 \x01(\v2\".nagomi.v1.StatementReconciliationR\x0ereconciliation\"h\n" +
+	"\x1bGetStatementCoverageRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12&\n" +
+	"\n" +
+	"account_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\"\\\n" +
+	"\x1cGetStatementCoverageResponse\x12<\n" +
+	"\aperiods\x18\x01 \x03(\v2\".nagomi.v1.StatementCoveragePeriodR\aperiods\"?\n" +
+	"\x1aListStatementAlertsRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"\x8e\x01\n" +
+	"\x0eStatementAlert\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\x03R\taccountId\x12!\n" +
+	"\faccount_name\x18\x02 \x01(\tR\vaccountName\x12:\n" +
+	"\x06period\x18\x03 \x01(\v2\".nagomi.v1.StatementCoveragePeriodR\x06period\"P\n" +
+	"\x1bListStatementAlertsResponse\x121\n" +
+	"\x06alerts\x18\x01 \x03(\v2\x19.nagomi.v1.StatementAlertR\x06alerts*\x99\x02\n" +
 	"\x14ReconciliationAction\x12%\n" +
 	"!RECONCILIATION_ACTION_UNSPECIFIED\x10\x00\x12!\n" +
 	"\x1dRECONCILIATION_ACTION_CONFIRM\x10\x01\x12'\n" +
@@ -1224,7 +1483,7 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"&RECONCILIATION_KEEP_REASON_UNSPECIFIED\x10\x00\x12%\n" +
 	"!RECONCILIATION_KEEP_REASON_MANUAL\x10\x01\x12(\n" +
 	"$RECONCILIATION_KEEP_REASON_USER_DATA\x10\x02\x12$\n" +
-	" RECONCILIATION_KEEP_REASON_GRACE\x10\x032\xb2\x05\n" +
+	" RECONCILIATION_KEEP_REASON_GRACE\x10\x032\x81\a\n" +
 	"\x10StatementService\x12m\n" +
 	"\x16PreviewStatementImport\x12(.nagomi.v1.PreviewStatementImportRequest\x1a).nagomi.v1.PreviewStatementImportResponse\x12d\n" +
 	"\x13PlanStatementImport\x12%.nagomi.v1.PlanStatementImportRequest\x1a&.nagomi.v1.PlanStatementImportResponse\x12j\n" +
@@ -1232,7 +1491,9 @@ const file_nagomi_v1_statement_services_proto_rawDesc = "" +
 	"\x0eListStatements\x12 .nagomi.v1.ListStatementsRequest\x1a!.nagomi.v1.ListStatementsResponse\x12O\n" +
 	"\fGetStatement\x12\x1e.nagomi.v1.GetStatementRequest\x1a\x1f.nagomi.v1.GetStatementResponse\x12X\n" +
 	"\x0fDeleteStatement\x12!.nagomi.v1.DeleteStatementRequest\x1a\".nagomi.v1.DeleteStatementResponse\x12[\n" +
-	"\x10ReparseStatement\x12\".nagomi.v1.ReparseStatementRequest\x1a#.nagomi.v1.ReparseStatementResponseB\x99\x01\n" +
+	"\x10ReparseStatement\x12\".nagomi.v1.ReparseStatementRequest\x1a#.nagomi.v1.ReparseStatementResponse\x12g\n" +
+	"\x14GetStatementCoverage\x12&.nagomi.v1.GetStatementCoverageRequest\x1a'.nagomi.v1.GetStatementCoverageResponse\x12d\n" +
+	"\x13ListStatementAlerts\x12%.nagomi.v1.ListStatementAlertsRequest\x1a&.nagomi.v1.ListStatementAlertsResponseB\x99\x01\n" +
 	"\rcom.nagomi.v1B\x16StatementServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -1249,7 +1510,7 @@ func file_nagomi_v1_statement_services_proto_rawDescGZIP() []byte {
 }
 
 var file_nagomi_v1_statement_services_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_nagomi_v1_statement_services_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_nagomi_v1_statement_services_proto_goTypes = []any{
 	(ReconciliationAction)(0),              // 0: nagomi.v1.ReconciliationAction
 	(ReconciliationKeepReason)(0),          // 1: nagomi.v1.ReconciliationKeepReason
@@ -1269,46 +1530,59 @@ var file_nagomi_v1_statement_services_proto_goTypes = []any{
 	(*DeleteStatementResponse)(nil),        // 15: nagomi.v1.DeleteStatementResponse
 	(*ReparseStatementRequest)(nil),        // 16: nagomi.v1.ReparseStatementRequest
 	(*ReparseStatementResponse)(nil),       // 17: nagomi.v1.ReparseStatementResponse
-	(*Statement)(nil),                      // 18: nagomi.v1.Statement
-	(*ParsedStatementLine)(nil),            // 19: nagomi.v1.ParsedStatementLine
-	(*Transaction)(nil),                    // 20: nagomi.v1.Transaction
-	(StatementStatus)(0),                   // 21: nagomi.v1.StatementStatus
+	(*GetStatementCoverageRequest)(nil),    // 18: nagomi.v1.GetStatementCoverageRequest
+	(*GetStatementCoverageResponse)(nil),   // 19: nagomi.v1.GetStatementCoverageResponse
+	(*ListStatementAlertsRequest)(nil),     // 20: nagomi.v1.ListStatementAlertsRequest
+	(*StatementAlert)(nil),                 // 21: nagomi.v1.StatementAlert
+	(*ListStatementAlertsResponse)(nil),    // 22: nagomi.v1.ListStatementAlertsResponse
+	(*Statement)(nil),                      // 23: nagomi.v1.Statement
+	(*ParsedStatementLine)(nil),            // 24: nagomi.v1.ParsedStatementLine
+	(*Transaction)(nil),                    // 25: nagomi.v1.Transaction
+	(StatementStatus)(0),                   // 26: nagomi.v1.StatementStatus
+	(*StatementCoveragePeriod)(nil),        // 27: nagomi.v1.StatementCoveragePeriod
 }
 var file_nagomi_v1_statement_services_proto_depIdxs = []int32{
-	18, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	19, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
+	23, // 0: nagomi.v1.PreviewStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	24, // 1: nagomi.v1.PreviewStatementImportResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
 	7,  // 2: nagomi.v1.PreviewStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
 	7,  // 3: nagomi.v1.PlanStatementImportResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
 	0,  // 4: nagomi.v1.ReconciliationItem.action:type_name -> nagomi.v1.ReconciliationAction
-	20, // 5: nagomi.v1.ReconciliationItem.transaction:type_name -> nagomi.v1.Transaction
+	25, // 5: nagomi.v1.ReconciliationItem.transaction:type_name -> nagomi.v1.Transaction
 	1,  // 6: nagomi.v1.ReconciliationItem.keep_reason:type_name -> nagomi.v1.ReconciliationKeepReason
 	6,  // 7: nagomi.v1.StatementReconciliation.items:type_name -> nagomi.v1.ReconciliationItem
-	18, // 8: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
-	21, // 9: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
-	18, // 10: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
-	18, // 11: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
-	18, // 12: nagomi.v1.ReparseStatementResponse.statement:type_name -> nagomi.v1.Statement
-	19, // 13: nagomi.v1.ReparseStatementResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
+	23, // 8: nagomi.v1.CommitStatementImportResponse.statement:type_name -> nagomi.v1.Statement
+	26, // 9: nagomi.v1.ListStatementsRequest.status:type_name -> nagomi.v1.StatementStatus
+	23, // 10: nagomi.v1.ListStatementsResponse.statements:type_name -> nagomi.v1.Statement
+	23, // 11: nagomi.v1.GetStatementResponse.statement:type_name -> nagomi.v1.Statement
+	23, // 12: nagomi.v1.ReparseStatementResponse.statement:type_name -> nagomi.v1.Statement
+	24, // 13: nagomi.v1.ReparseStatementResponse.lines:type_name -> nagomi.v1.ParsedStatementLine
 	7,  // 14: nagomi.v1.ReparseStatementResponse.reconciliation:type_name -> nagomi.v1.StatementReconciliation
-	2,  // 15: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
-	4,  // 16: nagomi.v1.StatementService.PlanStatementImport:input_type -> nagomi.v1.PlanStatementImportRequest
-	8,  // 17: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
-	10, // 18: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
-	12, // 19: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
-	14, // 20: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
-	16, // 21: nagomi.v1.StatementService.ReparseStatement:input_type -> nagomi.v1.ReparseStatementRequest
-	3,  // 22: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
-	5,  // 23: nagomi.v1.StatementService.PlanStatementImport:output_type -> nagomi.v1.PlanStatementImportResponse
-	9,  // 24: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
-	11, // 25: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
-	13, // 26: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
-	15, // 27: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
-	17, // 28: nagomi.v1.StatementService.ReparseStatement:output_type -> nagomi.v1.ReparseStatementResponse
-	22, // [22:29] is the sub-list for method output_type
-	15, // [15:22] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	27, // 15: nagomi.v1.GetStatementCoverageResponse.periods:type_name -> nagomi.v1.StatementCoveragePeriod
+	27, // 16: nagomi.v1.StatementAlert.period:type_name -> nagomi.v1.StatementCoveragePeriod
+	21, // 17: nagomi.v1.ListStatementAlertsResponse.alerts:type_name -> nagomi.v1.StatementAlert
+	2,  // 18: nagomi.v1.StatementService.PreviewStatementImport:input_type -> nagomi.v1.PreviewStatementImportRequest
+	4,  // 19: nagomi.v1.StatementService.PlanStatementImport:input_type -> nagomi.v1.PlanStatementImportRequest
+	8,  // 20: nagomi.v1.StatementService.CommitStatementImport:input_type -> nagomi.v1.CommitStatementImportRequest
+	10, // 21: nagomi.v1.StatementService.ListStatements:input_type -> nagomi.v1.ListStatementsRequest
+	12, // 22: nagomi.v1.StatementService.GetStatement:input_type -> nagomi.v1.GetStatementRequest
+	14, // 23: nagomi.v1.StatementService.DeleteStatement:input_type -> nagomi.v1.DeleteStatementRequest
+	16, // 24: nagomi.v1.StatementService.ReparseStatement:input_type -> nagomi.v1.ReparseStatementRequest
+	18, // 25: nagomi.v1.StatementService.GetStatementCoverage:input_type -> nagomi.v1.GetStatementCoverageRequest
+	20, // 26: nagomi.v1.StatementService.ListStatementAlerts:input_type -> nagomi.v1.ListStatementAlertsRequest
+	3,  // 27: nagomi.v1.StatementService.PreviewStatementImport:output_type -> nagomi.v1.PreviewStatementImportResponse
+	5,  // 28: nagomi.v1.StatementService.PlanStatementImport:output_type -> nagomi.v1.PlanStatementImportResponse
+	9,  // 29: nagomi.v1.StatementService.CommitStatementImport:output_type -> nagomi.v1.CommitStatementImportResponse
+	11, // 30: nagomi.v1.StatementService.ListStatements:output_type -> nagomi.v1.ListStatementsResponse
+	13, // 31: nagomi.v1.StatementService.GetStatement:output_type -> nagomi.v1.GetStatementResponse
+	15, // 32: nagomi.v1.StatementService.DeleteStatement:output_type -> nagomi.v1.DeleteStatementResponse
+	17, // 33: nagomi.v1.StatementService.ReparseStatement:output_type -> nagomi.v1.ReparseStatementResponse
+	19, // 34: nagomi.v1.StatementService.GetStatementCoverage:output_type -> nagomi.v1.GetStatementCoverageResponse
+	22, // 35: nagomi.v1.StatementService.ListStatementAlerts:output_type -> nagomi.v1.ListStatementAlertsResponse
+	27, // [27:36] is the sub-list for method output_type
+	18, // [18:27] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_statement_services_proto_init() }
@@ -1332,7 +1606,7 @@ func file_nagomi_v1_statement_services_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_statement_services_proto_rawDesc), len(file_nagomi_v1_statement_services_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   16,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

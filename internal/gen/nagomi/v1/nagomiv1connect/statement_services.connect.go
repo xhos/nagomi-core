@@ -54,6 +54,12 @@ const (
 	// StatementServiceReparseStatementProcedure is the fully-qualified name of the StatementService's
 	// ReparseStatement RPC.
 	StatementServiceReparseStatementProcedure = "/nagomi.v1.StatementService/ReparseStatement"
+	// StatementServiceGetStatementCoverageProcedure is the fully-qualified name of the
+	// StatementService's GetStatementCoverage RPC.
+	StatementServiceGetStatementCoverageProcedure = "/nagomi.v1.StatementService/GetStatementCoverage"
+	// StatementServiceListStatementAlertsProcedure is the fully-qualified name of the
+	// StatementService's ListStatementAlerts RPC.
+	StatementServiceListStatementAlertsProcedure = "/nagomi.v1.StatementService/ListStatementAlerts"
 )
 
 // StatementServiceClient is a client for the nagomi.v1.StatementService service.
@@ -75,6 +81,10 @@ type StatementServiceClient interface {
 	// transactions the statement no longer lists are deleted, unless they carry
 	// notes, a receipt or splits.
 	ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error)
+	// a statement-driven account's periods, oldest first: imported, missing and due
+	GetStatementCoverage(context.Context, *connect.Request[v1.GetStatementCoverageRequest]) (*connect.Response[v1.GetStatementCoverageResponse], error)
+	// missing, due and unbalanced periods across the user's statement-driven accounts
+	ListStatementAlerts(context.Context, *connect.Request[v1.ListStatementAlertsRequest]) (*connect.Response[v1.ListStatementAlertsResponse], error)
 }
 
 // NewStatementServiceClient constructs a client for the nagomi.v1.StatementService service. By
@@ -130,6 +140,18 @@ func NewStatementServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(statementServiceMethods.ByName("ReparseStatement")),
 			connect.WithClientOptions(opts...),
 		),
+		getStatementCoverage: connect.NewClient[v1.GetStatementCoverageRequest, v1.GetStatementCoverageResponse](
+			httpClient,
+			baseURL+StatementServiceGetStatementCoverageProcedure,
+			connect.WithSchema(statementServiceMethods.ByName("GetStatementCoverage")),
+			connect.WithClientOptions(opts...),
+		),
+		listStatementAlerts: connect.NewClient[v1.ListStatementAlertsRequest, v1.ListStatementAlertsResponse](
+			httpClient,
+			baseURL+StatementServiceListStatementAlertsProcedure,
+			connect.WithSchema(statementServiceMethods.ByName("ListStatementAlerts")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -142,6 +164,8 @@ type statementServiceClient struct {
 	getStatement           *connect.Client[v1.GetStatementRequest, v1.GetStatementResponse]
 	deleteStatement        *connect.Client[v1.DeleteStatementRequest, v1.DeleteStatementResponse]
 	reparseStatement       *connect.Client[v1.ReparseStatementRequest, v1.ReparseStatementResponse]
+	getStatementCoverage   *connect.Client[v1.GetStatementCoverageRequest, v1.GetStatementCoverageResponse]
+	listStatementAlerts    *connect.Client[v1.ListStatementAlertsRequest, v1.ListStatementAlertsResponse]
 }
 
 // PreviewStatementImport calls nagomi.v1.StatementService.PreviewStatementImport.
@@ -179,6 +203,16 @@ func (c *statementServiceClient) ReparseStatement(ctx context.Context, req *conn
 	return c.reparseStatement.CallUnary(ctx, req)
 }
 
+// GetStatementCoverage calls nagomi.v1.StatementService.GetStatementCoverage.
+func (c *statementServiceClient) GetStatementCoverage(ctx context.Context, req *connect.Request[v1.GetStatementCoverageRequest]) (*connect.Response[v1.GetStatementCoverageResponse], error) {
+	return c.getStatementCoverage.CallUnary(ctx, req)
+}
+
+// ListStatementAlerts calls nagomi.v1.StatementService.ListStatementAlerts.
+func (c *statementServiceClient) ListStatementAlerts(ctx context.Context, req *connect.Request[v1.ListStatementAlertsRequest]) (*connect.Response[v1.ListStatementAlertsResponse], error) {
+	return c.listStatementAlerts.CallUnary(ctx, req)
+}
+
 // StatementServiceHandler is an implementation of the nagomi.v1.StatementService service.
 type StatementServiceHandler interface {
 	// parses and stores the file as a pending statement. uploading a file that is
@@ -198,6 +232,10 @@ type StatementServiceHandler interface {
 	// transactions the statement no longer lists are deleted, unless they carry
 	// notes, a receipt or splits.
 	ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error)
+	// a statement-driven account's periods, oldest first: imported, missing and due
+	GetStatementCoverage(context.Context, *connect.Request[v1.GetStatementCoverageRequest]) (*connect.Response[v1.GetStatementCoverageResponse], error)
+	// missing, due and unbalanced periods across the user's statement-driven accounts
+	ListStatementAlerts(context.Context, *connect.Request[v1.ListStatementAlertsRequest]) (*connect.Response[v1.ListStatementAlertsResponse], error)
 }
 
 // NewStatementServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -249,6 +287,18 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 		connect.WithSchema(statementServiceMethods.ByName("ReparseStatement")),
 		connect.WithHandlerOptions(opts...),
 	)
+	statementServiceGetStatementCoverageHandler := connect.NewUnaryHandler(
+		StatementServiceGetStatementCoverageProcedure,
+		svc.GetStatementCoverage,
+		connect.WithSchema(statementServiceMethods.ByName("GetStatementCoverage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	statementServiceListStatementAlertsHandler := connect.NewUnaryHandler(
+		StatementServiceListStatementAlertsProcedure,
+		svc.ListStatementAlerts,
+		connect.WithSchema(statementServiceMethods.ByName("ListStatementAlerts")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/nagomi.v1.StatementService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case StatementServicePreviewStatementImportProcedure:
@@ -265,6 +315,10 @@ func NewStatementServiceHandler(svc StatementServiceHandler, opts ...connect.Han
 			statementServiceDeleteStatementHandler.ServeHTTP(w, r)
 		case StatementServiceReparseStatementProcedure:
 			statementServiceReparseStatementHandler.ServeHTTP(w, r)
+		case StatementServiceGetStatementCoverageProcedure:
+			statementServiceGetStatementCoverageHandler.ServeHTTP(w, r)
+		case StatementServiceListStatementAlertsProcedure:
+			statementServiceListStatementAlertsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -300,4 +354,12 @@ func (UnimplementedStatementServiceHandler) DeleteStatement(context.Context, *co
 
 func (UnimplementedStatementServiceHandler) ReparseStatement(context.Context, *connect.Request[v1.ReparseStatementRequest]) (*connect.Response[v1.ReparseStatementResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.ReparseStatement is not implemented"))
+}
+
+func (UnimplementedStatementServiceHandler) GetStatementCoverage(context.Context, *connect.Request[v1.GetStatementCoverageRequest]) (*connect.Response[v1.GetStatementCoverageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.GetStatementCoverage is not implemented"))
+}
+
+func (UnimplementedStatementServiceHandler) ListStatementAlerts(context.Context, *connect.Request[v1.ListStatementAlertsRequest]) (*connect.Response[v1.ListStatementAlertsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.StatementService.ListStatementAlerts is not implemented"))
 }

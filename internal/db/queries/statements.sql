@@ -200,3 +200,37 @@ where
   account_id = @account_id::bigint
   and external_id = any(@external_ids::text[])
   and statement_id is null;
+
+-- name: ListStatementDrivenAccounts :many
+select
+  id,
+  name,
+  statements_start,
+  statement_release_day,
+  closed_at
+from
+  accounts
+where
+  owner_id = @user_id::uuid
+  and statement_driven
+order by
+  name,
+  id;
+
+-- name: ListImportedStatementPeriods :many
+select
+  id,
+  account_id::bigint,
+  period_start,
+  period_end,
+  balance_ok
+from
+  statements
+where
+  user_id = @user_id::uuid
+  and status = 2
+  and account_id = any(@account_ids::bigint[])
+order by
+  account_id,
+  period_start,
+  id;

@@ -115,3 +115,31 @@ func (s *Server) ReparseStatement(ctx context.Context, req *connect.Request[pb.R
 
 	return connect.NewResponse(result), nil
 }
+
+func (s *Server) GetStatementCoverage(ctx context.Context, req *connect.Request[pb.GetStatementCoverageRequest]) (*connect.Response[pb.GetStatementCoverageResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	periods, err := s.services.Statements.Coverage(ctx, userID, req.Msg.GetAccountId())
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.GetStatementCoverageResponse{Periods: periods}), nil
+}
+
+func (s *Server) ListStatementAlerts(ctx context.Context, _ *connect.Request[pb.ListStatementAlertsRequest]) (*connect.Response[pb.ListStatementAlertsResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	alerts, err := s.services.Statements.Alerts(ctx, userID)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.ListStatementAlertsResponse{Alerts: alerts}), nil
+}

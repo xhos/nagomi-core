@@ -26,6 +26,8 @@ const (
 	StatementService_GetStatement_FullMethodName           = "/nagomi.v1.StatementService/GetStatement"
 	StatementService_DeleteStatement_FullMethodName        = "/nagomi.v1.StatementService/DeleteStatement"
 	StatementService_ReparseStatement_FullMethodName       = "/nagomi.v1.StatementService/ReparseStatement"
+	StatementService_GetStatementCoverage_FullMethodName   = "/nagomi.v1.StatementService/GetStatementCoverage"
+	StatementService_ListStatementAlerts_FullMethodName    = "/nagomi.v1.StatementService/ListStatementAlerts"
 )
 
 // StatementServiceClient is the client API for StatementService service.
@@ -49,6 +51,10 @@ type StatementServiceClient interface {
 	// transactions the statement no longer lists are deleted, unless they carry
 	// notes, a receipt or splits.
 	ReparseStatement(ctx context.Context, in *ReparseStatementRequest, opts ...grpc.CallOption) (*ReparseStatementResponse, error)
+	// a statement-driven account's periods, oldest first: imported, missing and due
+	GetStatementCoverage(ctx context.Context, in *GetStatementCoverageRequest, opts ...grpc.CallOption) (*GetStatementCoverageResponse, error)
+	// missing, due and unbalanced periods across the user's statement-driven accounts
+	ListStatementAlerts(ctx context.Context, in *ListStatementAlertsRequest, opts ...grpc.CallOption) (*ListStatementAlertsResponse, error)
 }
 
 type statementServiceClient struct {
@@ -129,6 +135,26 @@ func (c *statementServiceClient) ReparseStatement(ctx context.Context, in *Repar
 	return out, nil
 }
 
+func (c *statementServiceClient) GetStatementCoverage(ctx context.Context, in *GetStatementCoverageRequest, opts ...grpc.CallOption) (*GetStatementCoverageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStatementCoverageResponse)
+	err := c.cc.Invoke(ctx, StatementService_GetStatementCoverage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statementServiceClient) ListStatementAlerts(ctx context.Context, in *ListStatementAlertsRequest, opts ...grpc.CallOption) (*ListStatementAlertsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListStatementAlertsResponse)
+	err := c.cc.Invoke(ctx, StatementService_ListStatementAlerts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StatementServiceServer is the server API for StatementService service.
 // All implementations must embed UnimplementedStatementServiceServer
 // for forward compatibility.
@@ -150,6 +176,10 @@ type StatementServiceServer interface {
 	// transactions the statement no longer lists are deleted, unless they carry
 	// notes, a receipt or splits.
 	ReparseStatement(context.Context, *ReparseStatementRequest) (*ReparseStatementResponse, error)
+	// a statement-driven account's periods, oldest first: imported, missing and due
+	GetStatementCoverage(context.Context, *GetStatementCoverageRequest) (*GetStatementCoverageResponse, error)
+	// missing, due and unbalanced periods across the user's statement-driven accounts
+	ListStatementAlerts(context.Context, *ListStatementAlertsRequest) (*ListStatementAlertsResponse, error)
 	mustEmbedUnimplementedStatementServiceServer()
 }
 
@@ -180,6 +210,12 @@ func (UnimplementedStatementServiceServer) DeleteStatement(context.Context, *Del
 }
 func (UnimplementedStatementServiceServer) ReparseStatement(context.Context, *ReparseStatementRequest) (*ReparseStatementResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReparseStatement not implemented")
+}
+func (UnimplementedStatementServiceServer) GetStatementCoverage(context.Context, *GetStatementCoverageRequest) (*GetStatementCoverageResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetStatementCoverage not implemented")
+}
+func (UnimplementedStatementServiceServer) ListStatementAlerts(context.Context, *ListStatementAlertsRequest) (*ListStatementAlertsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListStatementAlerts not implemented")
 }
 func (UnimplementedStatementServiceServer) mustEmbedUnimplementedStatementServiceServer() {}
 func (UnimplementedStatementServiceServer) testEmbeddedByValue()                          {}
@@ -328,6 +364,42 @@ func _StatementService_ReparseStatement_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StatementService_GetStatementCoverage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStatementCoverageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatementServiceServer).GetStatementCoverage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StatementService_GetStatementCoverage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatementServiceServer).GetStatementCoverage(ctx, req.(*GetStatementCoverageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StatementService_ListStatementAlerts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStatementAlertsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatementServiceServer).ListStatementAlerts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StatementService_ListStatementAlerts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatementServiceServer).ListStatementAlerts(ctx, req.(*ListStatementAlertsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StatementService_ServiceDesc is the grpc.ServiceDesc for StatementService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -362,6 +434,14 @@ var StatementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReparseStatement",
 			Handler:    _StatementService_ReparseStatement_Handler,
+		},
+		{
+			MethodName: "GetStatementCoverage",
+			Handler:    _StatementService_GetStatementCoverage_Handler,
+		},
+		{
+			MethodName: "ListStatementAlerts",
+			Handler:    _StatementService_ListStatementAlerts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

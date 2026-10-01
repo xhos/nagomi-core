@@ -390,6 +390,64 @@ func (q *Queries) ListExistingExternalIDs(ctx context.Context, arg ListExistingE
 	return items, nil
 }
 
+const listImportedStatementPeriods = `-- name: ListImportedStatementPeriods :many
+select
+  id,
+  account_id::bigint,
+  period_start,
+  period_end,
+  balance_ok
+from
+  statements
+where
+  user_id = $1::uuid
+  and status = 2
+  and account_id = any($2::bigint[])
+order by
+  account_id,
+  period_start,
+  id
+`
+
+type ListImportedStatementPeriodsParams struct {
+	UserID     uuid.UUID `db:"user_id" json:"user_id"`
+	AccountIds []int64   `db:"account_ids" json:"account_ids"`
+}
+
+type ListImportedStatementPeriodsRow struct {
+	ID          int64     `db:"id" json:"id"`
+	AccountID   int64     `db:"account_id" json:"account_id"`
+	PeriodStart time.Time `db:"period_start" json:"period_start"`
+	PeriodEnd   time.Time `db:"period_end" json:"period_end"`
+	BalanceOk   *bool     `db:"balance_ok" json:"balance_ok"`
+}
+
+func (q *Queries) ListImportedStatementPeriods(ctx context.Context, arg ListImportedStatementPeriodsParams) ([]ListImportedStatementPeriodsRow, error) {
+	rows, err := q.db.Query(ctx, listImportedStatementPeriods, arg.UserID, arg.AccountIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListImportedStatementPeriodsRow
+	for rows.Next() {
+		var i ListImportedStatementPeriodsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.PeriodStart,
+			&i.PeriodEnd,
+			&i.BalanceOk,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listReconcileCandidates = `-- name: ListReconcileCandidates :many
 select
   t.id, t.account_id, t.external_id, t.tx_date, t.tx_amount_cents, t.tx_currency, t.tx_direction, t.tx_desc, t.balance_after_cents, t.balance_currency, t.merchant, t.category_id, t.category_manually_set, t.merchant_manually_set, t.suggestions, t.user_notes, t.foreign_amount_cents, t.foreign_currency, t.exchange_rate, t.created_at, t.updated_at, t.split_from_id, t.forgiven, t.source, t.statement_id,
@@ -476,6 +534,57 @@ func (q *Queries) ListReconcileCandidates(ctx context.Context, arg ListReconcile
 			&i.HasUserData,
 			&i.HasSplits,
 			&i.FromStatement,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStatementDrivenAccounts = `-- name: ListStatementDrivenAccounts :many
+select
+  id,
+  name,
+  statements_start,
+  statement_release_day,
+  closed_at
+from
+  accounts
+where
+  owner_id = $1::uuid
+  and statement_driven
+order by
+  name,
+  id
+`
+
+type ListStatementDrivenAccountsRow struct {
+	ID                  int64      `db:"id" json:"id"`
+	Name                string     `db:"name" json:"name"`
+	StatementsStart     *time.Time `db:"statements_start" json:"statements_start"`
+	StatementReleaseDay *int16     `db:"statement_release_day" json:"statement_release_day"`
+	ClosedAt            *time.Time `db:"closed_at" json:"closed_at"`
+}
+
+func (q *Queries) ListStatementDrivenAccounts(ctx context.Context, userID uuid.UUID) ([]ListStatementDrivenAccountsRow, error) {
+	rows, err := q.db.Query(ctx, listStatementDrivenAccounts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListStatementDrivenAccountsRow
+	for rows.Next() {
+		var i ListStatementDrivenAccountsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.StatementsStart,
+			&i.StatementReleaseDay,
+			&i.ClosedAt,
 		); err != nil {
 			return nil, err
 		}
