@@ -43,9 +43,6 @@ const (
 	RuleServiceUpdateRuleProcedure = "/nagomi.v1.RuleService/UpdateRule"
 	// RuleServiceDeleteRuleProcedure is the fully-qualified name of the RuleService's DeleteRule RPC.
 	RuleServiceDeleteRuleProcedure = "/nagomi.v1.RuleService/DeleteRule"
-	// RuleServiceValidateRuleProcedure is the fully-qualified name of the RuleService's ValidateRule
-	// RPC.
-	RuleServiceValidateRuleProcedure = "/nagomi.v1.RuleService/ValidateRule"
 )
 
 // RuleServiceClient is a client for the nagomi.v1.RuleService service.
@@ -55,7 +52,6 @@ type RuleServiceClient interface {
 	CreateRule(context.Context, *connect.Request[v1.CreateRuleRequest]) (*connect.Response[v1.CreateRuleResponse], error)
 	UpdateRule(context.Context, *connect.Request[v1.UpdateRuleRequest]) (*connect.Response[v1.UpdateRuleResponse], error)
 	DeleteRule(context.Context, *connect.Request[v1.DeleteRuleRequest]) (*connect.Response[v1.DeleteRuleResponse], error)
-	ValidateRule(context.Context, *connect.Request[v1.ValidateRuleRequest]) (*connect.Response[v1.ValidateRuleResponse], error)
 }
 
 // NewRuleServiceClient constructs a client for the nagomi.v1.RuleService service. By default, it
@@ -99,23 +95,16 @@ func NewRuleServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(ruleServiceMethods.ByName("DeleteRule")),
 			connect.WithClientOptions(opts...),
 		),
-		validateRule: connect.NewClient[v1.ValidateRuleRequest, v1.ValidateRuleResponse](
-			httpClient,
-			baseURL+RuleServiceValidateRuleProcedure,
-			connect.WithSchema(ruleServiceMethods.ByName("ValidateRule")),
-			connect.WithClientOptions(opts...),
-		),
 	}
 }
 
 // ruleServiceClient implements RuleServiceClient.
 type ruleServiceClient struct {
-	listRules    *connect.Client[v1.ListRulesRequest, v1.ListRulesResponse]
-	getRule      *connect.Client[v1.GetRuleRequest, v1.GetRuleResponse]
-	createRule   *connect.Client[v1.CreateRuleRequest, v1.CreateRuleResponse]
-	updateRule   *connect.Client[v1.UpdateRuleRequest, v1.UpdateRuleResponse]
-	deleteRule   *connect.Client[v1.DeleteRuleRequest, v1.DeleteRuleResponse]
-	validateRule *connect.Client[v1.ValidateRuleRequest, v1.ValidateRuleResponse]
+	listRules  *connect.Client[v1.ListRulesRequest, v1.ListRulesResponse]
+	getRule    *connect.Client[v1.GetRuleRequest, v1.GetRuleResponse]
+	createRule *connect.Client[v1.CreateRuleRequest, v1.CreateRuleResponse]
+	updateRule *connect.Client[v1.UpdateRuleRequest, v1.UpdateRuleResponse]
+	deleteRule *connect.Client[v1.DeleteRuleRequest, v1.DeleteRuleResponse]
 }
 
 // ListRules calls nagomi.v1.RuleService.ListRules.
@@ -143,11 +132,6 @@ func (c *ruleServiceClient) DeleteRule(ctx context.Context, req *connect.Request
 	return c.deleteRule.CallUnary(ctx, req)
 }
 
-// ValidateRule calls nagomi.v1.RuleService.ValidateRule.
-func (c *ruleServiceClient) ValidateRule(ctx context.Context, req *connect.Request[v1.ValidateRuleRequest]) (*connect.Response[v1.ValidateRuleResponse], error) {
-	return c.validateRule.CallUnary(ctx, req)
-}
-
 // RuleServiceHandler is an implementation of the nagomi.v1.RuleService service.
 type RuleServiceHandler interface {
 	ListRules(context.Context, *connect.Request[v1.ListRulesRequest]) (*connect.Response[v1.ListRulesResponse], error)
@@ -155,7 +139,6 @@ type RuleServiceHandler interface {
 	CreateRule(context.Context, *connect.Request[v1.CreateRuleRequest]) (*connect.Response[v1.CreateRuleResponse], error)
 	UpdateRule(context.Context, *connect.Request[v1.UpdateRuleRequest]) (*connect.Response[v1.UpdateRuleResponse], error)
 	DeleteRule(context.Context, *connect.Request[v1.DeleteRuleRequest]) (*connect.Response[v1.DeleteRuleResponse], error)
-	ValidateRule(context.Context, *connect.Request[v1.ValidateRuleRequest]) (*connect.Response[v1.ValidateRuleResponse], error)
 }
 
 // NewRuleServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -195,12 +178,6 @@ func NewRuleServiceHandler(svc RuleServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(ruleServiceMethods.ByName("DeleteRule")),
 		connect.WithHandlerOptions(opts...),
 	)
-	ruleServiceValidateRuleHandler := connect.NewUnaryHandler(
-		RuleServiceValidateRuleProcedure,
-		svc.ValidateRule,
-		connect.WithSchema(ruleServiceMethods.ByName("ValidateRule")),
-		connect.WithHandlerOptions(opts...),
-	)
 	return "/nagomi.v1.RuleService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case RuleServiceListRulesProcedure:
@@ -213,8 +190,6 @@ func NewRuleServiceHandler(svc RuleServiceHandler, opts ...connect.HandlerOption
 			ruleServiceUpdateRuleHandler.ServeHTTP(w, r)
 		case RuleServiceDeleteRuleProcedure:
 			ruleServiceDeleteRuleHandler.ServeHTTP(w, r)
-		case RuleServiceValidateRuleProcedure:
-			ruleServiceValidateRuleHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -242,8 +217,4 @@ func (UnimplementedRuleServiceHandler) UpdateRule(context.Context, *connect.Requ
 
 func (UnimplementedRuleServiceHandler) DeleteRule(context.Context, *connect.Request[v1.DeleteRuleRequest]) (*connect.Response[v1.DeleteRuleResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.RuleService.DeleteRule is not implemented"))
-}
-
-func (UnimplementedRuleServiceHandler) ValidateRule(context.Context, *connect.Request[v1.ValidateRuleRequest]) (*connect.Response[v1.ValidateRuleResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.RuleService.ValidateRule is not implemented"))
 }

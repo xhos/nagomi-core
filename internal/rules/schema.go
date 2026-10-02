@@ -3,6 +3,7 @@ package rules
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -274,13 +275,19 @@ func validateMinMaxCondition(_ OperatorType, condition *Condition) error {
 	return nil
 }
 
-func validateRegularValueCondition(_ OperatorType, condition *Condition) error {
+func validateRegularValueCondition(operator OperatorType, condition *Condition) error {
 	if condition.Value == nil {
 		return fmt.Errorf("operator '%s' requires 'value'", condition.Operator)
 	}
 
 	if len(condition.Values) > 0 {
 		return fmt.Errorf("operator '%s' should use 'value' not 'values'", condition.Operator)
+	}
+
+	if pattern, ok := condition.Value.(string); ok && operator == OpRegex {
+		if _, err := regexp.Compile(pattern); err != nil {
+			return fmt.Errorf("invalid regex pattern: %w", err)
+		}
 	}
 
 	return nil

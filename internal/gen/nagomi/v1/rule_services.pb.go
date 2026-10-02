@@ -584,170 +584,6 @@ func (x *DeleteRuleResponse) GetAffectedRows() int64 {
 	return 0
 }
 
-type ValidateRuleRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Conditions    *structpb.Struct       `protobuf:"bytes,1,opt,name=conditions,proto3" json:"conditions,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateRuleRequest) Reset() {
-	*x = ValidateRuleRequest{}
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateRuleRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateRuleRequest) ProtoMessage() {}
-
-func (x *ValidateRuleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateRuleRequest.ProtoReflect.Descriptor instead.
-func (*ValidateRuleRequest) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *ValidateRuleRequest) GetConditions() *structpb.Struct {
-	if x != nil {
-		return x.Conditions
-	}
-	return nil
-}
-
-type ValidationError struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidationError) Reset() {
-	*x = ValidationError{}
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidationError) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidationError) ProtoMessage() {}
-
-func (x *ValidationError) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidationError.ProtoReflect.Descriptor instead.
-func (*ValidationError) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *ValidationError) GetField() string {
-	if x != nil {
-		return x.Field
-	}
-	return ""
-}
-
-func (x *ValidationError) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *ValidationError) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-type ValidateRuleResponse struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	Valid                bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	Errors               []*ValidationError     `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
-	NormalizedConditions *structpb.Struct       `protobuf:"bytes,3,opt,name=normalized_conditions,json=normalizedConditions,proto3" json:"normalized_conditions,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
-}
-
-func (x *ValidateRuleResponse) Reset() {
-	*x = ValidateRuleResponse{}
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateRuleResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateRuleResponse) ProtoMessage() {}
-
-func (x *ValidateRuleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_rule_services_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateRuleResponse.ProtoReflect.Descriptor instead.
-func (*ValidateRuleResponse) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *ValidateRuleResponse) GetValid() bool {
-	if x != nil {
-		return x.Valid
-	}
-	return false
-}
-
-func (x *ValidateRuleResponse) GetErrors() []*ValidationError {
-	if x != nil {
-		return x.Errors
-	}
-	return nil
-}
-
-func (x *ValidateRuleResponse) GetNormalizedConditions() *structpb.Struct {
-	if x != nil {
-		return x.NormalizedConditions
-	}
-	return nil
-}
-
 var File_nagomi_v1_rule_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_rule_services_proto_rawDesc = "" +
@@ -761,7 +597,7 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\arule_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06ruleId\x12!\n" +
 	"\auser_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"6\n" +
 	"\x0fGetRuleResponse\x12#\n" +
-	"\x04rule\x18\x01 \x01(\v2\x0f.nagomi.v1.RuleR\x04rule\"\xc3\x02\n" +
+	"\x04rule\x18\x01 \x01(\v2\x0f.nagomi.v1.RuleR\x04rule\"\xad\x03\n" +
 	"\x11CreateRuleRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12'\n" +
 	"\trule_name\x18\x02 \x01(\tB\n" +
@@ -772,7 +608,8 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"conditions\x18\x04 \x01(\v2\x17.google.protobuf.StructR\n" +
 	"conditions\x12/\n" +
 	"\x11apply_to_existing\x18\x05 \x01(\bH\x01R\x0fapplyToExisting\x88\x01\x01\x12\x1f\n" +
-	"\bmerchant\x18\x06 \x01(\tH\x02R\bmerchant\x88\x01\x01B\x0e\n" +
+	"\bmerchant\x18\x06 \x01(\tH\x02R\bmerchant\x88\x01\x01:h\xbaHe\x1ac\n" +
+	"\x0faction_required\x12#category_id or merchant is required\x1a+has(this.category_id) || has(this.merchant)B\x0e\n" +
 	"\f_category_idB\x14\n" +
 	"\x12_apply_to_existingB\v\n" +
 	"\t_merchant\"9\n" +
@@ -808,19 +645,7 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\arule_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06ruleId\x12!\n" +
 	"\auser_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"9\n" +
 	"\x12DeleteRuleResponse\x12#\n" +
-	"\raffected_rows\x18\x01 \x01(\x03R\faffectedRows\"N\n" +
-	"\x13ValidateRuleRequest\x127\n" +
-	"\n" +
-	"conditions\x18\x01 \x01(\v2\x17.google.protobuf.StructR\n" +
-	"conditions\"U\n" +
-	"\x0fValidationError\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\x12\n" +
-	"\x04code\x18\x03 \x01(\tR\x04code\"\xae\x01\n" +
-	"\x14ValidateRuleResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x122\n" +
-	"\x06errors\x18\x02 \x03(\v2\x1a.nagomi.v1.ValidationErrorR\x06errors\x12L\n" +
-	"\x15normalized_conditions\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x14normalizedConditions2\xc9\x03\n" +
+	"\raffected_rows\x18\x01 \x01(\x03R\faffectedRows2\xf8\x02\n" +
 	"\vRuleService\x12F\n" +
 	"\tListRules\x12\x1b.nagomi.v1.ListRulesRequest\x1a\x1c.nagomi.v1.ListRulesResponse\x12@\n" +
 	"\aGetRule\x12\x19.nagomi.v1.GetRuleRequest\x1a\x1a.nagomi.v1.GetRuleResponse\x12I\n" +
@@ -829,8 +654,7 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\n" +
 	"UpdateRule\x12\x1c.nagomi.v1.UpdateRuleRequest\x1a\x1d.nagomi.v1.UpdateRuleResponse\x12I\n" +
 	"\n" +
-	"DeleteRule\x12\x1c.nagomi.v1.DeleteRuleRequest\x1a\x1d.nagomi.v1.DeleteRuleResponse\x12O\n" +
-	"\fValidateRule\x12\x1e.nagomi.v1.ValidateRuleRequest\x1a\x1f.nagomi.v1.ValidateRuleResponseB\x94\x01\n" +
+	"DeleteRule\x12\x1c.nagomi.v1.DeleteRuleRequest\x1a\x1d.nagomi.v1.DeleteRuleResponseB\x94\x01\n" +
 	"\rcom.nagomi.v1B\x11RuleServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -846,7 +670,7 @@ func file_nagomi_v1_rule_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_rule_services_proto_rawDescData
 }
 
-var file_nagomi_v1_rule_services_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_nagomi_v1_rule_services_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_nagomi_v1_rule_services_proto_goTypes = []any{
 	(*ListRulesRequest)(nil),      // 0: nagomi.v1.ListRulesRequest
 	(*ListRulesResponse)(nil),     // 1: nagomi.v1.ListRulesResponse
@@ -858,40 +682,32 @@ var file_nagomi_v1_rule_services_proto_goTypes = []any{
 	(*UpdateRuleResponse)(nil),    // 7: nagomi.v1.UpdateRuleResponse
 	(*DeleteRuleRequest)(nil),     // 8: nagomi.v1.DeleteRuleRequest
 	(*DeleteRuleResponse)(nil),    // 9: nagomi.v1.DeleteRuleResponse
-	(*ValidateRuleRequest)(nil),   // 10: nagomi.v1.ValidateRuleRequest
-	(*ValidationError)(nil),       // 11: nagomi.v1.ValidationError
-	(*ValidateRuleResponse)(nil),  // 12: nagomi.v1.ValidateRuleResponse
-	(*Rule)(nil),                  // 13: nagomi.v1.Rule
-	(*structpb.Struct)(nil),       // 14: google.protobuf.Struct
-	(*fieldmaskpb.FieldMask)(nil), // 15: google.protobuf.FieldMask
+	(*Rule)(nil),                  // 10: nagomi.v1.Rule
+	(*structpb.Struct)(nil),       // 11: google.protobuf.Struct
+	(*fieldmaskpb.FieldMask)(nil), // 12: google.protobuf.FieldMask
 }
 var file_nagomi_v1_rule_services_proto_depIdxs = []int32{
-	13, // 0: nagomi.v1.ListRulesResponse.rules:type_name -> nagomi.v1.Rule
-	13, // 1: nagomi.v1.GetRuleResponse.rule:type_name -> nagomi.v1.Rule
-	14, // 2: nagomi.v1.CreateRuleRequest.conditions:type_name -> google.protobuf.Struct
-	13, // 3: nagomi.v1.CreateRuleResponse.rule:type_name -> nagomi.v1.Rule
-	15, // 4: nagomi.v1.UpdateRuleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	14, // 5: nagomi.v1.UpdateRuleRequest.conditions:type_name -> google.protobuf.Struct
-	14, // 6: nagomi.v1.ValidateRuleRequest.conditions:type_name -> google.protobuf.Struct
-	11, // 7: nagomi.v1.ValidateRuleResponse.errors:type_name -> nagomi.v1.ValidationError
-	14, // 8: nagomi.v1.ValidateRuleResponse.normalized_conditions:type_name -> google.protobuf.Struct
-	0,  // 9: nagomi.v1.RuleService.ListRules:input_type -> nagomi.v1.ListRulesRequest
-	2,  // 10: nagomi.v1.RuleService.GetRule:input_type -> nagomi.v1.GetRuleRequest
-	4,  // 11: nagomi.v1.RuleService.CreateRule:input_type -> nagomi.v1.CreateRuleRequest
-	6,  // 12: nagomi.v1.RuleService.UpdateRule:input_type -> nagomi.v1.UpdateRuleRequest
-	8,  // 13: nagomi.v1.RuleService.DeleteRule:input_type -> nagomi.v1.DeleteRuleRequest
-	10, // 14: nagomi.v1.RuleService.ValidateRule:input_type -> nagomi.v1.ValidateRuleRequest
-	1,  // 15: nagomi.v1.RuleService.ListRules:output_type -> nagomi.v1.ListRulesResponse
-	3,  // 16: nagomi.v1.RuleService.GetRule:output_type -> nagomi.v1.GetRuleResponse
-	5,  // 17: nagomi.v1.RuleService.CreateRule:output_type -> nagomi.v1.CreateRuleResponse
-	7,  // 18: nagomi.v1.RuleService.UpdateRule:output_type -> nagomi.v1.UpdateRuleResponse
-	9,  // 19: nagomi.v1.RuleService.DeleteRule:output_type -> nagomi.v1.DeleteRuleResponse
-	12, // 20: nagomi.v1.RuleService.ValidateRule:output_type -> nagomi.v1.ValidateRuleResponse
-	15, // [15:21] is the sub-list for method output_type
-	9,  // [9:15] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	10, // 0: nagomi.v1.ListRulesResponse.rules:type_name -> nagomi.v1.Rule
+	10, // 1: nagomi.v1.GetRuleResponse.rule:type_name -> nagomi.v1.Rule
+	11, // 2: nagomi.v1.CreateRuleRequest.conditions:type_name -> google.protobuf.Struct
+	10, // 3: nagomi.v1.CreateRuleResponse.rule:type_name -> nagomi.v1.Rule
+	12, // 4: nagomi.v1.UpdateRuleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	11, // 5: nagomi.v1.UpdateRuleRequest.conditions:type_name -> google.protobuf.Struct
+	0,  // 6: nagomi.v1.RuleService.ListRules:input_type -> nagomi.v1.ListRulesRequest
+	2,  // 7: nagomi.v1.RuleService.GetRule:input_type -> nagomi.v1.GetRuleRequest
+	4,  // 8: nagomi.v1.RuleService.CreateRule:input_type -> nagomi.v1.CreateRuleRequest
+	6,  // 9: nagomi.v1.RuleService.UpdateRule:input_type -> nagomi.v1.UpdateRuleRequest
+	8,  // 10: nagomi.v1.RuleService.DeleteRule:input_type -> nagomi.v1.DeleteRuleRequest
+	1,  // 11: nagomi.v1.RuleService.ListRules:output_type -> nagomi.v1.ListRulesResponse
+	3,  // 12: nagomi.v1.RuleService.GetRule:output_type -> nagomi.v1.GetRuleResponse
+	5,  // 13: nagomi.v1.RuleService.CreateRule:output_type -> nagomi.v1.CreateRuleResponse
+	7,  // 14: nagomi.v1.RuleService.UpdateRule:output_type -> nagomi.v1.UpdateRuleResponse
+	9,  // 15: nagomi.v1.RuleService.DeleteRule:output_type -> nagomi.v1.DeleteRuleResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_rule_services_proto_init() }
@@ -908,7 +724,7 @@ func file_nagomi_v1_rule_services_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_rule_services_proto_rawDesc), len(file_nagomi_v1_rule_services_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

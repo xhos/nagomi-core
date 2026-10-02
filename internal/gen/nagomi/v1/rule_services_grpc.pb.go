@@ -19,12 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RuleService_ListRules_FullMethodName    = "/nagomi.v1.RuleService/ListRules"
-	RuleService_GetRule_FullMethodName      = "/nagomi.v1.RuleService/GetRule"
-	RuleService_CreateRule_FullMethodName   = "/nagomi.v1.RuleService/CreateRule"
-	RuleService_UpdateRule_FullMethodName   = "/nagomi.v1.RuleService/UpdateRule"
-	RuleService_DeleteRule_FullMethodName   = "/nagomi.v1.RuleService/DeleteRule"
-	RuleService_ValidateRule_FullMethodName = "/nagomi.v1.RuleService/ValidateRule"
+	RuleService_ListRules_FullMethodName  = "/nagomi.v1.RuleService/ListRules"
+	RuleService_GetRule_FullMethodName    = "/nagomi.v1.RuleService/GetRule"
+	RuleService_CreateRule_FullMethodName = "/nagomi.v1.RuleService/CreateRule"
+	RuleService_UpdateRule_FullMethodName = "/nagomi.v1.RuleService/UpdateRule"
+	RuleService_DeleteRule_FullMethodName = "/nagomi.v1.RuleService/DeleteRule"
 )
 
 // RuleServiceClient is the client API for RuleService service.
@@ -36,7 +35,6 @@ type RuleServiceClient interface {
 	CreateRule(ctx context.Context, in *CreateRuleRequest, opts ...grpc.CallOption) (*CreateRuleResponse, error)
 	UpdateRule(ctx context.Context, in *UpdateRuleRequest, opts ...grpc.CallOption) (*UpdateRuleResponse, error)
 	DeleteRule(ctx context.Context, in *DeleteRuleRequest, opts ...grpc.CallOption) (*DeleteRuleResponse, error)
-	ValidateRule(ctx context.Context, in *ValidateRuleRequest, opts ...grpc.CallOption) (*ValidateRuleResponse, error)
 }
 
 type ruleServiceClient struct {
@@ -97,16 +95,6 @@ func (c *ruleServiceClient) DeleteRule(ctx context.Context, in *DeleteRuleReques
 	return out, nil
 }
 
-func (c *ruleServiceClient) ValidateRule(ctx context.Context, in *ValidateRuleRequest, opts ...grpc.CallOption) (*ValidateRuleResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateRuleResponse)
-	err := c.cc.Invoke(ctx, RuleService_ValidateRule_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // RuleServiceServer is the server API for RuleService service.
 // All implementations must embed UnimplementedRuleServiceServer
 // for forward compatibility.
@@ -116,7 +104,6 @@ type RuleServiceServer interface {
 	CreateRule(context.Context, *CreateRuleRequest) (*CreateRuleResponse, error)
 	UpdateRule(context.Context, *UpdateRuleRequest) (*UpdateRuleResponse, error)
 	DeleteRule(context.Context, *DeleteRuleRequest) (*DeleteRuleResponse, error)
-	ValidateRule(context.Context, *ValidateRuleRequest) (*ValidateRuleResponse, error)
 	mustEmbedUnimplementedRuleServiceServer()
 }
 
@@ -141,9 +128,6 @@ func (UnimplementedRuleServiceServer) UpdateRule(context.Context, *UpdateRuleReq
 }
 func (UnimplementedRuleServiceServer) DeleteRule(context.Context, *DeleteRuleRequest) (*DeleteRuleResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteRule not implemented")
-}
-func (UnimplementedRuleServiceServer) ValidateRule(context.Context, *ValidateRuleRequest) (*ValidateRuleResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ValidateRule not implemented")
 }
 func (UnimplementedRuleServiceServer) mustEmbedUnimplementedRuleServiceServer() {}
 func (UnimplementedRuleServiceServer) testEmbeddedByValue()                     {}
@@ -256,24 +240,6 @@ func _RuleService_DeleteRule_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RuleService_ValidateRule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateRuleRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RuleServiceServer).ValidateRule(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RuleService_ValidateRule_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RuleServiceServer).ValidateRule(ctx, req.(*ValidateRuleRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // RuleService_ServiceDesc is the grpc.ServiceDesc for RuleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -300,10 +266,6 @@ var RuleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteRule",
 			Handler:    _RuleService_DeleteRule_Handler,
-		},
-		{
-			MethodName: "ValidateRule",
-			Handler:    _RuleService_ValidateRule_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

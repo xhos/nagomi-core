@@ -60,16 +60,6 @@ func newTxnSvc(
 
 func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTransactionRequest) ([]*pb.Transaction, error) {
 	paramsList := buildCreateTxParamsList(userID, req)
-	hasNoTransactions := len(paramsList) == 0
-	if hasNoTransactions {
-		return nil, fmt.Errorf("TransactionService.Create: no transactions provided")
-	}
-
-	for i, params := range paramsList {
-		if err := validateCreateParams(params); err != nil {
-			return nil, fmt.Errorf("TransactionService.Create: transaction %d invalid: %w", i, err)
-		}
-	}
 
 	for i := range paramsList {
 		converted, err := s.processForeignCurrency(ctx, userID, &paramsList[i])
@@ -146,10 +136,6 @@ func (s *txnSvc) Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Trans
 }
 
 func (s *txnSvc) Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateTransactionRequest) error {
-	if err := validateUpdateRequest(req); err != nil {
-		return err
-	}
-
 	params := buildUpdateTxParams(userID, req)
 
 	tx, err := s.queries.GetTransaction(ctx, sqlc.GetTransactionParams{UserID: params.UserID, ID: params.ID})

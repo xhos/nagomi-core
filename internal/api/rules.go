@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	pb "nagomi-core/internal/gen/nagomi/v1"
 	"nagomi-core/internal/rules"
@@ -13,7 +12,18 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// TODO: validation can be simplified
+// normalizeConditions validates rule conditions and returns them normalized
+func normalizeConditions(conditions *structpb.Struct) ([]byte, error) {
+	raw, err := conditions.MarshalJSON()
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	rule, err := rules.NormalizeAndValidateRule(raw)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	return json.Marshal(rule)
+}
 
 func (s *Server) ListRules(ctx context.Context, req *connect.Request[pb.ListRulesRequest]) (*connect.Response[pb.ListRulesResponse], error) {
 	userID, err := getUserID(ctx)
@@ -55,35 +65,10 @@ func (s *Server) CreateRule(ctx context.Context, req *connect.Request[pb.CreateR
 		return nil, err
 	}
 
-	// validate that at least one action (category or merchant) is specified
-	if req.Msg.CategoryId == nil && req.Msg.Merchant == nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("at least one action (category_id or merchant) must be specified"))
-	}
-
-	conditionsBytes, err := req.Msg.GetConditions().MarshalJSON()
+	conditionsBytes, err := normalizeConditions(req.Msg.GetConditions())
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid conditions JSON"))
+		return nil, err
 	}
-
-	validationResult := rules.ValidateRuleJSONDetailed(conditionsBytes)
-	if !validationResult.Valid {
-		errorMsg := "rule validation failed:"
-		for _, validationErr := range validationResult.Errors {
-			errorMsg += " " + validationErr.Error() + ";"
-		}
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(errorMsg))
-	}
-
-	normalizedRule, err := rules.NormalizeAndValidateRule(conditionsBytes)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule normalization failed: "+err.Error()))
-	}
-
-	normalizedBytes, err := json.Marshal(normalizedRule)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, errors.New("failed to serialize normalized rule"))
-	}
-	conditionsBytes = normalizedBytes
 
 	rule, err := s.services.Rules.Create(ctx, userID, req.Msg.GetRuleName(), conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant)
 	if err != nil {
@@ -116,30 +101,9 @@ func (s *Server) UpdateRule(ctx context.Context, req *connect.Request[pb.UpdateR
 
 	var conditionsBytes []byte
 	if req.Msg.Conditions != nil {
-		condBytes, err := req.Msg.Conditions.MarshalJSON()
-		if err != nil {
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid conditions JSON"))
+		if conditionsBytes, err = normalizeConditions(req.Msg.Conditions); err != nil {
+			return nil, err
 		}
-
-		validationResult := rules.ValidateRuleJSONDetailed(condBytes)
-		if !validationResult.Valid {
-			errorMsg := "rule validation failed:"
-			for _, validationErr := range validationResult.Errors {
-				errorMsg += " " + validationErr.Error() + ";"
-			}
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(errorMsg))
-		}
-
-		normalizedRule, err := rules.NormalizeAndValidateRule(condBytes)
-		if err != nil {
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("rule normalization failed: "+err.Error()))
-		}
-
-		normalizedBytes, err := json.Marshal(normalizedRule)
-		if err != nil {
-			return nil, connect.NewError(connect.CodeInternal, errors.New("failed to serialize normalized rule"))
-		}
-		conditionsBytes = normalizedBytes
 	}
 
 	err = s.services.Rules.Update(ctx, userID, ruleID, req.Msg.RuleName, conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant)
@@ -176,48 +140,4 @@ func (s *Server) DeleteRule(ctx context.Context, req *connect.Request[pb.DeleteR
 	return connect.NewResponse(&pb.DeleteRuleResponse{
 		AffectedRows: affected,
 	}), nil
-}
-
-func (s *Server) ValidateRule(ctx context.Context, req *connect.Request[pb.ValidateRuleRequest]) (*connect.Response[pb.ValidateRuleResponse], error) {
-	conditionsBytes, err := req.Msg.GetConditions().MarshalJSON()
-	if err != nil {
-		return connect.NewResponse(&pb.ValidateRuleResponse{
-			Valid: false,
-			Errors: []*pb.ValidationError{{
-				Field:   "conditions",
-				Message: "Invalid JSON: " + err.Error(),
-				Code:    "INVALID_JSON",
-			}},
-		}), nil
-	}
-
-	validationResult := rules.ValidateRuleJSONDetailed(conditionsBytes)
-
-	response := &pb.ValidateRuleResponse{
-		Valid:  validationResult.Valid,
-		Errors: make([]*pb.ValidationError, len(validationResult.Errors)),
-	}
-
-	for i, validationErr := range validationResult.Errors {
-		response.Errors[i] = &pb.ValidationError{
-			Field:   validationErr.Field,
-			Message: validationErr.Message,
-			Code:    validationErr.Code,
-		}
-	}
-
-	if validationResult.Valid {
-		normalizedRule, err := rules.NormalizeAndValidateRule(conditionsBytes)
-		if err == nil {
-			normalizedBytes, err := json.Marshal(normalizedRule)
-			if err == nil {
-				var normalizedStruct structpb.Struct
-				if err := normalizedStruct.UnmarshalJSON(normalizedBytes); err == nil {
-					response.NormalizedConditions = &normalizedStruct
-				}
-			}
-		}
-	}
-
-	return connect.NewResponse(response), nil
 }

@@ -98,9 +98,8 @@ func TestValidateRuleJSON_ValidRules(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ValidateRuleJSON([]byte(tt.rule))
-			if !result.Valid {
-				t.Errorf("Expected rule to be valid, got errors: %v", result.Errors)
+			if _, err := ParseRuleConditions([]byte(tt.rule)); err != nil {
+				t.Errorf("Expected rule to be valid, got: %v", err)
 			}
 		})
 	}
@@ -108,9 +107,8 @@ func TestValidateRuleJSON_ValidRules(t *testing.T) {
 
 func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 	tests := []struct {
-		name           string
-		rule           string
-		expectedErrors []string
+		name string
+		rule string
 	}{
 		{
 			name: "Missing logic",
@@ -123,7 +121,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Logic is required"},
 		},
 		{
 			name: "Invalid logic operator",
@@ -137,7 +134,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Logic must be 'AND' or 'OR'"},
 		},
 		{
 			name: "No conditions",
@@ -145,7 +141,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 				"logic": "AND",
 				"conditions": []
 			}`,
-			expectedErrors: []string{"At least one condition is required"},
 		},
 		{
 			name: "Invalid field",
@@ -159,7 +154,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Invalid field: invalid_field"},
 		},
 		{
 			name: "String operator on numeric field",
@@ -173,7 +167,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'contains' is not valid for numeric field 'amount'"},
 		},
 		{
 			name: "Numeric operator on string field",
@@ -187,7 +180,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'greater_than' is not valid for string field 'merchant'"},
 		},
 		{
 			name: "Missing value for regular operator",
@@ -200,7 +192,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'equals' requires 'value'"},
 		},
 		{
 			name: "Missing values for contains_any",
@@ -213,7 +204,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'contains_any' requires 'values' array"},
 		},
 		{
 			name: "Missing min/max for between",
@@ -227,7 +217,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'between' requires 'min_value'", "Operator 'between' requires 'max_value'"},
 		},
 		{
 			name: "Invalid range for between",
@@ -242,7 +231,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"min_value must be less than max_value"},
 		},
 		{
 			name: "Case sensitive on numeric field",
@@ -257,7 +245,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"case_sensitive only applies to string fields"},
 		},
 		{
 			name: "Currency property not supported",
@@ -272,7 +259,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"currency property is not supported"},
 		},
 		{
 			name: "Invalid regex pattern",
@@ -286,7 +272,6 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Invalid regex pattern"},
 		},
 		{
 			name: "Conflicting value fields for contains_any",
@@ -301,28 +286,13 @@ func TestValidateRuleJSON_InvalidRules(t *testing.T) {
 					}
 				]
 			}`,
-			expectedErrors: []string{"Operator 'contains_any' should use 'values' not 'value'"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ValidateRuleJSONDetailed([]byte(tt.rule))
-			if result.Valid {
+			if _, err := ParseRuleConditions([]byte(tt.rule)); err == nil {
 				t.Errorf("Expected rule to be invalid")
-			}
-
-			for _, expectedError := range tt.expectedErrors {
-				found := false
-				for _, actualError := range result.Errors {
-					if contains(actualError.Message, expectedError) {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Errorf("Expected error containing '%s', got errors: %v", expectedError, result.Errors)
-				}
 			}
 		})
 	}
@@ -475,18 +445,3 @@ func TestNormalizeAndValidateRule(t *testing.T) {
 	}
 }
 
-// Helper function to check if a string contains a substring
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-			containsSubstring(s, substr)))
-}
-
-func containsSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
-}

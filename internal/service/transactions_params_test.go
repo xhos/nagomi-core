@@ -155,63 +155,6 @@ func TestToPgTimeOfDay_InvalidInputReturnsNull(t *testing.T) {
 	}
 }
 
-func TestValidateCreateParams_RequiresCoreFields(t *testing.T) {
-	err := validateCreateParams(sqlc.CreateTransactionParams{})
-	if err == nil {
-		t.Fatalf("expected error for missing required fields")
-	}
-
-	valid := sqlc.CreateTransactionParams{
-		AccountID:     1,
-		TxDate:        time.Now().UTC(),
-		TxAmountCents: 100,
-		TxCurrency:    "USD",
-		TxDirection:   1,
-	}
-	if err := validateCreateParams(valid); err != nil {
-		t.Fatalf("expected valid params, got error: %v", err)
-	}
-}
-
-func TestValidateUpdateRequest_RejectsInvalidMoneyCurrency(t *testing.T) {
-	err := validateUpdateRequest(&pb.UpdateTransactionRequest{
-		Id:       1,
-		TxAmount: &money.Money{Units: 10},
-	})
-	if err == nil {
-		t.Fatalf("expected error when tx_amount has empty currency")
-	}
-
-	err = validateUpdateRequest(&pb.UpdateTransactionRequest{
-		Id:            1,
-		ForeignAmount: &money.Money{Units: 5},
-	})
-	if err == nil {
-		t.Fatalf("expected error when foreign_amount has empty currency")
-	}
-
-	err = validateUpdateRequest(&pb.UpdateTransactionRequest{
-		Id:       1,
-		TxAmount: &money.Money{CurrencyCode: "USD", Units: 10},
-	})
-	if err != nil {
-		t.Fatalf("expected valid update request, got error: %v", err)
-	}
-}
-
-func TestValidateUpdateRequest_RejectsInvalidTimestamp(t *testing.T) {
-	err := validateUpdateRequest(&pb.UpdateTransactionRequest{
-		Id: 1,
-		TxDate: &timestamppb.Timestamp{
-			Seconds: 1,
-			Nanos:   1_000_000_000,
-		},
-	})
-	if err == nil {
-		t.Fatalf("expected error when tx_date is invalid")
-	}
-}
-
 func TestBuildCreateTxParamsList_MapsAndDefaults(t *testing.T) {
 	userID := uuid.New()
 	txDate := time.Date(2026, 3, 24, 12, 0, 0, 0, time.UTC)

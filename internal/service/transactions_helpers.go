@@ -258,54 +258,6 @@ func transactionToPb(tx *sqlc.Transaction) *pb.Transaction {
 	return proto
 }
 
-func validateCreateParams(params sqlc.CreateTransactionParams) error {
-	if params.AccountID <= 0 {
-		return fmt.Errorf("account_id must be greater than zero: %w", ErrValidation)
-	}
-
-	if params.TxDate.IsZero() {
-		return fmt.Errorf("tx_date is required: %w", ErrValidation)
-	}
-
-	if params.TxCurrency == "" {
-		return fmt.Errorf("tx_currency is required: %w", ErrValidation)
-	}
-
-	if params.TxAmountCents == 0 {
-		return fmt.Errorf("tx_amount cannot be zero: %w", ErrValidation)
-	}
-
-	switch params.TxDirection {
-	case 1, 2:
-	default:
-		return fmt.Errorf("tx_direction must be 1 or 2: %w", ErrValidation)
-	}
-
-	return nil
-}
-
-func validateUpdateRequest(req *pb.UpdateTransactionRequest) error {
-	hasTxDate := req.TxDate != nil
-	txDateInvalid := hasTxDate && !req.TxDate.IsValid()
-	if txDateInvalid {
-		return fmt.Errorf("tx_date is invalid: %w", ErrValidation)
-	}
-
-	hasTxAmount := req.TxAmount != nil
-	missingTxAmountCurrency := hasTxAmount && req.TxAmount.GetCurrencyCode() == ""
-	if missingTxAmountCurrency {
-		return fmt.Errorf("tx_amount.currency_code is required when tx_amount is provided: %w", ErrValidation)
-	}
-
-	hasForeignAmount := req.ForeignAmount != nil
-	missingForeignAmountCurrency := hasForeignAmount && req.ForeignAmount.GetCurrencyCode() == ""
-	if missingForeignAmountCurrency {
-		return fmt.Errorf("foreign_amount.currency_code is required when foreign_amount is provided: %w", ErrValidation)
-	}
-
-	return nil
-}
-
 func (s *txnSvc) processForeignCurrency(ctx context.Context, userID uuid.UUID, params *sqlc.CreateTransactionParams) (*sqlc.CreateTransactionParams, error) {
 	account, err := s.queries.GetAccount(ctx, sqlc.GetAccountParams{UserID: userID, ID: params.AccountID})
 	if err != nil {

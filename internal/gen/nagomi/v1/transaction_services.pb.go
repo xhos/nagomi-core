@@ -1443,13 +1443,15 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"R\n" +
 	"\x16GetTransactionResponse\x128\n" +
-	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\xed\x05\n" +
+	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\xc0\a\n" +
 	"\x10TransactionInput\x12&\n" +
 	"\n" +
-	"account_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\x123\n" +
-	"\atx_date\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x06txDate\x12/\n" +
-	"\ttx_amount\x18\x03 \x01(\v2\x12.google.type.MoneyR\btxAmount\x12=\n" +
-	"\tdirection\x18\x04 \x01(\x0e2\x1f.nagomi.v1.TransactionDirectionR\tdirection\x12%\n" +
+	"account_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\x12;\n" +
+	"\atx_date\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampB\x06\xbaH\x03\xc8\x01\x01R\x06txDate\x12\xed\x01\n" +
+	"\ttx_amount\x18\x03 \x01(\v2\x12.google.type.MoneyB\xbb\x01\xbaH\xb7\x01\xba\x01\xb0\x01\n" +
+	"\x06amount\x12Bcurrency_code is required and the amount must be at least one cent\x1abthis.currency_code != '' && (this.units != 0 || this.nanos >= 10000000 || this.nanos <= -10000000)\xc8\x01\x01R\btxAmount\x12I\n" +
+	"\tdirection\x18\x04 \x01(\x0e2\x1f.nagomi.v1.TransactionDirectionB\n" +
+	"\xbaH\a\x82\x01\x04\x18\x01\x18\x02R\tdirection\x12%\n" +
 	"\vdescription\x18\x05 \x01(\tH\x00R\vdescription\x88\x01\x01\x12\x1f\n" +
 	"\bmerchant\x18\x06 \x01(\tH\x01R\bmerchant\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -1476,14 +1478,15 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\ftransactions\x18\x02 \x03(\v2\x1b.nagomi.v1.TransactionInputB\b\xbaH\x05\x92\x01\x02\b\x01R\ftransactions\"|\n" +
 	"\x19CreateTransactionResponse\x12:\n" +
 	"\ftransactions\x18\x01 \x03(\v2\x16.nagomi.v1.TransactionR\ftransactions\x12#\n" +
-	"\rcreated_count\x18\x02 \x01(\x05R\fcreatedCount\"\x88\x06\n" +
+	"\rcreated_count\x18\x02 \x01(\x05R\fcreatedCount\"\x97\a\n" +
 	"\x18UpdateTransactionRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12;\n" +
 	"\vupdate_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
 	"updateMask\x128\n" +
-	"\atx_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x06txDate\x88\x01\x01\x124\n" +
-	"\ttx_amount\x18\x05 \x01(\v2\x12.google.type.MoneyH\x01R\btxAmount\x88\x01\x01\x12B\n" +
+	"\atx_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x06txDate\x88\x01\x01\x12{\n" +
+	"\ttx_amount\x18\x05 \x01(\v2\x12.google.type.MoneyBE\xbaHB\xba\x01?\n" +
+	"\bcurrency\x12\x19currency_code is required\x1a\x18this.currency_code != ''H\x01R\btxAmount\x88\x01\x01\x12B\n" +
 	"\tdirection\x18\x06 \x01(\x0e2\x1f.nagomi.v1.TransactionDirectionH\x02R\tdirection\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\a \x01(\tH\x03R\vdescription\x88\x01\x01\x12\x1f\n" +
 	"\bmerchant\x18\b \x01(\tH\x04R\bmerchant\x88\x01\x01\x12\"\n" +
@@ -1491,8 +1494,9 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"user_notes\x18\t \x01(\tH\x05R\tuserNotes\x88\x01\x01\x12$\n" +
 	"\vcategory_id\x18\n" +
 	" \x01(\x03H\x06R\n" +
-	"categoryId\x88\x01\x01\x12>\n" +
-	"\x0eforeign_amount\x18\v \x01(\v2\x12.google.type.MoneyH\aR\rforeignAmount\x88\x01\x01\x12(\n" +
+	"categoryId\x88\x01\x01\x12\x85\x01\n" +
+	"\x0eforeign_amount\x18\v \x01(\v2\x12.google.type.MoneyBE\xbaHB\xba\x01?\n" +
+	"\bcurrency\x12\x19currency_code is required\x1a\x18this.currency_code != ''H\aR\rforeignAmount\x88\x01\x01\x12(\n" +
 	"\rexchange_rate\x18\f \x01(\x01H\bR\fexchangeRate\x88\x01\x01\x12+\n" +
 	"\n" +
 	"account_id\x18\r \x01(\x03B\a\xbaH\x04\"\x02 \x00H\tR\taccountId\x88\x01\x01B\n" +
