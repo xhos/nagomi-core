@@ -39,7 +39,7 @@ type Account struct {
 	FriendlyName  *string                `protobuf:"bytes,10,opt,name=friendly_name,json=friendlyName,proto3,oneof" json:"friendly_name,omitempty"`
 	Aliases       []string               `protobuf:"bytes,14,rep,name=aliases,proto3" json:"aliases,omitempty"`
 	MainCurrency  string                 `protobuf:"bytes,11,opt,name=main_currency,json=mainCurrency,proto3" json:"main_currency,omitempty"`
-	Colors        []string               `protobuf:"bytes,12,rep,name=colors,proto3" json:"colors,omitempty"`
+	Color         string                 `protobuf:"bytes,12,opt,name=color,proto3" json:"color,omitempty"`
 	Balance       *money.Money           `protobuf:"bytes,13,opt,name=balance,proto3" json:"balance,omitempty"`
 	// balance comes from imported bank statements, which reconcile the
 	// provisional email and connector transactions. only these accept statements
@@ -168,11 +168,11 @@ func (x *Account) GetMainCurrency() string {
 	return ""
 }
 
-func (x *Account) GetColors() []string {
+func (x *Account) GetColor() string {
 	if x != nil {
-		return x.Colors
+		return x.Color
 	}
-	return nil
+	return ""
 }
 
 func (x *Account) GetBalance() *money.Money {
@@ -290,7 +290,7 @@ var File_nagomi_v1_account_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xc1\a\n" +
+	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xb3\a\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x1d\n" +
@@ -308,8 +308,8 @@ const file_nagomi_v1_account_proto_rawDesc = "" +
 	" \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182H\x00R\ffriendlyName\x88\x01\x01\x12\x18\n" +
 	"\aaliases\x18\x0e \x03(\tR\aaliases\x129\n" +
 	"\rmain_currency\x18\v \x01(\tB\x14\xbaH\x11r\x0f2\n" +
-	"^[A-Z]{3}$\x98\x01\x03R\fmainCurrency\x12<\n" +
-	"\x06colors\x18\f \x03(\tB$\xbaH!\x92\x01\x1e\b\x03\x10\x03\"\x18r\x162\x11^#[0-9a-fA-F]{6}$\x98\x01\aR\x06colors\x12,\n" +
+	"^[A-Z]{3}$\x98\x01\x03R\fmainCurrency\x12.\n" +
+	"\x05color\x18\f \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$R\x05color\x12,\n" +
 	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalance\x12)\n" +
 	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDriven\x12A\n" +
 	"\x10statements_start\x18\x10 \x01(\v2\x11.google.type.DateH\x01R\x0fstatementsStart\x88\x01\x01\x127\n" +

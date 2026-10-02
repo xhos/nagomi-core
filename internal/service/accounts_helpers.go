@@ -14,22 +14,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var defaultAccountColors = []string{"#1f2937", "#3b82f6", "#10b981"}
-
 func buildCreateAccountParams(req *pb.CreateAccountRequest) (sqlc.CreateAccountParams, error) {
 	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
 		return sqlc.CreateAccountParams{}, fmt.Errorf("invalid user_id: %w", err)
-	}
-
-	colors := req.GetColors()
-	hasCustomColors := len(colors) > 0
-	if !hasCustomColors {
-		colors = defaultAccountColors
-	}
-	invalidColorCount := len(colors) != 3
-	if invalidColorCount {
-		return sqlc.CreateAccountParams{}, fmt.Errorf("colors must be exactly 3 hex values, got %d", len(colors))
 	}
 
 	anchorBalance := req.GetAnchorBalance()
@@ -42,7 +30,7 @@ func buildCreateAccountParams(req *pb.CreateAccountRequest) (sqlc.CreateAccountP
 		AnchorBalanceCents: moneyToCents(anchorBalance),
 		AnchorCurrency:     anchorBalance.GetCurrencyCode(),
 		MainCurrency:       req.GetMainCurrency(),
-		Colors:             colors,
+		Color:              req.Color,
 		StatementDriven:    req.GetStatementDriven(),
 	}, nil
 }
@@ -78,8 +66,8 @@ func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sq
 	if req.MainCurrency != nil {
 		params.MainCurrency = req.MainCurrency
 	}
-	if len(req.Colors) > 0 {
-		params.Colors = req.Colors
+	if req.Color != nil {
+		params.Color = req.Color
 	}
 	// TODO: connector accounts must never be statement-driven, but core can't refuse
 	// it: they're plain accounts the connector creates and finds by alias
@@ -174,7 +162,7 @@ func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) 
 		AnchorDate:      timestamppb.New(a.AnchorDate),
 		AnchorBalance:   centsToMoney(a.AnchorBalanceCents, a.AnchorCurrency),
 		MainCurrency:    a.MainCurrency,
-		Colors:          a.Colors,
+		Color:           a.Color,
 		Aliases:         a.Aliases,
 		CreatedAt:       timestamppb.New(a.CreatedAt),
 		UpdatedAt:       timestamppb.New(a.UpdatedAt),

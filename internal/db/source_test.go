@@ -19,7 +19,6 @@ func TestCreateTransactionSource(t *testing.T) {
 		Bank:           "Test Bank",
 		AnchorCurrency: "CAD",
 		MainCurrency:   "CAD",
-		Colors:         []string{"#1f2937", "#3b82f6", "#10b981"},
 	})
 
 	tests := []struct {

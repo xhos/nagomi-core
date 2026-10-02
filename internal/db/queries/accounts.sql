@@ -60,7 +60,7 @@ insert into
     anchor_balance_cents,
     anchor_currency,
     main_currency,
-    colors,
+    color,
     statement_driven
   )
 values
@@ -73,7 +73,7 @@ values
     @anchor_balance_cents::bigint,
     @anchor_currency::char(3),
     @main_currency::char(3),
-    @colors::text [],
+    coalesce(sqlc.narg('color')::text, '#3b82f6'),
     @statement_driven::boolean
   )
 returning
@@ -91,7 +91,7 @@ set
   anchor_balance_cents = coalesce(sqlc.narg('anchor_balance_cents')::bigint, anchor_balance_cents),
   anchor_currency = coalesce(sqlc.narg('anchor_currency')::char(3), anchor_currency),
   main_currency = coalesce(sqlc.narg('main_currency')::char(3), main_currency),
-  colors = coalesce(sqlc.narg('colors')::text [], colors),
+  color = coalesce(sqlc.narg('color')::text, color),
   statement_driven = coalesce(sqlc.narg('statement_driven')::boolean, statement_driven),
   statements_start = case
     when @clear_statements_start::boolean then null

@@ -22,7 +22,6 @@ type Account struct {
 	AnchorBalanceCents  int64              `db:"anchor_balance_cents" json:"anchor_balance_cents"`
 	AnchorCurrency      string             `db:"anchor_currency" json:"anchor_currency"`
 	MainCurrency        string             `db:"main_currency" json:"main_currency"`
-	Colors              []string           `db:"colors" json:"colors"`
 	CreatedAt           time.Time          `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time          `db:"updated_at" json:"updated_at"`
 	Aliases             []string           `db:"aliases" json:"aliases"`
@@ -30,6 +29,7 @@ type Account struct {
 	StatementsStart     *time.Time         `db:"statements_start" json:"statements_start"`
 	StatementReleaseDay *int16             `db:"statement_release_day" json:"statement_release_day"`
 	ClosedAt            *time.Time         `db:"closed_at" json:"closed_at"`
+	Color               string             `db:"color" json:"color"`
 }
 
 type Category struct {

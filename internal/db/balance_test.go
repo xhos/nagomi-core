@@ -60,7 +60,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000, // $1000.00
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		// Update anchor_date (CreateAccount uses CURRENT_DATE)
@@ -97,7 +96,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000, // $1000.00
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -135,7 +133,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -171,7 +168,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -202,7 +198,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -236,7 +231,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 50000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		// Should not error on empty account
@@ -257,7 +251,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: -50000, // -$500 (debt)
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -287,7 +280,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "USD",
 			MainCurrency:       "USD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -324,7 +316,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000, // $1000
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -371,7 +362,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)
@@ -405,7 +395,6 @@ func TestSyncAccountBalances(t *testing.T) {
 			AnchorBalanceCents: 100000,
 			AnchorCurrency:     "CAD",
 			MainCurrency:       "CAD",
-			Colors:             []string{"#1f2937", "#3b82f6", "#10b981"},
 		})
 
 		_, err := tdb.Pool().Exec(ctx, `UPDATE accounts SET anchor_date = $1 WHERE id = $2`, anchorDate, account.ID)

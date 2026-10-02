@@ -641,7 +641,6 @@ func resolveStatementAccount(
 			AccountType:     stmt.AccountType,
 			AnchorCurrency:  stmt.Currency,
 			MainCurrency:    stmt.Currency,
-			Colors:          defaultAccountColors,
 			StatementDriven: true,
 		})
 		if err != nil {

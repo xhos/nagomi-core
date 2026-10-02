@@ -39,19 +39,11 @@ func TestBuildCreateAccountParams_DefaultsAndValidation(t *testing.T) {
 	if params.OwnerID != userID {
 		t.Fatalf("expected owner_id %v, got %v", userID, params.OwnerID)
 	}
-	if len(params.Colors) != 3 {
-		t.Fatalf("expected default colors length 3, got %d", len(params.Colors))
-	}
 	if params.AnchorBalanceCents != 1234 {
 		t.Fatalf("expected anchor balance cents 1234, got %d", params.AnchorBalanceCents)
 	}
 	if params.AnchorCurrency != "USD" {
 		t.Fatalf("expected anchor currency USD, got %q", params.AnchorCurrency)
-	}
-
-	_, err = buildCreateAccountParams(&pb.CreateAccountRequest{UserId: userID.String(), Colors: []string{"#1", "#2"}})
-	if err == nil {
-		t.Fatalf("expected error for invalid colors length")
 	}
 
 	_, err = buildCreateAccountParams(&pb.CreateAccountRequest{UserId: "not-a-uuid"})
@@ -65,6 +57,7 @@ func TestBuildUpdateAccountParams_MapsProvidedFields(t *testing.T) {
 	accountType := pb.AccountType_ACCOUNT_SAVINGS
 	anchorDate := time.Date(2026, 3, 25, 9, 0, 0, 0, time.UTC)
 	name := "Updated"
+	color := "#111111"
 
 	params := buildUpdateAccountParams(userID, &pb.UpdateAccountRequest{
 		Id:          42,
@@ -75,7 +68,7 @@ func TestBuildUpdateAccountParams_MapsProvidedFields(t *testing.T) {
 			CurrencyCode: "CAD",
 			Units:        50,
 		},
-		Colors: []string{"#111111", "#222222", "#333333"},
+		Color: &color,
 	})
 
 	if params.ID != 42 || params.UserID != userID {
@@ -96,8 +89,8 @@ func TestBuildUpdateAccountParams_MapsProvidedFields(t *testing.T) {
 	if params.AnchorCurrency == nil || *params.AnchorCurrency != "CAD" {
 		t.Fatalf("expected anchor currency CAD, got %v", params.AnchorCurrency)
 	}
-	if len(params.Colors) != 3 {
-		t.Fatalf("expected 3 colors mapped, got %d", len(params.Colors))
+	if params.Color == nil || *params.Color != color {
+		t.Fatalf("expected color mapped, got %v", params.Color)
 	}
 }
 
@@ -180,7 +173,7 @@ func TestAccountRowToPb_MapsCoreFields(t *testing.T) {
 		AnchorBalanceCents: 120050,
 		AnchorCurrency:     "USD",
 		MainCurrency:       "USD",
-		Colors:             []string{"#1", "#2", "#3"},
+		Color:              "#123456",
 		Aliases:            []string{"main"},
 		CreatedAt:          now,
 		UpdatedAt:          now,
@@ -196,7 +189,7 @@ func TestAccountRowToPb_MapsCoreFields(t *testing.T) {
 	if account.Balance == nil || account.Balance.Units != 100 {
 		t.Fatalf("expected balance mapped, got %v", account.Balance)
 	}
-	if len(account.Colors) != 3 || len(account.Aliases) != 1 {
-		t.Fatalf("expected colors/aliases mapped, got colors=%v aliases=%v", account.Colors, account.Aliases)
+	if account.Color != "#123456" || len(account.Aliases) != 1 {
+		t.Fatalf("expected color/aliases mapped, got color=%s aliases=%v", account.Color, account.Aliases)
 	}
 }
