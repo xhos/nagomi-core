@@ -9,6 +9,7 @@ import (
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
 	"connectrpc.com/grpcreflect"
+	"connectrpc.com/validate"
 	"github.com/charmbracelet/log"
 )
 
@@ -87,10 +88,9 @@ func (s *Server) registerServices(mux *http.ServeMux) {
 	reflectPathAlpha, reflectHandlerAlpha := grpcreflect.NewHandlerV1Alpha(reflector)
 	mux.Handle(reflectPathAlpha, reflectHandlerAlpha)
 
-	// TODO: no protovalidate interceptor, so the buf.validate rules in the protos are
-	// never checked here; services re-check what matters by hand (statement release day)
 	interceptors := connect.WithInterceptors(
 		middleware.ConnectLoggingInterceptor(s.log),
+		validate.NewInterceptor(),
 		middleware.EnsureUserInterceptor(s.services.Users, s.log),
 		middleware.UserIDExtractor(),
 	)

@@ -9,6 +9,7 @@ import (
 	"nagomi-core/internal/rules"
 
 	"connectrpc.com/connect"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -36,10 +37,7 @@ func (s *Server) GetRule(ctx context.Context, req *connect.Request[pb.GetRuleReq
 		return nil, err
 	}
 
-	ruleID, err := parseUUID(req.Msg.GetRuleId())
-	if err != nil {
-		return nil, err
-	}
+	ruleID := uuid.MustParse(req.Msg.GetRuleId())
 
 	rule, err := s.services.Rules.Get(ctx, userID, ruleID)
 	if err != nil {
@@ -114,10 +112,7 @@ func (s *Server) UpdateRule(ctx context.Context, req *connect.Request[pb.UpdateR
 		return nil, err
 	}
 
-	ruleID, err := parseUUID(req.Msg.GetRuleId())
-	if err != nil {
-		return nil, err
-	}
+	ruleID := uuid.MustParse(req.Msg.GetRuleId())
 
 	var conditionsBytes []byte
 	if req.Msg.Conditions != nil {
@@ -171,10 +166,7 @@ func (s *Server) DeleteRule(ctx context.Context, req *connect.Request[pb.DeleteR
 		return nil, err
 	}
 
-	ruleID, err := parseUUID(req.Msg.GetRuleId())
-	if err != nil {
-		return nil, err
-	}
+	ruleID := uuid.MustParse(req.Msg.GetRuleId())
 
 	affected, err := s.services.Rules.Delete(ctx, userID, ruleID)
 	if err != nil {

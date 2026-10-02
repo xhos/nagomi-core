@@ -1161,7 +1161,7 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"B\n" +
 	"\x12GetAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xf9\x02\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\x93\x03\n" +
 	"\x14CreateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -1169,13 +1169,13 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x04type\x18\x04 \x01(\x0e2\x16.nagomi.v1.AccountTypeR\x04type\x12(\n" +
 	"\rfriendly_name\x18\x05 \x01(\tH\x00R\ffriendlyName\x88\x01\x01\x129\n" +
 	"\x0eanchor_balance\x18\x06 \x01(\v2\x12.google.type.MoneyR\ranchorBalance\x12#\n" +
-	"\rmain_currency\x18\a \x01(\tR\fmainCurrency\x12\x19\n" +
-	"\x05color\x18\b \x01(\tH\x01R\x05color\x88\x01\x01\x12)\n" +
+	"\rmain_currency\x18\a \x01(\tR\fmainCurrency\x123\n" +
+	"\x05color\x18\b \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$H\x01R\x05color\x88\x01\x01\x12)\n" +
 	"\x10statement_driven\x18\t \x01(\bR\x0fstatementDrivenB\x10\n" +
 	"\x0e_friendly_nameB\b\n" +
 	"\x06_color\"E\n" +
 	"\x15CreateAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xa4\a\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xbe\a\n" +
 	"\x14UpdateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12;\n" +
@@ -1189,8 +1189,8 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"anchorDate\x88\x01\x01\x12>\n" +
 	"\x0eanchor_balance\x18\t \x01(\v2\x12.google.type.MoneyH\x05R\ranchorBalance\x88\x01\x01\x12(\n" +
 	"\rmain_currency\x18\n" +
-	" \x01(\tH\x06R\fmainCurrency\x88\x01\x01\x12\x19\n" +
-	"\x05color\x18\v \x01(\tH\aR\x05color\x88\x01\x01\x12.\n" +
+	" \x01(\tH\x06R\fmainCurrency\x88\x01\x01\x123\n" +
+	"\x05color\x18\v \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$H\aR\x05color\x88\x01\x01\x12.\n" +
 	"\x10statement_driven\x18\f \x01(\bH\bR\x0fstatementDriven\x88\x01\x01\x12A\n" +
 	"\x10statements_start\x18\r \x01(\v2\x11.google.type.DateH\tR\x0fstatementsStart\x88\x01\x01\x12B\n" +
 	"\x15statement_release_day\x18\x0e \x01(\x05B\t\xbaH\x06\x1a\x04\x18\x1f(\x01H\n" +

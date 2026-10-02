@@ -14,8 +14,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/genproto/googleapis/type/money"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func wrapErr(err error) error {
@@ -63,18 +61,4 @@ func centsToMoney(cents int64, currency string) *money.Money {
 		Units:        cents / 100,
 		Nanos:        int32((cents % 100) * 10_000_000),
 	}
-}
-
-// TODO: should be gone?
-func parseUUID(s string) (uuid.UUID, error) {
-	if s == "" {
-		return uuid.Nil, status.Error(codes.InvalidArgument, "uuid cannot be empty")
-	}
-
-	id, err := uuid.Parse(s)
-	if err != nil {
-		return uuid.Nil, status.Errorf(codes.InvalidArgument, "invalid uuid: %v", err)
-	}
-
-	return id, nil
 }

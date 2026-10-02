@@ -51,7 +51,7 @@
         pname = "nagomi-core";
         version = self.shortRev or self.dirtyShortRev or "dev";
         src = ./.;
-        vendorHash = "sha256-R4AHEa2t2cclh0QTOLYWYn+sm2DZm4WR6+aU2NdynX8=";
+        vendorHash = "sha256-koEOYtbM2rCqR302hNs2o3aMHMMeMH2JlRKyKFderSo=";
         subPackages = ["cmd/nagomi"];
       };
     });
