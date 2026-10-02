@@ -377,12 +377,11 @@ type UpdateAccountRequest struct {
 	MainCurrency    *string                `protobuf:"bytes,10,opt,name=main_currency,json=mainCurrency,proto3,oneof" json:"main_currency,omitempty"`
 	Color           *string                `protobuf:"bytes,11,opt,name=color,proto3,oneof" json:"color,omitempty"`
 	StatementDriven *bool                  `protobuf:"varint,12,opt,name=statement_driven,json=statementDriven,proto3,oneof" json:"statement_driven,omitempty"`
-	// these three are cleared by naming them in update_mask and leaving them unset
-	StatementsStart     *date.Date `protobuf:"bytes,13,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
-	StatementReleaseDay *int32     `protobuf:"varint,14,opt,name=statement_release_day,json=statementReleaseDay,proto3,oneof" json:"statement_release_day,omitempty"`
-	ClosedAt            *date.Date `protobuf:"bytes,15,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// these two are cleared by naming them in update_mask and leaving them unset
+	StatementsStart *date.Date `protobuf:"bytes,13,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
+	ClosedAt        *date.Date `protobuf:"bytes,15,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *UpdateAccountRequest) Reset() {
@@ -504,13 +503,6 @@ func (x *UpdateAccountRequest) GetStatementsStart() *date.Date {
 		return x.StatementsStart
 	}
 	return nil
-}
-
-func (x *UpdateAccountRequest) GetStatementReleaseDay() int32 {
-	if x != nil && x.StatementReleaseDay != nil {
-		return *x.StatementReleaseDay
-	}
-	return 0
 }
 
 func (x *UpdateAccountRequest) GetClosedAt() *date.Date {
@@ -1175,7 +1167,7 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x0e_friendly_nameB\b\n" +
 	"\x06_color\"E\n" +
 	"\x15CreateAccountResponse\x12,\n" +
-	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xbe\a\n" +
+	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\"\xfd\x06\n" +
 	"\x14UpdateAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12;\n" +
@@ -1192,10 +1184,9 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	" \x01(\tH\x06R\fmainCurrency\x88\x01\x01\x123\n" +
 	"\x05color\x18\v \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$H\aR\x05color\x88\x01\x01\x12.\n" +
 	"\x10statement_driven\x18\f \x01(\bH\bR\x0fstatementDriven\x88\x01\x01\x12A\n" +
-	"\x10statements_start\x18\r \x01(\v2\x11.google.type.DateH\tR\x0fstatementsStart\x88\x01\x01\x12B\n" +
-	"\x15statement_release_day\x18\x0e \x01(\x05B\t\xbaH\x06\x1a\x04\x18\x1f(\x01H\n" +
-	"R\x13statementReleaseDay\x88\x01\x01\x123\n" +
-	"\tclosed_at\x18\x0f \x01(\v2\x11.google.type.DateH\vR\bclosedAt\x88\x01\x01B\a\n" +
+	"\x10statements_start\x18\r \x01(\v2\x11.google.type.DateH\tR\x0fstatementsStart\x88\x01\x01\x123\n" +
+	"\tclosed_at\x18\x0f \x01(\v2\x11.google.type.DateH\n" +
+	"R\bclosedAt\x88\x01\x01B\a\n" +
 	"\x05_nameB\a\n" +
 	"\x05_bankB\x0f\n" +
 	"\r_account_typeB\x10\n" +
@@ -1205,10 +1196,9 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x0e_main_currencyB\b\n" +
 	"\x06_colorB\x13\n" +
 	"\x11_statement_drivenB\x13\n" +
-	"\x11_statements_startB\x18\n" +
-	"\x16_statement_release_dayB\f\n" +
+	"\x11_statements_startB\f\n" +
 	"\n" +
-	"_closed_at\"\x17\n" +
+	"_closed_atJ\x04\b\x0e\x10\x0fR\x15statement_release_day\"\x17\n" +
 	"\x15UpdateAccountResponse\"R\n" +
 	"\x14DeleteAccountRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +

@@ -46,8 +46,6 @@ type Account struct {
 	StatementDriven bool `protobuf:"varint,15,opt,name=statement_driven,json=statementDriven,proto3" json:"statement_driven,omitempty"`
 	// the first statement the bank has; earlier periods aren't expected
 	StatementsStart *date.Date `protobuf:"bytes,16,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
-	// day of the month new statements come out; inferred from past statements when unset
-	StatementReleaseDay *int32 `protobuf:"varint,17,opt,name=statement_release_day,json=statementReleaseDay,proto3,oneof" json:"statement_release_day,omitempty"`
 	// no statements are expected after this
 	ClosedAt      *date.Date `protobuf:"bytes,18,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -196,13 +194,6 @@ func (x *Account) GetStatementsStart() *date.Date {
 	return nil
 }
 
-func (x *Account) GetStatementReleaseDay() int32 {
-	if x != nil && x.StatementReleaseDay != nil {
-		return *x.StatementReleaseDay
-	}
-	return 0
-}
-
 func (x *Account) GetClosedAt() *date.Date {
 	if x != nil {
 		return x.ClosedAt
@@ -290,7 +281,7 @@ var File_nagomi_v1_account_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xb3\a\n" +
+	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xfd\x06\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x1d\n" +
@@ -312,14 +303,12 @@ const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\x05color\x18\f \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$R\x05color\x12,\n" +
 	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalance\x12)\n" +
 	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDriven\x12A\n" +
-	"\x10statements_start\x18\x10 \x01(\v2\x11.google.type.DateH\x01R\x0fstatementsStart\x88\x01\x01\x127\n" +
-	"\x15statement_release_day\x18\x11 \x01(\x05H\x02R\x13statementReleaseDay\x88\x01\x01\x123\n" +
-	"\tclosed_at\x18\x12 \x01(\v2\x11.google.type.DateH\x03R\bclosedAt\x88\x01\x01B\x10\n" +
+	"\x10statements_start\x18\x10 \x01(\v2\x11.google.type.DateH\x01R\x0fstatementsStart\x88\x01\x01\x123\n" +
+	"\tclosed_at\x18\x12 \x01(\v2\x11.google.type.DateH\x02R\bclosedAt\x88\x01\x01B\x10\n" +
 	"\x0e_friendly_nameB\x13\n" +
-	"\x11_statements_startB\x18\n" +
-	"\x16_statement_release_dayB\f\n" +
+	"\x11_statements_startB\f\n" +
 	"\n" +
-	"_closed_at\"\xc8\x01\n" +
+	"_closed_atJ\x04\b\x11\x10\x12R\x15statement_release_day\"\xc8\x01\n" +
 	"\x0eAccountBalance\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +

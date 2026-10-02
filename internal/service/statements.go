@@ -455,7 +455,7 @@ func (s *stmtSvc) Coverage(ctx context.Context, userID uuid.UUID, accountID int6
 		return nil, wrapErr("StatementService.Coverage.ListStatements", err)
 	}
 
-	settings := coverageSettings{StatementsStart: account.StatementsStart, ReleaseDay: account.StatementReleaseDay, ClosedAt: account.ClosedAt}
+	settings := coverageSettings{StatementsStart: account.StatementsStart, ClosedAt: account.ClosedAt}
 	today := calendarDay(time.Now(), s.userLocation(ctx, userID))
 	periods := planCoverage(toCoverageStatements(statements), settings, today)
 
@@ -491,7 +491,7 @@ func (s *stmtSvc) Alerts(ctx context.Context, userID uuid.UUID) ([]*pb.Statement
 	today := calendarDay(time.Now(), s.userLocation(ctx, userID))
 	var alerts []*pb.StatementAlert
 	for _, account := range accounts {
-		settings := coverageSettings{StatementsStart: account.StatementsStart, ReleaseDay: account.StatementReleaseDay, ClosedAt: account.ClosedAt}
+		settings := coverageSettings{StatementsStart: account.StatementsStart, ClosedAt: account.ClosedAt}
 		for _, period := range planCoverage(toCoverageStatements(byAccount[account.ID]), settings, today) {
 			if period.Status == pb.StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_IMPORTED {
 				continue

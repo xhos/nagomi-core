@@ -97,10 +97,6 @@ set
     when @clear_statements_start::boolean then null
     else coalesce(sqlc.narg('statements_start')::date, statements_start)
   end,
-  statement_release_day = case
-    when @clear_statement_release_day::boolean then null
-    else coalesce(sqlc.narg('statement_release_day')::smallint, statement_release_day)
-  end,
   closed_at = case
     when @clear_closed_at::boolean then null
     else coalesce(sqlc.narg('closed_at')::date, closed_at)

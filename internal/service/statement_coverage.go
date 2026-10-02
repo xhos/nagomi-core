@@ -6,12 +6,8 @@ import (
 	pb "nagomi-core/internal/gen/nagomi/v1"
 )
 
-const (
-	// without a release day, a statement is due this many days after its period ends
-	statementReleaseLagDays = 3
-	// bounds the periods generated around a statement, in case of a decades-old one
-	maxCoveragePeriods = 600
-)
+// bounds the periods generated around a statement, in case of a decades-old one
+const maxCoveragePeriods = 600
 
 // coverageStatement is an imported statement's period, as calendar days in UTC.
 type coverageStatement struct {
@@ -24,7 +20,6 @@ type coverageStatement struct {
 type coverageSettings struct {
 	// periods starting before this aren't expected
 	StatementsStart *time.Time
-	ReleaseDay      *int16
 	// periods starting after this aren't expected
 	ClosedAt *time.Time
 }
@@ -99,7 +94,8 @@ func planCoverage(statements []coverageStatement, settings coverageSettings, tod
 		if settings.ClosedAt != nil && start.After(*settings.ClosedAt) {
 			break
 		}
-		if releaseDate(end, settings.ReleaseDay).After(today) {
+		// due the day after it ends; the bank may take a day or two to release it
+		if !end.Before(today) {
 			break
 		}
 		out = append(out, coveragePeriod{Start: start, End: end, Status: pb.StatementCoverageStatus_STATEMENT_COVERAGE_STATUS_DUE})
@@ -123,19 +119,6 @@ func monthlyPeriods(from, to time.Time, status pb.StatementCoverageStatus) []cov
 		out = append(out, coveragePeriod{Start: start, End: end, Status: status})
 	}
 	return out
-}
-
-// releaseDate is when the statement for a period ending on end comes out: the first
-// release day after it, or a few days after it when the account has none.
-func releaseDate(end time.Time, releaseDay *int16) time.Time {
-	if releaseDay == nil {
-		return end.AddDate(0, 0, statementReleaseLagDays)
-	}
-	release := dayInMonth(end.Year(), end.Month(), int(*releaseDay))
-	if !release.After(end) {
-		release = dayInMonth(end.Year(), end.Month()+1, int(*releaseDay))
-	}
-	return release
 }
 
 // addMonthsClamped moves t by n months, keeping its day where the month is long

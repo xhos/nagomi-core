@@ -96,30 +96,25 @@ func TestBuildUpdateAccountParams_MapsProvidedFields(t *testing.T) {
 
 func TestBuildUpdateAccountParams_StatementTracking(t *testing.T) {
 	userID := uuid.New()
-	releaseDay := int32(15)
 
 	params := buildUpdateAccountParams(userID, &pb.UpdateAccountRequest{
-		Id:                  42,
-		StatementsStart:     &date.Date{Year: 2024, Month: 7, Day: 12},
-		StatementReleaseDay: &releaseDay,
-		UpdateMask:          &fieldmaskpb.FieldMask{Paths: []string{"closed_at"}},
+		Id:              42,
+		StatementsStart: &date.Date{Year: 2024, Month: 7, Day: 12},
+		UpdateMask:      &fieldmaskpb.FieldMask{Paths: []string{"closed_at"}},
 	})
 
 	if params.StatementsStart == nil || !params.StatementsStart.Equal(time.Date(2024, 7, 12, 0, 0, 0, 0, time.UTC)) {
 		t.Fatalf("expected statements start mapped, got %v", params.StatementsStart)
 	}
-	if params.StatementReleaseDay == nil || *params.StatementReleaseDay != 15 {
-		t.Fatalf("expected release day 15, got %v", params.StatementReleaseDay)
-	}
-	if params.ClearStatementsStart || params.ClearStatementReleaseDay {
-		t.Fatalf("expected set fields not cleared")
+	if params.ClearStatementsStart {
+		t.Fatalf("expected set field not cleared")
 	}
 	if !params.ClearClosedAt || params.ClosedAt != nil {
 		t.Fatalf("expected masked, unset closed_at cleared, got clear=%v value=%v", params.ClearClosedAt, params.ClosedAt)
 	}
 
 	params = buildUpdateAccountParams(userID, &pb.UpdateAccountRequest{Id: 42})
-	if params.ClearStatementsStart || params.ClearStatementReleaseDay || params.ClearClosedAt {
+	if params.ClearStatementsStart || params.ClearClosedAt {
 		t.Fatalf("expected nothing cleared without a mask")
 	}
 }

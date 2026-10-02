@@ -206,7 +206,6 @@ select
   id,
   name,
   statements_start,
-  statement_release_day,
   closed_at
 from
   accounts

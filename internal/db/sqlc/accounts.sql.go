@@ -72,7 +72,7 @@ values
     $10::boolean
   )
 returning
-  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, created_at, updated_at, aliases, statement_driven, statements_start, statement_release_day, closed_at, color
+  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, created_at, updated_at, aliases, statement_driven, statements_start, closed_at, color
 `
 
 type CreateAccountParams struct {
@@ -118,7 +118,6 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		&i.Aliases,
 		&i.StatementDriven,
 		&i.StatementsStart,
-		&i.StatementReleaseDay,
 		&i.ClosedAt,
 		&i.Color,
 	)
@@ -147,7 +146,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, arg DeleteAccountParams) (i
 }
 
 const findAccountByAlias = `-- name: FindAccountByAlias :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at, a.color
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color
 from accounts a
 where a.owner_id = $1::uuid
   and a.aliases @> array[$2::text]
@@ -182,7 +181,6 @@ func (q *Queries) FindAccountByAlias(ctx context.Context, arg FindAccountByAlias
 		&i.Account.Aliases,
 		&i.Account.StatementDriven,
 		&i.Account.StatementsStart,
-		&i.Account.StatementReleaseDay,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
 	)
@@ -190,7 +188,7 @@ func (q *Queries) FindAccountByAlias(ctx context.Context, arg FindAccountByAlias
 }
 
 const findAccountByName = `-- name: FindAccountByName :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at, a.color
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color
 from accounts a
 where a.owner_id = $1::uuid
   and a.name = $2::text
@@ -225,7 +223,6 @@ func (q *Queries) FindAccountByName(ctx context.Context, arg FindAccountByNamePa
 		&i.Account.Aliases,
 		&i.Account.StatementDriven,
 		&i.Account.StatementsStart,
-		&i.Account.StatementReleaseDay,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
 	)
@@ -234,7 +231,7 @@ func (q *Queries) FindAccountByName(ctx context.Context, arg FindAccountByNamePa
 
 const getAccount = `-- name: GetAccount :one
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at, a.color,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -288,7 +285,6 @@ func (q *Queries) GetAccount(ctx context.Context, arg GetAccountParams) (GetAcco
 		&i.Account.Aliases,
 		&i.Account.StatementDriven,
 		&i.Account.StatementsStart,
-		&i.Account.StatementReleaseDay,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
 		&i.BalanceCents,
@@ -416,7 +412,7 @@ func (q *Queries) GetUserAccountsCount(ctx context.Context, userID uuid.UUID) (i
 
 const listAccounts = `-- name: ListAccounts :many
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.statement_release_day, a.closed_at, a.color,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -472,7 +468,6 @@ func (q *Queries) ListAccounts(ctx context.Context, userID uuid.UUID) ([]ListAcc
 			&i.Account.Aliases,
 			&i.Account.StatementDriven,
 			&i.Account.StatementsStart,
-			&i.Account.StatementReleaseDay,
 			&i.Account.ClosedAt,
 			&i.Account.Color,
 			&i.BalanceCents,
@@ -685,38 +680,32 @@ set
     when $11::boolean then null
     else coalesce($12::date, statements_start)
   end,
-  statement_release_day = case
-    when $13::boolean then null
-    else coalesce($14::smallint, statement_release_day)
-  end,
   closed_at = case
-    when $15::boolean then null
-    else coalesce($16::date, closed_at)
+    when $13::boolean then null
+    else coalesce($14::date, closed_at)
   end
 where
-  id = $17::bigint
-  and owner_id = $18::uuid
+  id = $15::bigint
+  and owner_id = $16::uuid
 `
 
 type UpdateAccountParams struct {
-	Name                     *string    `db:"name" json:"name"`
-	Bank                     *string    `db:"bank" json:"bank"`
-	AccountType              *int16     `db:"account_type" json:"account_type"`
-	FriendlyName             *string    `db:"friendly_name" json:"friendly_name"`
-	AnchorDate               *time.Time `db:"anchor_date" json:"anchor_date"`
-	AnchorBalanceCents       *int64     `db:"anchor_balance_cents" json:"anchor_balance_cents"`
-	AnchorCurrency           *string    `db:"anchor_currency" json:"anchor_currency"`
-	MainCurrency             *string    `db:"main_currency" json:"main_currency"`
-	Color                    *string    `db:"color" json:"color"`
-	StatementDriven          *bool      `db:"statement_driven" json:"statement_driven"`
-	ClearStatementsStart     bool       `db:"clear_statements_start" json:"clear_statements_start"`
-	StatementsStart          *time.Time `db:"statements_start" json:"statements_start"`
-	ClearStatementReleaseDay bool       `db:"clear_statement_release_day" json:"clear_statement_release_day"`
-	StatementReleaseDay      *int16     `db:"statement_release_day" json:"statement_release_day"`
-	ClearClosedAt            bool       `db:"clear_closed_at" json:"clear_closed_at"`
-	ClosedAt                 *time.Time `db:"closed_at" json:"closed_at"`
-	ID                       int64      `db:"id" json:"id"`
-	UserID                   uuid.UUID  `db:"user_id" json:"user_id"`
+	Name                 *string    `db:"name" json:"name"`
+	Bank                 *string    `db:"bank" json:"bank"`
+	AccountType          *int16     `db:"account_type" json:"account_type"`
+	FriendlyName         *string    `db:"friendly_name" json:"friendly_name"`
+	AnchorDate           *time.Time `db:"anchor_date" json:"anchor_date"`
+	AnchorBalanceCents   *int64     `db:"anchor_balance_cents" json:"anchor_balance_cents"`
+	AnchorCurrency       *string    `db:"anchor_currency" json:"anchor_currency"`
+	MainCurrency         *string    `db:"main_currency" json:"main_currency"`
+	Color                *string    `db:"color" json:"color"`
+	StatementDriven      *bool      `db:"statement_driven" json:"statement_driven"`
+	ClearStatementsStart bool       `db:"clear_statements_start" json:"clear_statements_start"`
+	StatementsStart      *time.Time `db:"statements_start" json:"statements_start"`
+	ClearClosedAt        bool       `db:"clear_closed_at" json:"clear_closed_at"`
+	ClosedAt             *time.Time `db:"closed_at" json:"closed_at"`
+	ID                   int64      `db:"id" json:"id"`
+	UserID               uuid.UUID  `db:"user_id" json:"user_id"`
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
@@ -733,8 +722,6 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) er
 		arg.StatementDriven,
 		arg.ClearStatementsStart,
 		arg.StatementsStart,
-		arg.ClearStatementReleaseDay,
-		arg.StatementReleaseDay,
 		arg.ClearClosedAt,
 		arg.ClosedAt,
 		arg.ID,

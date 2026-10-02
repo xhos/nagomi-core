@@ -11,7 +11,6 @@ import (
 func TestPlanCoverage(t *testing.T) {
 	day := func(m time.Month, d int) time.Time { return time.Date(2026, m, d, 0, 0, 0, 0, time.UTC) }
 	dayPtr := func(m time.Month, d int) *time.Time { t := day(m, d); return &t }
-	releaseDay := func(d int16) *int16 { return &d }
 	stmt := func(id int64, start, end time.Time) coverageStatement {
 		return coverageStatement{ID: id, Start: start, End: end}
 	}
@@ -51,15 +50,15 @@ func TestPlanCoverage(t *testing.T) {
 			want:     []coveragePeriod{missing(day(1, 1), day(2, 1))},
 		},
 		{
-			name:       "next period isn't due until it has ended and come out",
+			name:       "next period isn't due on its last day",
 			statements: []coverageStatement{stmt(1, day(1, 15), day(2, 14))},
-			today:      day(3, 16),
+			today:      day(3, 14),
 			want:       []coveragePeriod{imported(1, day(1, 15), day(2, 14))},
 		},
 		{
-			name:       "due a few days after the period ends",
+			name:       "due the day after the period ends",
 			statements: []coverageStatement{stmt(1, day(1, 15), day(2, 14))},
-			today:      day(3, 17),
+			today:      day(3, 15),
 			want:       []coveragePeriod{imported(1, day(1, 15), day(2, 14)), due(day(2, 15), day(3, 14))},
 		},
 		{
@@ -71,20 +70,6 @@ func TestPlanCoverage(t *testing.T) {
 				due(day(2, 15), day(3, 14)),
 				due(day(3, 15), day(4, 14)),
 			},
-		},
-		{
-			name:       "release day later in the month",
-			statements: []coverageStatement{stmt(1, day(1, 15), day(2, 14))},
-			settings:   coverageSettings{ReleaseDay: releaseDay(20)},
-			today:      day(3, 19),
-			want:       []coveragePeriod{imported(1, day(1, 15), day(2, 14))},
-		},
-		{
-			name:       "release day before the period end falls in the next month",
-			statements: []coverageStatement{stmt(1, day(1, 15), day(2, 14))},
-			settings:   coverageSettings{ReleaseDay: releaseDay(10)},
-			today:      day(4, 10),
-			want:       []coveragePeriod{imported(1, day(1, 15), day(2, 14)), due(day(2, 15), day(3, 14))},
 		},
 		{
 			name:       "nothing due after closing",

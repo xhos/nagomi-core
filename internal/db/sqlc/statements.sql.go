@@ -550,7 +550,6 @@ select
   id,
   name,
   statements_start,
-  statement_release_day,
   closed_at
 from
   accounts
@@ -563,11 +562,10 @@ order by
 `
 
 type ListStatementDrivenAccountsRow struct {
-	ID                  int64      `db:"id" json:"id"`
-	Name                string     `db:"name" json:"name"`
-	StatementsStart     *time.Time `db:"statements_start" json:"statements_start"`
-	StatementReleaseDay *int16     `db:"statement_release_day" json:"statement_release_day"`
-	ClosedAt            *time.Time `db:"closed_at" json:"closed_at"`
+	ID              int64      `db:"id" json:"id"`
+	Name            string     `db:"name" json:"name"`
+	StatementsStart *time.Time `db:"statements_start" json:"statements_start"`
+	ClosedAt        *time.Time `db:"closed_at" json:"closed_at"`
 }
 
 func (q *Queries) ListStatementDrivenAccounts(ctx context.Context, userID uuid.UUID) ([]ListStatementDrivenAccountsRow, error) {
@@ -583,7 +581,6 @@ func (q *Queries) ListStatementDrivenAccounts(ctx context.Context, userID uuid.U
 			&i.ID,
 			&i.Name,
 			&i.StatementsStart,
-			&i.StatementReleaseDay,
 			&i.ClosedAt,
 		); err != nil {
 			return nil, err

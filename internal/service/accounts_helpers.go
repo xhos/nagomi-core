@@ -82,12 +82,6 @@ func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sq
 	} else if slices.Contains(masked, "statements_start") {
 		params.ClearStatementsStart = true
 	}
-	if req.StatementReleaseDay != nil {
-		day := int16(req.GetStatementReleaseDay())
-		params.StatementReleaseDay = &day
-	} else if slices.Contains(masked, "statement_release_day") {
-		params.ClearStatementReleaseDay = true
-	}
 	if req.ClosedAt != nil {
 		closed := dateToUTC(req.ClosedAt)
 		params.ClosedAt = &closed
@@ -170,10 +164,6 @@ func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) 
 		StatementDriven: a.StatementDriven,
 		StatementsStart: optionalDate(a.StatementsStart),
 		ClosedAt:        optionalDate(a.ClosedAt),
-	}
-	if a.StatementReleaseDay != nil {
-		day := int32(*a.StatementReleaseDay)
-		account.StatementReleaseDay = &day
 	}
 	return account
 }
