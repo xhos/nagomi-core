@@ -14,7 +14,7 @@ import (
 
 func requireInternal(ctx context.Context) error {
 	if internal, _ := ctx.Value(middleware.InternalAuthKey).(bool); !internal {
-		return connect.NewError(connect.CodePermissionDenied, errors.New("connector service requires internal auth"))
+		return connect.NewError(connect.CodePermissionDenied, errors.New("requires internal auth"))
 	}
 	return nil
 }

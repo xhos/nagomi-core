@@ -83,3 +83,7 @@ sql:
             go_type:
               import: 'nagomi-core/internal/gen/nagomi/v1'
               type: 'ReceiptStatus'
+          - column: 'received_emails.outcome'
+            go_type:
+              import: 'nagomi-core/internal/gen/nagomi/v1'
+              type: 'EmailOutcome'

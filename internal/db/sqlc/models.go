@@ -86,6 +86,18 @@ type ReceiptItem struct {
 	UpdatedAt      time.Time `db:"updated_at" json:"updated_at"`
 }
 
+type ReceivedEmail struct {
+	ID            int64               `db:"id" json:"id"`
+	UserID        uuid.UUID           `db:"user_id" json:"user_id"`
+	ReceivedAt    time.Time           `db:"received_at" json:"received_at"`
+	Sender        string              `db:"sender" json:"sender"`
+	Subject       string              `db:"subject" json:"subject"`
+	Outcome       nagomi.EmailOutcome `db:"outcome" json:"outcome"`
+	TransactionID *int64              `db:"transaction_id" json:"transaction_id"`
+	Error         *string             `db:"error" json:"error"`
+	Body          *string             `db:"body" json:"body"`
+}
+
 type Statement struct {
 	ID                  int64      `db:"id" json:"id"`
 	UserID              uuid.UUID  `db:"user_id" json:"user_id"`

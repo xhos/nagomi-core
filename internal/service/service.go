@@ -23,6 +23,7 @@ type Services struct {
 	Connector    ConnectorService
 	Connections  ConnectionService
 	Statements   StatementService
+	Emails       EmailService
 }
 
 func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, error) {
@@ -57,5 +58,6 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		Connector:    newConnSvc(queries, cipher, logger.WithPrefix("connector")),
 		Connections:  newConnectionSvc(queries, cipher),
 		Statements:   newStmtSvc(database.Pool(), queries, logger.WithPrefix("stmt"), cfg.NagomiStatementsURL, store, txnSvc),
+		Emails:       newEmailSvc(queries, logger.WithPrefix("email")),
 	}, nil
 }
