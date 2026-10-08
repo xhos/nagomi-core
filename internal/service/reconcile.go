@@ -354,17 +354,22 @@ func (r *reconciliation) apply(
 			actual := float64(line.GetAmountCents()) / float64(*tx.ForeignAmountCents)
 			rate = &actual
 		}
+		if line.ExchangeRate != nil {
+			rate = line.ExchangeRate
+		}
 
 		if err := q.ConfirmStatementTransaction(ctx, sqlc.ConfirmStatementTransactionParams{
 			ID:            tx.ID,
 			AccountID:     r.accountID,
 			TxDate:        txDate,
 			TxAmountCents: line.GetAmountCents(),
-			TxDesc:        line.GetDescription(),
-			ExchangeRate:  rate,
-			ExternalID:    r.externalIDs[m.Line],
-			StatementID:   stmt.ID,
-			Source:        source,
+			TxDesc:             line.GetDescription(),
+			ForeignAmountCents: line.ForeignAmountCents,
+			ForeignCurrency:    line.ForeignCurrency,
+			ExchangeRate:       rate,
+			ExternalID:         r.externalIDs[m.Line],
+			StatementID:        stmt.ID,
+			Source:             source,
 		}); err != nil {
 			return res, wrapErr("StatementService.Commit.Confirm", err)
 		}
@@ -390,6 +395,9 @@ func (r *reconciliation) apply(
 			TxCurrency:          stmt.Currency,
 			TxDirection:         int16(line.GetDirection()),
 			TxDesc:              &line.Description,
+			ForeignAmountCents:  line.ForeignAmountCents,
+			ForeignCurrency:     line.ForeignCurrency,
+			ExchangeRate:        line.ExchangeRate,
 			CategoryManuallySet: &notManual,
 			MerchantManuallySet: &notManual,
 			Source:              source,

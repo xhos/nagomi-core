@@ -184,6 +184,8 @@ set
   tx_date = @tx_date::timestamptz,
   tx_amount_cents = @tx_amount_cents::bigint,
   tx_desc = @tx_desc::text,
+  foreign_amount_cents = coalesce(sqlc.narg('foreign_amount_cents')::bigint, foreign_amount_cents),
+  foreign_currency = coalesce(sqlc.narg('foreign_currency')::char(3), foreign_currency),
   exchange_rate = coalesce(sqlc.narg('exchange_rate')::double precision, exchange_rate),
   external_id = @external_id::text,
   statement_id = @statement_id::bigint,

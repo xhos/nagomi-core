@@ -231,9 +231,15 @@ type ParsedStatementLine struct {
 	Date        *date.Date             `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
 	PostingDate *date.Date             `protobuf:"bytes,2,opt,name=posting_date,json=postingDate,proto3,oneof" json:"posting_date,omitempty"`
 	// always positive, sign lives in direction
-	AmountCents   int64                `protobuf:"varint,3,opt,name=amount_cents,json=amountCents,proto3" json:"amount_cents,omitempty"`
-	Direction     TransactionDirection `protobuf:"varint,4,opt,name=direction,proto3,enum=nagomi.v1.TransactionDirection" json:"direction,omitempty"`
-	Description   string               `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	AmountCents int64                `protobuf:"varint,3,opt,name=amount_cents,json=amountCents,proto3" json:"amount_cents,omitempty"`
+	Direction   TransactionDirection `protobuf:"varint,4,opt,name=direction,proto3,enum=nagomi.v1.TransactionDirection" json:"direction,omitempty"`
+	Description string               `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	// set when the line was charged in another currency; cents use the same
+	// hundredths scale as amount_cents, whatever the currency's minor unit
+	ForeignAmountCents *int64  `protobuf:"varint,6,opt,name=foreign_amount_cents,json=foreignAmountCents,proto3,oneof" json:"foreign_amount_cents,omitempty"`
+	ForeignCurrency    *string `protobuf:"bytes,7,opt,name=foreign_currency,json=foreignCurrency,proto3,oneof" json:"foreign_currency,omitempty"`
+	// foreign_currency to the statement's currency
+	ExchangeRate  *float64 `protobuf:"fixed64,8,opt,name=exchange_rate,json=exchangeRate,proto3,oneof" json:"exchange_rate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -303,6 +309,27 @@ func (x *ParsedStatementLine) GetDescription() string {
 	return ""
 }
 
+func (x *ParsedStatementLine) GetForeignAmountCents() int64 {
+	if x != nil && x.ForeignAmountCents != nil {
+		return *x.ForeignAmountCents
+	}
+	return 0
+}
+
+func (x *ParsedStatementLine) GetForeignCurrency() string {
+	if x != nil && x.ForeignCurrency != nil {
+		return *x.ForeignCurrency
+	}
+	return ""
+}
+
+func (x *ParsedStatementLine) GetExchangeRate() float64 {
+	if x != nil && x.ExchangeRate != nil {
+		return *x.ExchangeRate
+	}
+	return 0
+}
+
 var File_nagomi_v1_statement_parser_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_statement_parser_proto_rawDesc = "" +
@@ -326,14 +353,20 @@ const file_nagomi_v1_statement_parser_proto_rawDesc = "" +
 	"\x05lines\x18\n" +
 	" \x03(\v2\x1e.nagomi.v1.ParsedStatementLineR\x05linesB\x18\n" +
 	"\x16_opening_balance_centsB\x18\n" +
-	"\x16_closing_balance_cents\"\x8c\x02\n" +
+	"\x16_closing_balance_cents\"\xdd\x03\n" +
 	"\x13ParsedStatementLine\x12%\n" +
 	"\x04date\x18\x01 \x01(\v2\x11.google.type.DateR\x04date\x129\n" +
 	"\fposting_date\x18\x02 \x01(\v2\x11.google.type.DateH\x00R\vpostingDate\x88\x01\x01\x12!\n" +
 	"\famount_cents\x18\x03 \x01(\x03R\vamountCents\x12=\n" +
 	"\tdirection\x18\x04 \x01(\x0e2\x1f.nagomi.v1.TransactionDirectionR\tdirection\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescriptionB\x0f\n" +
-	"\r_posting_date2o\n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x125\n" +
+	"\x14foreign_amount_cents\x18\x06 \x01(\x03H\x01R\x12foreignAmountCents\x88\x01\x01\x12.\n" +
+	"\x10foreign_currency\x18\a \x01(\tH\x02R\x0fforeignCurrency\x88\x01\x01\x12(\n" +
+	"\rexchange_rate\x18\b \x01(\x01H\x03R\fexchangeRate\x88\x01\x01B\x0f\n" +
+	"\r_posting_dateB\x17\n" +
+	"\x15_foreign_amount_centsB\x13\n" +
+	"\x11_foreign_currencyB\x10\n" +
+	"\x0e_exchange_rate2o\n" +
 	"\x16StatementParserService\x12U\n" +
 	"\x0eParseStatement\x12 .nagomi.v1.ParseStatementRequest\x1a!.nagomi.v1.ParseStatementResponseB\x97\x01\n" +
 	"\rcom.nagomi.v1B\x14StatementParserProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +

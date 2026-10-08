@@ -18,25 +18,29 @@ set
   tx_date = $1::timestamptz,
   tx_amount_cents = $2::bigint,
   tx_desc = $3::text,
-  exchange_rate = coalesce($4::double precision, exchange_rate),
-  external_id = $5::text,
-  statement_id = $6::bigint,
-  source = $7::smallint
+  foreign_amount_cents = coalesce($4::bigint, foreign_amount_cents),
+  foreign_currency = coalesce($5::char(3), foreign_currency),
+  exchange_rate = coalesce($6::double precision, exchange_rate),
+  external_id = $7::text,
+  statement_id = $8::bigint,
+  source = $9::smallint
 where
-  id = $8::bigint
-  and account_id = $9::bigint
+  id = $10::bigint
+  and account_id = $11::bigint
 `
 
 type ConfirmStatementTransactionParams struct {
-	TxDate        time.Time `db:"tx_date" json:"tx_date"`
-	TxAmountCents int64     `db:"tx_amount_cents" json:"tx_amount_cents"`
-	TxDesc        string    `db:"tx_desc" json:"tx_desc"`
-	ExchangeRate  *float64  `db:"exchange_rate" json:"exchange_rate"`
-	ExternalID    string    `db:"external_id" json:"external_id"`
-	StatementID   int64     `db:"statement_id" json:"statement_id"`
-	Source        int16     `db:"source" json:"source"`
-	ID            int64     `db:"id" json:"id"`
-	AccountID     int64     `db:"account_id" json:"account_id"`
+	TxDate             time.Time `db:"tx_date" json:"tx_date"`
+	TxAmountCents      int64     `db:"tx_amount_cents" json:"tx_amount_cents"`
+	TxDesc             string    `db:"tx_desc" json:"tx_desc"`
+	ForeignAmountCents *int64    `db:"foreign_amount_cents" json:"foreign_amount_cents"`
+	ForeignCurrency    *string   `db:"foreign_currency" json:"foreign_currency"`
+	ExchangeRate       *float64  `db:"exchange_rate" json:"exchange_rate"`
+	ExternalID         string    `db:"external_id" json:"external_id"`
+	StatementID        int64     `db:"statement_id" json:"statement_id"`
+	Source             int16     `db:"source" json:"source"`
+	ID                 int64     `db:"id" json:"id"`
+	AccountID          int64     `db:"account_id" json:"account_id"`
 }
 
 func (q *Queries) ConfirmStatementTransaction(ctx context.Context, arg ConfirmStatementTransactionParams) error {
@@ -44,6 +48,8 @@ func (q *Queries) ConfirmStatementTransaction(ctx context.Context, arg ConfirmSt
 		arg.TxDate,
 		arg.TxAmountCents,
 		arg.TxDesc,
+		arg.ForeignAmountCents,
+		arg.ForeignCurrency,
 		arg.ExchangeRate,
 		arg.ExternalID,
 		arg.StatementID,
