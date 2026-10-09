@@ -1487,11 +1487,14 @@ func (*LinkTransferResponse) Descriptor() ([]byte, []int) {
 	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{22}
 }
 
+// marks a pair as not a transfer so matching never pairs it again
 type UnlinkTransferRequest struct {
 	state  protoimpl.MessageState `protogen:"open.v1"`
 	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	// either side of the transfer
 	TransactionId int64 `protobuf:"varint,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	// the other side, to reject one suggested pair; without it, the linked transfer is rejected
+	CounterpartId *int64 `protobuf:"varint,3,opt,name=counterpart_id,json=counterpartId,proto3,oneof" json:"counterpart_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1536,6 +1539,13 @@ func (x *UnlinkTransferRequest) GetUserId() string {
 func (x *UnlinkTransferRequest) GetTransactionId() int64 {
 	if x != nil {
 		return x.TransactionId
+	}
+	return 0
+}
+
+func (x *UnlinkTransferRequest) GetCounterpartId() int64 {
+	if x != nil && x.CounterpartId != nil {
+		return *x.CounterpartId
 	}
 	return 0
 }
@@ -1894,10 +1904,12 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"outgoingId\x12(\n" +
 	"\vincoming_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"incomingId\"\x16\n" +
-	"\x14LinkTransferResponse\"j\n" +
+	"\x14LinkTransferResponse\"\xb2\x01\n" +
 	"\x15UnlinkTransferRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12.\n" +
-	"\x0etransaction_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\rtransactionId\"\x18\n" +
+	"\x0etransaction_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\rtransactionId\x123\n" +
+	"\x0ecounterpart_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00H\x00R\rcounterpartId\x88\x01\x01B\x11\n" +
+	"\x0f_counterpart_id\"\x18\n" +
 	"\x16UnlinkTransferResponse\"C\n" +
 	"\x1eListTransferSuggestionsRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"|\n" +
@@ -2048,6 +2060,7 @@ func file_nagomi_v1_transaction_services_proto_init() {
 	file_nagomi_v1_transaction_services_proto_msgTypes[1].OneofWrappers = []any{}
 	file_nagomi_v1_transaction_services_proto_msgTypes[4].OneofWrappers = []any{}
 	file_nagomi_v1_transaction_services_proto_msgTypes[7].OneofWrappers = []any{}
+	file_nagomi_v1_transaction_services_proto_msgTypes[23].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

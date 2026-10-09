@@ -18,7 +18,8 @@ type TransferService interface {
 	// MatchAll runs Match over every user's history.
 	MatchAll(ctx context.Context)
 	Link(ctx context.Context, userID uuid.UUID, outgoingID, incomingID int64) error
-	Unlink(ctx context.Context, userID uuid.UUID, transactionID int64) error
+	// Unlink rejects the transaction's linked transfer, or with a counterpart, that one pair.
+	Unlink(ctx context.Context, userID uuid.UUID, transactionID int64, counterpartID *int64) error
 	ListSuggestions(ctx context.Context, userID uuid.UUID) ([]*pb.TransferSuggestion, error)
 }
 
@@ -197,8 +198,14 @@ func (s *transferSvc) Link(ctx context.Context, userID uuid.UUID, outgoingID, in
 	return nil
 }
 
-func (s *transferSvc) Unlink(ctx context.Context, userID uuid.UUID, transactionID int64) error {
-	n, err := s.queries.RejectTransfer(ctx, sqlc.RejectTransferParams{UserID: userID, TxID: transactionID})
+func (s *transferSvc) Unlink(ctx context.Context, userID uuid.UUID, transactionID int64, counterpartID *int64) error {
+	var n int64
+	var err error
+	if counterpartID != nil {
+		n, err = s.queries.RejectTransferPair(ctx, sqlc.RejectTransferPairParams{UserID: userID, A: transactionID, B: *counterpartID})
+	} else {
+		n, err = s.queries.RejectTransfer(ctx, sqlc.RejectTransferParams{UserID: userID, TxID: transactionID})
+	}
 	if err != nil {
 		return wrapErr("TransferService.Unlink", err)
 	}

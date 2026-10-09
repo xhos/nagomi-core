@@ -63,6 +63,13 @@ where user_id = @user_id::uuid
   and status = 1
   and (out_tx_id = @tx_id::bigint or in_tx_id = @tx_id::bigint);
 
+-- name: RejectTransferPair :execrows
+update transfers
+set status = 3
+where user_id = @user_id::uuid
+  and status in (1, 2)
+  and ((out_tx_id = @a::bigint and in_tx_id = @b::bigint) or (out_tx_id = @b::bigint and in_tx_id = @a::bigint));
+
 -- name: CountLinkedTransfers :one
 select count(*)
 from transfers

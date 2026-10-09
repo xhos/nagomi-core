@@ -78,7 +78,7 @@ func TestTransfersEndToEnd(t *testing.T) {
 	}
 
 	// an unlinked pair stays apart when matching runs again
-	if err := svc.Unlink(ctx, user, sweepIn); err != nil {
+	if err := svc.Unlink(ctx, user, sweepIn, nil); err != nil {
 		t.Fatal(err)
 	}
 	svc.Match(ctx, user, []int64{sweepOut, topUpOut})
@@ -103,5 +103,20 @@ func TestTransfersEndToEnd(t *testing.T) {
 	}
 	if got.GetTransfer().GetMethod() != pb.TransferMethod_TRANSFER_METHOD_MANUAL {
 		t.Errorf("method = %v, want manual", got.GetTransfer().GetMethod())
+	}
+
+	// a pair with nothing in common is suggested, and dismissing it sticks
+	purchase := create(chequing, 5000, out, "AMAZON.CA")
+	gift := create(savings, 5000, in, "E-TRANSFER RECEIVED ALEX")
+	svc.Match(ctx, user, []int64{purchase})
+	suggestions, err := svc.ListSuggestions(ctx, user)
+	if err != nil || len(suggestions) != 1 || suggestions[0].GetIncoming().GetId() != gift {
+		t.Fatalf("suggestions = %v, err %v; want the purchase and the gift", suggestions, err)
+	}
+	if err := svc.Unlink(ctx, user, gift, &purchase); err != nil {
+		t.Fatal(err)
+	}
+	if suggestions, _ := svc.ListSuggestions(ctx, user); len(suggestions) != 0 {
+		t.Errorf("dismissed suggestion came back: %v", suggestions)
 	}
 }

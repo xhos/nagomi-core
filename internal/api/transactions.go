@@ -175,7 +175,7 @@ func (s *Server) UnlinkTransfer(ctx context.Context, req *connect.Request[pb.Unl
 		return nil, err
 	}
 
-	if err := s.services.Transfers.Unlink(ctx, userID, req.Msg.GetTransactionId()); err != nil {
+	if err := s.services.Transfers.Unlink(ctx, userID, req.Msg.GetTransactionId(), req.Msg.CounterpartId); err != nil {
 		return nil, wrapErr(err)
 	}
 

@@ -445,6 +445,28 @@ func (q *Queries) RejectTransfer(ctx context.Context, arg RejectTransferParams) 
 	return result.RowsAffected(), nil
 }
 
+const rejectTransferPair = `-- name: RejectTransferPair :execrows
+update transfers
+set status = 3
+where user_id = $1::uuid
+  and status in (1, 2)
+  and ((out_tx_id = $2::bigint and in_tx_id = $3::bigint) or (out_tx_id = $3::bigint and in_tx_id = $2::bigint))
+`
+
+type RejectTransferPairParams struct {
+	UserID uuid.UUID `db:"user_id" json:"user_id"`
+	A      int64     `db:"a" json:"a"`
+	B      int64     `db:"b" json:"b"`
+}
+
+func (q *Queries) RejectTransferPair(ctx context.Context, arg RejectTransferPairParams) (int64, error) {
+	result, err := q.db.Exec(ctx, rejectTransferPair, arg.UserID, arg.A, arg.B)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const setTransferRef = `-- name: SetTransferRef :one
 update transactions t
 set transfer_ref = $1::text
