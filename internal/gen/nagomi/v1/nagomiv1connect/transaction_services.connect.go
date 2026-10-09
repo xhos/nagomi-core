@@ -60,6 +60,15 @@ const (
 	// TransactionServiceGetFriendBalancesProcedure is the fully-qualified name of the
 	// TransactionService's GetFriendBalances RPC.
 	TransactionServiceGetFriendBalancesProcedure = "/nagomi.v1.TransactionService/GetFriendBalances"
+	// TransactionServiceLinkTransferProcedure is the fully-qualified name of the TransactionService's
+	// LinkTransfer RPC.
+	TransactionServiceLinkTransferProcedure = "/nagomi.v1.TransactionService/LinkTransfer"
+	// TransactionServiceUnlinkTransferProcedure is the fully-qualified name of the TransactionService's
+	// UnlinkTransfer RPC.
+	TransactionServiceUnlinkTransferProcedure = "/nagomi.v1.TransactionService/UnlinkTransfer"
+	// TransactionServiceListTransferSuggestionsProcedure is the fully-qualified name of the
+	// TransactionService's ListTransferSuggestions RPC.
+	TransactionServiceListTransferSuggestionsProcedure = "/nagomi.v1.TransactionService/ListTransferSuggestions"
 )
 
 // TransactionServiceClient is a client for the nagomi.v1.TransactionService service.
@@ -73,6 +82,9 @@ type TransactionServiceClient interface {
 	SplitTransaction(context.Context, *connect.Request[v1.SplitTransactionRequest]) (*connect.Response[v1.SplitTransactionResponse], error)
 	ForgiveTransaction(context.Context, *connect.Request[v1.ForgiveTransactionRequest]) (*connect.Response[v1.ForgiveTransactionResponse], error)
 	GetFriendBalances(context.Context, *connect.Request[v1.GetFriendBalancesRequest]) (*connect.Response[v1.GetFriendBalancesResponse], error)
+	LinkTransfer(context.Context, *connect.Request[v1.LinkTransferRequest]) (*connect.Response[v1.LinkTransferResponse], error)
+	UnlinkTransfer(context.Context, *connect.Request[v1.UnlinkTransferRequest]) (*connect.Response[v1.UnlinkTransferResponse], error)
+	ListTransferSuggestions(context.Context, *connect.Request[v1.ListTransferSuggestionsRequest]) (*connect.Response[v1.ListTransferSuggestionsResponse], error)
 }
 
 // NewTransactionServiceClient constructs a client for the nagomi.v1.TransactionService service. By
@@ -140,20 +152,41 @@ func NewTransactionServiceClient(httpClient connect.HTTPClient, baseURL string, 
 			connect.WithSchema(transactionServiceMethods.ByName("GetFriendBalances")),
 			connect.WithClientOptions(opts...),
 		),
+		linkTransfer: connect.NewClient[v1.LinkTransferRequest, v1.LinkTransferResponse](
+			httpClient,
+			baseURL+TransactionServiceLinkTransferProcedure,
+			connect.WithSchema(transactionServiceMethods.ByName("LinkTransfer")),
+			connect.WithClientOptions(opts...),
+		),
+		unlinkTransfer: connect.NewClient[v1.UnlinkTransferRequest, v1.UnlinkTransferResponse](
+			httpClient,
+			baseURL+TransactionServiceUnlinkTransferProcedure,
+			connect.WithSchema(transactionServiceMethods.ByName("UnlinkTransfer")),
+			connect.WithClientOptions(opts...),
+		),
+		listTransferSuggestions: connect.NewClient[v1.ListTransferSuggestionsRequest, v1.ListTransferSuggestionsResponse](
+			httpClient,
+			baseURL+TransactionServiceListTransferSuggestionsProcedure,
+			connect.WithSchema(transactionServiceMethods.ByName("ListTransferSuggestions")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // transactionServiceClient implements TransactionServiceClient.
 type transactionServiceClient struct {
-	listTransactions       *connect.Client[v1.ListTransactionsRequest, v1.ListTransactionsResponse]
-	getTransaction         *connect.Client[v1.GetTransactionRequest, v1.GetTransactionResponse]
-	createTransaction      *connect.Client[v1.CreateTransactionRequest, v1.CreateTransactionResponse]
-	updateTransaction      *connect.Client[v1.UpdateTransactionRequest, v1.UpdateTransactionResponse]
-	deleteTransaction      *connect.Client[v1.DeleteTransactionRequest, v1.DeleteTransactionResponse]
-	categorizeTransactions *connect.Client[v1.CategorizeTransactionsRequest, v1.CategorizeTransactionsResponse]
-	splitTransaction       *connect.Client[v1.SplitTransactionRequest, v1.SplitTransactionResponse]
-	forgiveTransaction     *connect.Client[v1.ForgiveTransactionRequest, v1.ForgiveTransactionResponse]
-	getFriendBalances      *connect.Client[v1.GetFriendBalancesRequest, v1.GetFriendBalancesResponse]
+	listTransactions        *connect.Client[v1.ListTransactionsRequest, v1.ListTransactionsResponse]
+	getTransaction          *connect.Client[v1.GetTransactionRequest, v1.GetTransactionResponse]
+	createTransaction       *connect.Client[v1.CreateTransactionRequest, v1.CreateTransactionResponse]
+	updateTransaction       *connect.Client[v1.UpdateTransactionRequest, v1.UpdateTransactionResponse]
+	deleteTransaction       *connect.Client[v1.DeleteTransactionRequest, v1.DeleteTransactionResponse]
+	categorizeTransactions  *connect.Client[v1.CategorizeTransactionsRequest, v1.CategorizeTransactionsResponse]
+	splitTransaction        *connect.Client[v1.SplitTransactionRequest, v1.SplitTransactionResponse]
+	forgiveTransaction      *connect.Client[v1.ForgiveTransactionRequest, v1.ForgiveTransactionResponse]
+	getFriendBalances       *connect.Client[v1.GetFriendBalancesRequest, v1.GetFriendBalancesResponse]
+	linkTransfer            *connect.Client[v1.LinkTransferRequest, v1.LinkTransferResponse]
+	unlinkTransfer          *connect.Client[v1.UnlinkTransferRequest, v1.UnlinkTransferResponse]
+	listTransferSuggestions *connect.Client[v1.ListTransferSuggestionsRequest, v1.ListTransferSuggestionsResponse]
 }
 
 // ListTransactions calls nagomi.v1.TransactionService.ListTransactions.
@@ -201,6 +234,21 @@ func (c *transactionServiceClient) GetFriendBalances(ctx context.Context, req *c
 	return c.getFriendBalances.CallUnary(ctx, req)
 }
 
+// LinkTransfer calls nagomi.v1.TransactionService.LinkTransfer.
+func (c *transactionServiceClient) LinkTransfer(ctx context.Context, req *connect.Request[v1.LinkTransferRequest]) (*connect.Response[v1.LinkTransferResponse], error) {
+	return c.linkTransfer.CallUnary(ctx, req)
+}
+
+// UnlinkTransfer calls nagomi.v1.TransactionService.UnlinkTransfer.
+func (c *transactionServiceClient) UnlinkTransfer(ctx context.Context, req *connect.Request[v1.UnlinkTransferRequest]) (*connect.Response[v1.UnlinkTransferResponse], error) {
+	return c.unlinkTransfer.CallUnary(ctx, req)
+}
+
+// ListTransferSuggestions calls nagomi.v1.TransactionService.ListTransferSuggestions.
+func (c *transactionServiceClient) ListTransferSuggestions(ctx context.Context, req *connect.Request[v1.ListTransferSuggestionsRequest]) (*connect.Response[v1.ListTransferSuggestionsResponse], error) {
+	return c.listTransferSuggestions.CallUnary(ctx, req)
+}
+
 // TransactionServiceHandler is an implementation of the nagomi.v1.TransactionService service.
 type TransactionServiceHandler interface {
 	ListTransactions(context.Context, *connect.Request[v1.ListTransactionsRequest]) (*connect.Response[v1.ListTransactionsResponse], error)
@@ -212,6 +260,9 @@ type TransactionServiceHandler interface {
 	SplitTransaction(context.Context, *connect.Request[v1.SplitTransactionRequest]) (*connect.Response[v1.SplitTransactionResponse], error)
 	ForgiveTransaction(context.Context, *connect.Request[v1.ForgiveTransactionRequest]) (*connect.Response[v1.ForgiveTransactionResponse], error)
 	GetFriendBalances(context.Context, *connect.Request[v1.GetFriendBalancesRequest]) (*connect.Response[v1.GetFriendBalancesResponse], error)
+	LinkTransfer(context.Context, *connect.Request[v1.LinkTransferRequest]) (*connect.Response[v1.LinkTransferResponse], error)
+	UnlinkTransfer(context.Context, *connect.Request[v1.UnlinkTransferRequest]) (*connect.Response[v1.UnlinkTransferResponse], error)
+	ListTransferSuggestions(context.Context, *connect.Request[v1.ListTransferSuggestionsRequest]) (*connect.Response[v1.ListTransferSuggestionsResponse], error)
 }
 
 // NewTransactionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -275,6 +326,24 @@ func NewTransactionServiceHandler(svc TransactionServiceHandler, opts ...connect
 		connect.WithSchema(transactionServiceMethods.ByName("GetFriendBalances")),
 		connect.WithHandlerOptions(opts...),
 	)
+	transactionServiceLinkTransferHandler := connect.NewUnaryHandler(
+		TransactionServiceLinkTransferProcedure,
+		svc.LinkTransfer,
+		connect.WithSchema(transactionServiceMethods.ByName("LinkTransfer")),
+		connect.WithHandlerOptions(opts...),
+	)
+	transactionServiceUnlinkTransferHandler := connect.NewUnaryHandler(
+		TransactionServiceUnlinkTransferProcedure,
+		svc.UnlinkTransfer,
+		connect.WithSchema(transactionServiceMethods.ByName("UnlinkTransfer")),
+		connect.WithHandlerOptions(opts...),
+	)
+	transactionServiceListTransferSuggestionsHandler := connect.NewUnaryHandler(
+		TransactionServiceListTransferSuggestionsProcedure,
+		svc.ListTransferSuggestions,
+		connect.WithSchema(transactionServiceMethods.ByName("ListTransferSuggestions")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/nagomi.v1.TransactionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case TransactionServiceListTransactionsProcedure:
@@ -295,6 +364,12 @@ func NewTransactionServiceHandler(svc TransactionServiceHandler, opts ...connect
 			transactionServiceForgiveTransactionHandler.ServeHTTP(w, r)
 		case TransactionServiceGetFriendBalancesProcedure:
 			transactionServiceGetFriendBalancesHandler.ServeHTTP(w, r)
+		case TransactionServiceLinkTransferProcedure:
+			transactionServiceLinkTransferHandler.ServeHTTP(w, r)
+		case TransactionServiceUnlinkTransferProcedure:
+			transactionServiceUnlinkTransferHandler.ServeHTTP(w, r)
+		case TransactionServiceListTransferSuggestionsProcedure:
+			transactionServiceListTransferSuggestionsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -338,4 +413,16 @@ func (UnimplementedTransactionServiceHandler) ForgiveTransaction(context.Context
 
 func (UnimplementedTransactionServiceHandler) GetFriendBalances(context.Context, *connect.Request[v1.GetFriendBalancesRequest]) (*connect.Response[v1.GetFriendBalancesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.TransactionService.GetFriendBalances is not implemented"))
+}
+
+func (UnimplementedTransactionServiceHandler) LinkTransfer(context.Context, *connect.Request[v1.LinkTransferRequest]) (*connect.Response[v1.LinkTransferResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.TransactionService.LinkTransfer is not implemented"))
+}
+
+func (UnimplementedTransactionServiceHandler) UnlinkTransfer(context.Context, *connect.Request[v1.UnlinkTransferRequest]) (*connect.Response[v1.UnlinkTransferResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.TransactionService.UnlinkTransfer is not implemented"))
+}
+
+func (UnimplementedTransactionServiceHandler) ListTransferSuggestions(context.Context, *connect.Request[v1.ListTransferSuggestionsRequest]) (*connect.Response[v1.ListTransferSuggestionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.TransactionService.ListTransferSuggestions is not implemented"))
 }

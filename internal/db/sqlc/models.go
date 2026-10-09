@@ -148,6 +148,13 @@ type Transaction struct {
 	Forgiven            bool                        `db:"forgiven" json:"forgiven"`
 	Source              int16                       `db:"source" json:"source"`
 	StatementID         *int64                      `db:"statement_id" json:"statement_id"`
+	TransferRef         *string                     `db:"transfer_ref" json:"transfer_ref"`
+}
+
+type TransactionReport struct {
+	ID          int64 `db:"id" json:"id"`
+	IsTransfer  bool  `db:"is_transfer" json:"is_transfer"`
+	ReportCents int64 `db:"report_cents" json:"report_cents"`
 }
 
 type TransactionRule struct {
@@ -165,6 +172,16 @@ type TransactionRule struct {
 	UpdatedAt     time.Time  `db:"updated_at" json:"updated_at"`
 	LastAppliedAt *time.Time `db:"last_applied_at" json:"last_applied_at"`
 	TimesApplied  *int32     `db:"times_applied" json:"times_applied"`
+}
+
+type Transfer struct {
+	ID        int64     `db:"id" json:"id"`
+	UserID    uuid.UUID `db:"user_id" json:"user_id"`
+	OutTxID   int64     `db:"out_tx_id" json:"out_tx_id"`
+	InTxID    int64     `db:"in_tx_id" json:"in_tx_id"`
+	Status    int16     `db:"status" json:"status"`
+	Method    int16     `db:"method" json:"method"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
 type User struct {

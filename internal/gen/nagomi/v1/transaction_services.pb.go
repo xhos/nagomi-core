@@ -376,7 +376,9 @@ type TransactionInput struct {
 	SplitFromId   *int64                 `protobuf:"varint,11,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
 	ExternalId    *string                `protobuf:"bytes,12,opt,name=external_id,json=externalId,proto3,oneof" json:"external_id,omitempty"`
 	// unspecified is manual
-	Source        TransactionSource `protobuf:"varint,13,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
+	Source TransactionSource `protobuf:"varint,13,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
+	// rows sharing a transfer_ref are the two sides of one transfer
+	TransferRef   *string `protobuf:"bytes,14,opt,name=transfer_ref,json=transferRef,proto3,oneof" json:"transfer_ref,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -500,6 +502,13 @@ func (x *TransactionInput) GetSource() TransactionSource {
 		return x.Source
 	}
 	return TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED
+}
+
+func (x *TransactionInput) GetTransferRef() string {
+	if x != nil && x.TransferRef != nil {
+		return *x.TransferRef
+	}
+	return ""
 }
 
 type CreateTransactionRequest struct {
@@ -1382,6 +1391,331 @@ func (x *GetFriendBalancesResponse) GetBalances() []*FriendBalance {
 	return nil
 }
 
+type LinkTransferRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	OutgoingId    int64                  `protobuf:"varint,2,opt,name=outgoing_id,json=outgoingId,proto3" json:"outgoing_id,omitempty"`
+	IncomingId    int64                  `protobuf:"varint,3,opt,name=incoming_id,json=incomingId,proto3" json:"incoming_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LinkTransferRequest) Reset() {
+	*x = LinkTransferRequest{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LinkTransferRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LinkTransferRequest) ProtoMessage() {}
+
+func (x *LinkTransferRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LinkTransferRequest.ProtoReflect.Descriptor instead.
+func (*LinkTransferRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *LinkTransferRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *LinkTransferRequest) GetOutgoingId() int64 {
+	if x != nil {
+		return x.OutgoingId
+	}
+	return 0
+}
+
+func (x *LinkTransferRequest) GetIncomingId() int64 {
+	if x != nil {
+		return x.IncomingId
+	}
+	return 0
+}
+
+type LinkTransferResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LinkTransferResponse) Reset() {
+	*x = LinkTransferResponse{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LinkTransferResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LinkTransferResponse) ProtoMessage() {}
+
+func (x *LinkTransferResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LinkTransferResponse.ProtoReflect.Descriptor instead.
+func (*LinkTransferResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{22}
+}
+
+type UnlinkTransferRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// either side of the transfer
+	TransactionId int64 `protobuf:"varint,2,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnlinkTransferRequest) Reset() {
+	*x = UnlinkTransferRequest{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnlinkTransferRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnlinkTransferRequest) ProtoMessage() {}
+
+func (x *UnlinkTransferRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnlinkTransferRequest.ProtoReflect.Descriptor instead.
+func (*UnlinkTransferRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UnlinkTransferRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UnlinkTransferRequest) GetTransactionId() int64 {
+	if x != nil {
+		return x.TransactionId
+	}
+	return 0
+}
+
+type UnlinkTransferResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnlinkTransferResponse) Reset() {
+	*x = UnlinkTransferResponse{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnlinkTransferResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnlinkTransferResponse) ProtoMessage() {}
+
+func (x *UnlinkTransferResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnlinkTransferResponse.ProtoReflect.Descriptor instead.
+func (*UnlinkTransferResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{24}
+}
+
+type ListTransferSuggestionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTransferSuggestionsRequest) Reset() {
+	*x = ListTransferSuggestionsRequest{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTransferSuggestionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTransferSuggestionsRequest) ProtoMessage() {}
+
+func (x *ListTransferSuggestionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTransferSuggestionsRequest.ProtoReflect.Descriptor instead.
+func (*ListTransferSuggestionsRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ListTransferSuggestionsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type TransferSuggestion struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Outgoing      *Transaction           `protobuf:"bytes,1,opt,name=outgoing,proto3" json:"outgoing,omitempty"`
+	Incoming      *Transaction           `protobuf:"bytes,2,opt,name=incoming,proto3" json:"incoming,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferSuggestion) Reset() {
+	*x = TransferSuggestion{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferSuggestion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferSuggestion) ProtoMessage() {}
+
+func (x *TransferSuggestion) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferSuggestion.ProtoReflect.Descriptor instead.
+func (*TransferSuggestion) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *TransferSuggestion) GetOutgoing() *Transaction {
+	if x != nil {
+		return x.Outgoing
+	}
+	return nil
+}
+
+func (x *TransferSuggestion) GetIncoming() *Transaction {
+	if x != nil {
+		return x.Incoming
+	}
+	return nil
+}
+
+type ListTransferSuggestionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Suggestions   []*TransferSuggestion  `protobuf:"bytes,1,rep,name=suggestions,proto3" json:"suggestions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTransferSuggestionsResponse) Reset() {
+	*x = ListTransferSuggestionsResponse{}
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTransferSuggestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTransferSuggestionsResponse) ProtoMessage() {}
+
+func (x *ListTransferSuggestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_services_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTransferSuggestionsResponse.ProtoReflect.Descriptor instead.
+func (*ListTransferSuggestionsResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_services_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListTransferSuggestionsResponse) GetSuggestions() []*TransferSuggestion {
+	if x != nil {
+		return x.Suggestions
+	}
+	return nil
+}
+
 var File_nagomi_v1_transaction_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
@@ -1443,7 +1777,7 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
 	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"R\n" +
 	"\x16GetTransactionResponse\x128\n" +
-	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\xc0\a\n" +
+	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\"\x85\b\n" +
 	"\x10TransactionInput\x12&\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\taccountId\x12;\n" +
@@ -1464,7 +1798,9 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\rsplit_from_id\x18\v \x01(\x03H\x06R\vsplitFromId\x88\x01\x01\x12$\n" +
 	"\vexternal_id\x18\f \x01(\tH\aR\n" +
 	"externalId\x88\x01\x01\x12>\n" +
-	"\x06source\x18\r \x01(\x0e2\x1c.nagomi.v1.TransactionSourceB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06sourceB\x0e\n" +
+	"\x06source\x18\r \x01(\x0e2\x1c.nagomi.v1.TransactionSourceB\b\xbaH\x05\x82\x01\x02\x10\x01R\x06source\x122\n" +
+	"\ftransfer_ref\x18\x0e \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xc8\x01H\bR\vtransferRef\x88\x01\x01B\x0e\n" +
 	"\f_descriptionB\v\n" +
 	"\t_merchantB\r\n" +
 	"\v_user_notesB\x0e\n" +
@@ -1472,7 +1808,8 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\x0f_foreign_amountB\x10\n" +
 	"\x0e_exchange_rateB\x10\n" +
 	"\x0e_split_from_idB\x0e\n" +
-	"\f_external_id\"\x88\x01\n" +
+	"\f_external_idB\x0f\n" +
+	"\r_transfer_ref\"\x88\x01\n" +
 	"\x18CreateTransactionRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12I\n" +
 	"\ftransactions\x18\x02 \x03(\v2\x1b.nagomi.v1.TransactionInputB\b\xbaH\x05\x92\x01\x02\b\x01R\ftransactions\"|\n" +
@@ -1550,7 +1887,25 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"friendName\x12,\n" +
 	"\abalance\x18\x03 \x01(\v2\x12.google.type.MoneyR\abalance\"Q\n" +
 	"\x19GetFriendBalancesResponse\x124\n" +
-	"\bbalances\x18\x01 \x03(\v2\x18.nagomi.v1.FriendBalanceR\bbalances2\xf7\x06\n" +
+	"\bbalances\x18\x01 \x03(\v2\x18.nagomi.v1.FriendBalanceR\bbalances\"\x8c\x01\n" +
+	"\x13LinkTransferRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12(\n" +
+	"\voutgoing_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"outgoingId\x12(\n" +
+	"\vincoming_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"incomingId\"\x16\n" +
+	"\x14LinkTransferResponse\"j\n" +
+	"\x15UnlinkTransferRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12.\n" +
+	"\x0etransaction_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\rtransactionId\"\x18\n" +
+	"\x16UnlinkTransferResponse\"C\n" +
+	"\x1eListTransferSuggestionsRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"|\n" +
+	"\x12TransferSuggestion\x122\n" +
+	"\boutgoing\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\boutgoing\x122\n" +
+	"\bincoming\x18\x02 \x01(\v2\x16.nagomi.v1.TransactionR\bincoming\"b\n" +
+	"\x1fListTransferSuggestionsResponse\x12?\n" +
+	"\vsuggestions\x18\x01 \x03(\v2\x1d.nagomi.v1.TransferSuggestionR\vsuggestions2\x91\t\n" +
 	"\x12TransactionService\x12[\n" +
 	"\x10ListTransactions\x12\".nagomi.v1.ListTransactionsRequest\x1a#.nagomi.v1.ListTransactionsResponse\x12U\n" +
 	"\x0eGetTransaction\x12 .nagomi.v1.GetTransactionRequest\x1a!.nagomi.v1.GetTransactionResponse\x12^\n" +
@@ -1560,7 +1915,10 @@ const file_nagomi_v1_transaction_services_proto_rawDesc = "" +
 	"\x16CategorizeTransactions\x12(.nagomi.v1.CategorizeTransactionsRequest\x1a).nagomi.v1.CategorizeTransactionsResponse\x12[\n" +
 	"\x10SplitTransaction\x12\".nagomi.v1.SplitTransactionRequest\x1a#.nagomi.v1.SplitTransactionResponse\x12a\n" +
 	"\x12ForgiveTransaction\x12$.nagomi.v1.ForgiveTransactionRequest\x1a%.nagomi.v1.ForgiveTransactionResponse\x12^\n" +
-	"\x11GetFriendBalances\x12#.nagomi.v1.GetFriendBalancesRequest\x1a$.nagomi.v1.GetFriendBalancesResponseB\x9b\x01\n" +
+	"\x11GetFriendBalances\x12#.nagomi.v1.GetFriendBalancesRequest\x1a$.nagomi.v1.GetFriendBalancesResponse\x12O\n" +
+	"\fLinkTransfer\x12\x1e.nagomi.v1.LinkTransferRequest\x1a\x1f.nagomi.v1.LinkTransferResponse\x12U\n" +
+	"\x0eUnlinkTransfer\x12 .nagomi.v1.UnlinkTransferRequest\x1a!.nagomi.v1.UnlinkTransferResponse\x12p\n" +
+	"\x17ListTransferSuggestions\x12).nagomi.v1.ListTransferSuggestionsRequest\x1a*.nagomi.v1.ListTransferSuggestionsResponseB\x9b\x01\n" +
 	"\rcom.nagomi.v1B\x18TransactionServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -1576,90 +1934,106 @@ func file_nagomi_v1_transaction_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_transaction_services_proto_rawDescData
 }
 
-var file_nagomi_v1_transaction_services_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_nagomi_v1_transaction_services_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_nagomi_v1_transaction_services_proto_goTypes = []any{
-	(*ListTransactionsRequest)(nil),        // 0: nagomi.v1.ListTransactionsRequest
-	(*ListTransactionsResponse)(nil),       // 1: nagomi.v1.ListTransactionsResponse
-	(*GetTransactionRequest)(nil),          // 2: nagomi.v1.GetTransactionRequest
-	(*GetTransactionResponse)(nil),         // 3: nagomi.v1.GetTransactionResponse
-	(*TransactionInput)(nil),               // 4: nagomi.v1.TransactionInput
-	(*CreateTransactionRequest)(nil),       // 5: nagomi.v1.CreateTransactionRequest
-	(*CreateTransactionResponse)(nil),      // 6: nagomi.v1.CreateTransactionResponse
-	(*UpdateTransactionRequest)(nil),       // 7: nagomi.v1.UpdateTransactionRequest
-	(*UpdateTransactionResponse)(nil),      // 8: nagomi.v1.UpdateTransactionResponse
-	(*DeleteTransactionRequest)(nil),       // 9: nagomi.v1.DeleteTransactionRequest
-	(*DeleteTransactionResponse)(nil),      // 10: nagomi.v1.DeleteTransactionResponse
-	(*CategorizeTransactionsRequest)(nil),  // 11: nagomi.v1.CategorizeTransactionsRequest
-	(*CategorizeTransactionsResponse)(nil), // 12: nagomi.v1.CategorizeTransactionsResponse
-	(*SplitEntry)(nil),                     // 13: nagomi.v1.SplitEntry
-	(*SplitTransactionRequest)(nil),        // 14: nagomi.v1.SplitTransactionRequest
-	(*SplitTransactionResponse)(nil),       // 15: nagomi.v1.SplitTransactionResponse
-	(*ForgiveTransactionRequest)(nil),      // 16: nagomi.v1.ForgiveTransactionRequest
-	(*ForgiveTransactionResponse)(nil),     // 17: nagomi.v1.ForgiveTransactionResponse
-	(*GetFriendBalancesRequest)(nil),       // 18: nagomi.v1.GetFriendBalancesRequest
-	(*FriendBalance)(nil),                  // 19: nagomi.v1.FriendBalance
-	(*GetFriendBalancesResponse)(nil),      // 20: nagomi.v1.GetFriendBalancesResponse
-	(*timestamppb.Timestamp)(nil),          // 21: google.protobuf.Timestamp
-	(*Cursor)(nil),                         // 22: nagomi.v1.Cursor
-	(*money.Money)(nil),                    // 23: google.type.Money
-	(TransactionDirection)(0),              // 24: nagomi.v1.TransactionDirection
-	(*TimeOfDay)(nil),                      // 25: nagomi.v1.TimeOfDay
-	(*Transaction)(nil),                    // 26: nagomi.v1.Transaction
-	(TransactionSource)(0),                 // 27: nagomi.v1.TransactionSource
-	(*fieldmaskpb.FieldMask)(nil),          // 28: google.protobuf.FieldMask
+	(*ListTransactionsRequest)(nil),         // 0: nagomi.v1.ListTransactionsRequest
+	(*ListTransactionsResponse)(nil),        // 1: nagomi.v1.ListTransactionsResponse
+	(*GetTransactionRequest)(nil),           // 2: nagomi.v1.GetTransactionRequest
+	(*GetTransactionResponse)(nil),          // 3: nagomi.v1.GetTransactionResponse
+	(*TransactionInput)(nil),                // 4: nagomi.v1.TransactionInput
+	(*CreateTransactionRequest)(nil),        // 5: nagomi.v1.CreateTransactionRequest
+	(*CreateTransactionResponse)(nil),       // 6: nagomi.v1.CreateTransactionResponse
+	(*UpdateTransactionRequest)(nil),        // 7: nagomi.v1.UpdateTransactionRequest
+	(*UpdateTransactionResponse)(nil),       // 8: nagomi.v1.UpdateTransactionResponse
+	(*DeleteTransactionRequest)(nil),        // 9: nagomi.v1.DeleteTransactionRequest
+	(*DeleteTransactionResponse)(nil),       // 10: nagomi.v1.DeleteTransactionResponse
+	(*CategorizeTransactionsRequest)(nil),   // 11: nagomi.v1.CategorizeTransactionsRequest
+	(*CategorizeTransactionsResponse)(nil),  // 12: nagomi.v1.CategorizeTransactionsResponse
+	(*SplitEntry)(nil),                      // 13: nagomi.v1.SplitEntry
+	(*SplitTransactionRequest)(nil),         // 14: nagomi.v1.SplitTransactionRequest
+	(*SplitTransactionResponse)(nil),        // 15: nagomi.v1.SplitTransactionResponse
+	(*ForgiveTransactionRequest)(nil),       // 16: nagomi.v1.ForgiveTransactionRequest
+	(*ForgiveTransactionResponse)(nil),      // 17: nagomi.v1.ForgiveTransactionResponse
+	(*GetFriendBalancesRequest)(nil),        // 18: nagomi.v1.GetFriendBalancesRequest
+	(*FriendBalance)(nil),                   // 19: nagomi.v1.FriendBalance
+	(*GetFriendBalancesResponse)(nil),       // 20: nagomi.v1.GetFriendBalancesResponse
+	(*LinkTransferRequest)(nil),             // 21: nagomi.v1.LinkTransferRequest
+	(*LinkTransferResponse)(nil),            // 22: nagomi.v1.LinkTransferResponse
+	(*UnlinkTransferRequest)(nil),           // 23: nagomi.v1.UnlinkTransferRequest
+	(*UnlinkTransferResponse)(nil),          // 24: nagomi.v1.UnlinkTransferResponse
+	(*ListTransferSuggestionsRequest)(nil),  // 25: nagomi.v1.ListTransferSuggestionsRequest
+	(*TransferSuggestion)(nil),              // 26: nagomi.v1.TransferSuggestion
+	(*ListTransferSuggestionsResponse)(nil), // 27: nagomi.v1.ListTransferSuggestionsResponse
+	(*timestamppb.Timestamp)(nil),           // 28: google.protobuf.Timestamp
+	(*Cursor)(nil),                          // 29: nagomi.v1.Cursor
+	(*money.Money)(nil),                     // 30: google.type.Money
+	(TransactionDirection)(0),               // 31: nagomi.v1.TransactionDirection
+	(*TimeOfDay)(nil),                       // 32: nagomi.v1.TimeOfDay
+	(*Transaction)(nil),                     // 33: nagomi.v1.Transaction
+	(TransactionSource)(0),                  // 34: nagomi.v1.TransactionSource
+	(*fieldmaskpb.FieldMask)(nil),           // 35: google.protobuf.FieldMask
 }
 var file_nagomi_v1_transaction_services_proto_depIdxs = []int32{
-	21, // 0: nagomi.v1.ListTransactionsRequest.start_date:type_name -> google.protobuf.Timestamp
-	21, // 1: nagomi.v1.ListTransactionsRequest.end_date:type_name -> google.protobuf.Timestamp
-	22, // 2: nagomi.v1.ListTransactionsRequest.cursor:type_name -> nagomi.v1.Cursor
-	23, // 3: nagomi.v1.ListTransactionsRequest.amount_min:type_name -> google.type.Money
-	23, // 4: nagomi.v1.ListTransactionsRequest.amount_max:type_name -> google.type.Money
-	24, // 5: nagomi.v1.ListTransactionsRequest.direction:type_name -> nagomi.v1.TransactionDirection
-	25, // 6: nagomi.v1.ListTransactionsRequest.time_of_day_start:type_name -> nagomi.v1.TimeOfDay
-	25, // 7: nagomi.v1.ListTransactionsRequest.time_of_day_end:type_name -> nagomi.v1.TimeOfDay
-	26, // 8: nagomi.v1.ListTransactionsResponse.transactions:type_name -> nagomi.v1.Transaction
-	22, // 9: nagomi.v1.ListTransactionsResponse.next_cursor:type_name -> nagomi.v1.Cursor
-	26, // 10: nagomi.v1.GetTransactionResponse.transaction:type_name -> nagomi.v1.Transaction
-	21, // 11: nagomi.v1.TransactionInput.tx_date:type_name -> google.protobuf.Timestamp
-	23, // 12: nagomi.v1.TransactionInput.tx_amount:type_name -> google.type.Money
-	24, // 13: nagomi.v1.TransactionInput.direction:type_name -> nagomi.v1.TransactionDirection
-	23, // 14: nagomi.v1.TransactionInput.foreign_amount:type_name -> google.type.Money
-	27, // 15: nagomi.v1.TransactionInput.source:type_name -> nagomi.v1.TransactionSource
+	28, // 0: nagomi.v1.ListTransactionsRequest.start_date:type_name -> google.protobuf.Timestamp
+	28, // 1: nagomi.v1.ListTransactionsRequest.end_date:type_name -> google.protobuf.Timestamp
+	29, // 2: nagomi.v1.ListTransactionsRequest.cursor:type_name -> nagomi.v1.Cursor
+	30, // 3: nagomi.v1.ListTransactionsRequest.amount_min:type_name -> google.type.Money
+	30, // 4: nagomi.v1.ListTransactionsRequest.amount_max:type_name -> google.type.Money
+	31, // 5: nagomi.v1.ListTransactionsRequest.direction:type_name -> nagomi.v1.TransactionDirection
+	32, // 6: nagomi.v1.ListTransactionsRequest.time_of_day_start:type_name -> nagomi.v1.TimeOfDay
+	32, // 7: nagomi.v1.ListTransactionsRequest.time_of_day_end:type_name -> nagomi.v1.TimeOfDay
+	33, // 8: nagomi.v1.ListTransactionsResponse.transactions:type_name -> nagomi.v1.Transaction
+	29, // 9: nagomi.v1.ListTransactionsResponse.next_cursor:type_name -> nagomi.v1.Cursor
+	33, // 10: nagomi.v1.GetTransactionResponse.transaction:type_name -> nagomi.v1.Transaction
+	28, // 11: nagomi.v1.TransactionInput.tx_date:type_name -> google.protobuf.Timestamp
+	30, // 12: nagomi.v1.TransactionInput.tx_amount:type_name -> google.type.Money
+	31, // 13: nagomi.v1.TransactionInput.direction:type_name -> nagomi.v1.TransactionDirection
+	30, // 14: nagomi.v1.TransactionInput.foreign_amount:type_name -> google.type.Money
+	34, // 15: nagomi.v1.TransactionInput.source:type_name -> nagomi.v1.TransactionSource
 	4,  // 16: nagomi.v1.CreateTransactionRequest.transactions:type_name -> nagomi.v1.TransactionInput
-	26, // 17: nagomi.v1.CreateTransactionResponse.transactions:type_name -> nagomi.v1.Transaction
-	28, // 18: nagomi.v1.UpdateTransactionRequest.update_mask:type_name -> google.protobuf.FieldMask
-	21, // 19: nagomi.v1.UpdateTransactionRequest.tx_date:type_name -> google.protobuf.Timestamp
-	23, // 20: nagomi.v1.UpdateTransactionRequest.tx_amount:type_name -> google.type.Money
-	24, // 21: nagomi.v1.UpdateTransactionRequest.direction:type_name -> nagomi.v1.TransactionDirection
-	23, // 22: nagomi.v1.UpdateTransactionRequest.foreign_amount:type_name -> google.type.Money
-	23, // 23: nagomi.v1.SplitEntry.amount:type_name -> google.type.Money
+	33, // 17: nagomi.v1.CreateTransactionResponse.transactions:type_name -> nagomi.v1.Transaction
+	35, // 18: nagomi.v1.UpdateTransactionRequest.update_mask:type_name -> google.protobuf.FieldMask
+	28, // 19: nagomi.v1.UpdateTransactionRequest.tx_date:type_name -> google.protobuf.Timestamp
+	30, // 20: nagomi.v1.UpdateTransactionRequest.tx_amount:type_name -> google.type.Money
+	31, // 21: nagomi.v1.UpdateTransactionRequest.direction:type_name -> nagomi.v1.TransactionDirection
+	30, // 22: nagomi.v1.UpdateTransactionRequest.foreign_amount:type_name -> google.type.Money
+	30, // 23: nagomi.v1.SplitEntry.amount:type_name -> google.type.Money
 	13, // 24: nagomi.v1.SplitTransactionRequest.splits:type_name -> nagomi.v1.SplitEntry
-	26, // 25: nagomi.v1.SplitTransactionResponse.created_splits:type_name -> nagomi.v1.Transaction
-	23, // 26: nagomi.v1.FriendBalance.balance:type_name -> google.type.Money
+	33, // 25: nagomi.v1.SplitTransactionResponse.created_splits:type_name -> nagomi.v1.Transaction
+	30, // 26: nagomi.v1.FriendBalance.balance:type_name -> google.type.Money
 	19, // 27: nagomi.v1.GetFriendBalancesResponse.balances:type_name -> nagomi.v1.FriendBalance
-	0,  // 28: nagomi.v1.TransactionService.ListTransactions:input_type -> nagomi.v1.ListTransactionsRequest
-	2,  // 29: nagomi.v1.TransactionService.GetTransaction:input_type -> nagomi.v1.GetTransactionRequest
-	5,  // 30: nagomi.v1.TransactionService.CreateTransaction:input_type -> nagomi.v1.CreateTransactionRequest
-	7,  // 31: nagomi.v1.TransactionService.UpdateTransaction:input_type -> nagomi.v1.UpdateTransactionRequest
-	9,  // 32: nagomi.v1.TransactionService.DeleteTransaction:input_type -> nagomi.v1.DeleteTransactionRequest
-	11, // 33: nagomi.v1.TransactionService.CategorizeTransactions:input_type -> nagomi.v1.CategorizeTransactionsRequest
-	14, // 34: nagomi.v1.TransactionService.SplitTransaction:input_type -> nagomi.v1.SplitTransactionRequest
-	16, // 35: nagomi.v1.TransactionService.ForgiveTransaction:input_type -> nagomi.v1.ForgiveTransactionRequest
-	18, // 36: nagomi.v1.TransactionService.GetFriendBalances:input_type -> nagomi.v1.GetFriendBalancesRequest
-	1,  // 37: nagomi.v1.TransactionService.ListTransactions:output_type -> nagomi.v1.ListTransactionsResponse
-	3,  // 38: nagomi.v1.TransactionService.GetTransaction:output_type -> nagomi.v1.GetTransactionResponse
-	6,  // 39: nagomi.v1.TransactionService.CreateTransaction:output_type -> nagomi.v1.CreateTransactionResponse
-	8,  // 40: nagomi.v1.TransactionService.UpdateTransaction:output_type -> nagomi.v1.UpdateTransactionResponse
-	10, // 41: nagomi.v1.TransactionService.DeleteTransaction:output_type -> nagomi.v1.DeleteTransactionResponse
-	12, // 42: nagomi.v1.TransactionService.CategorizeTransactions:output_type -> nagomi.v1.CategorizeTransactionsResponse
-	15, // 43: nagomi.v1.TransactionService.SplitTransaction:output_type -> nagomi.v1.SplitTransactionResponse
-	17, // 44: nagomi.v1.TransactionService.ForgiveTransaction:output_type -> nagomi.v1.ForgiveTransactionResponse
-	20, // 45: nagomi.v1.TransactionService.GetFriendBalances:output_type -> nagomi.v1.GetFriendBalancesResponse
-	37, // [37:46] is the sub-list for method output_type
-	28, // [28:37] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	28, // [28:28] is the sub-list for extension extendee
-	0,  // [0:28] is the sub-list for field type_name
+	33, // 28: nagomi.v1.TransferSuggestion.outgoing:type_name -> nagomi.v1.Transaction
+	33, // 29: nagomi.v1.TransferSuggestion.incoming:type_name -> nagomi.v1.Transaction
+	26, // 30: nagomi.v1.ListTransferSuggestionsResponse.suggestions:type_name -> nagomi.v1.TransferSuggestion
+	0,  // 31: nagomi.v1.TransactionService.ListTransactions:input_type -> nagomi.v1.ListTransactionsRequest
+	2,  // 32: nagomi.v1.TransactionService.GetTransaction:input_type -> nagomi.v1.GetTransactionRequest
+	5,  // 33: nagomi.v1.TransactionService.CreateTransaction:input_type -> nagomi.v1.CreateTransactionRequest
+	7,  // 34: nagomi.v1.TransactionService.UpdateTransaction:input_type -> nagomi.v1.UpdateTransactionRequest
+	9,  // 35: nagomi.v1.TransactionService.DeleteTransaction:input_type -> nagomi.v1.DeleteTransactionRequest
+	11, // 36: nagomi.v1.TransactionService.CategorizeTransactions:input_type -> nagomi.v1.CategorizeTransactionsRequest
+	14, // 37: nagomi.v1.TransactionService.SplitTransaction:input_type -> nagomi.v1.SplitTransactionRequest
+	16, // 38: nagomi.v1.TransactionService.ForgiveTransaction:input_type -> nagomi.v1.ForgiveTransactionRequest
+	18, // 39: nagomi.v1.TransactionService.GetFriendBalances:input_type -> nagomi.v1.GetFriendBalancesRequest
+	21, // 40: nagomi.v1.TransactionService.LinkTransfer:input_type -> nagomi.v1.LinkTransferRequest
+	23, // 41: nagomi.v1.TransactionService.UnlinkTransfer:input_type -> nagomi.v1.UnlinkTransferRequest
+	25, // 42: nagomi.v1.TransactionService.ListTransferSuggestions:input_type -> nagomi.v1.ListTransferSuggestionsRequest
+	1,  // 43: nagomi.v1.TransactionService.ListTransactions:output_type -> nagomi.v1.ListTransactionsResponse
+	3,  // 44: nagomi.v1.TransactionService.GetTransaction:output_type -> nagomi.v1.GetTransactionResponse
+	6,  // 45: nagomi.v1.TransactionService.CreateTransaction:output_type -> nagomi.v1.CreateTransactionResponse
+	8,  // 46: nagomi.v1.TransactionService.UpdateTransaction:output_type -> nagomi.v1.UpdateTransactionResponse
+	10, // 47: nagomi.v1.TransactionService.DeleteTransaction:output_type -> nagomi.v1.DeleteTransactionResponse
+	12, // 48: nagomi.v1.TransactionService.CategorizeTransactions:output_type -> nagomi.v1.CategorizeTransactionsResponse
+	15, // 49: nagomi.v1.TransactionService.SplitTransaction:output_type -> nagomi.v1.SplitTransactionResponse
+	17, // 50: nagomi.v1.TransactionService.ForgiveTransaction:output_type -> nagomi.v1.ForgiveTransactionResponse
+	20, // 51: nagomi.v1.TransactionService.GetFriendBalances:output_type -> nagomi.v1.GetFriendBalancesResponse
+	22, // 52: nagomi.v1.TransactionService.LinkTransfer:output_type -> nagomi.v1.LinkTransferResponse
+	24, // 53: nagomi.v1.TransactionService.UnlinkTransfer:output_type -> nagomi.v1.UnlinkTransferResponse
+	27, // 54: nagomi.v1.TransactionService.ListTransferSuggestions:output_type -> nagomi.v1.ListTransferSuggestionsResponse
+	43, // [43:55] is the sub-list for method output_type
+	31, // [31:43] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_transaction_services_proto_init() }
@@ -1680,7 +2054,7 @@ func file_nagomi_v1_transaction_services_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_transaction_services_proto_rawDesc), len(file_nagomi_v1_transaction_services_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -48,7 +48,8 @@ type stmtSvc struct {
 	log     *log.Logger
 	parser  nagomiv1connect.StatementParserServiceClient
 	store   *storage.Store
-	txnSvc  TransactionService
+	txnSvc    TransactionService
+	transfers TransferService
 }
 
 func newStmtSvc(
@@ -58,6 +59,7 @@ func newStmtSvc(
 	parserURL string,
 	store *storage.Store,
 	txnSvc TransactionService,
+	transfers TransferService,
 ) StatementService {
 	var parser nagomiv1connect.StatementParserServiceClient
 	if parserURL != "" {
@@ -75,7 +77,8 @@ func newStmtSvc(
 		log:     logger,
 		parser:  parser,
 		store:   store,
-		txnSvc:  txnSvc,
+		txnSvc:    txnSvc,
+		transfers: transfers,
 	}
 }
 
@@ -222,6 +225,7 @@ func (s *stmtSvc) Commit(ctx context.Context, userID uuid.UUID, req *pb.CommitSt
 		}
 	}
 	s.txnSvc.ApplyRules(ctx, userID, result.createdIDs)
+	s.transfers.Match(ctx, userID, recon.transactionIDs(result))
 
 	return &pb.CommitStatementImportResponse{
 		Statement:      statementToPb(&imported, &account.Name),
@@ -432,6 +436,7 @@ func (s *stmtSvc) Reparse(ctx context.Context, userID uuid.UUID, id int64, apply
 		}
 	}
 	s.txnSvc.ApplyRules(ctx, userID, result.createdIDs)
+	s.transfers.Match(ctx, userID, recon.transactionIDs(result))
 
 	return &pb.ReparseStatementResponse{
 		Statement:      statementToPb(&saved, row.AccountName),

@@ -189,6 +189,115 @@ func (TransactionSource) EnumDescriptor() ([]byte, []int) {
 	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{2}
 }
 
+type TransferStatus int32
+
+const (
+	TransferStatus_TRANSFER_STATUS_UNSPECIFIED TransferStatus = 0
+	// counted as a move between own accounts
+	TransferStatus_TRANSFER_STATUS_LINKED TransferStatus = 1
+	// a plausible pair the user should confirm
+	TransferStatus_TRANSFER_STATUS_SUGGESTED TransferStatus = 2
+	// the user said these are not a transfer; never suggested again
+	TransferStatus_TRANSFER_STATUS_REJECTED TransferStatus = 3
+)
+
+// Enum value maps for TransferStatus.
+var (
+	TransferStatus_name = map[int32]string{
+		0: "TRANSFER_STATUS_UNSPECIFIED",
+		1: "TRANSFER_STATUS_LINKED",
+		2: "TRANSFER_STATUS_SUGGESTED",
+		3: "TRANSFER_STATUS_REJECTED",
+	}
+	TransferStatus_value = map[string]int32{
+		"TRANSFER_STATUS_UNSPECIFIED": 0,
+		"TRANSFER_STATUS_LINKED":      1,
+		"TRANSFER_STATUS_SUGGESTED":   2,
+		"TRANSFER_STATUS_REJECTED":    3,
+	}
+)
+
+func (x TransferStatus) Enum() *TransferStatus {
+	p := new(TransferStatus)
+	*p = x
+	return p
+}
+
+func (x TransferStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TransferStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_enums_proto_enumTypes[3].Descriptor()
+}
+
+func (TransferStatus) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_enums_proto_enumTypes[3]
+}
+
+func (x TransferStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TransferStatus.Descriptor instead.
+func (TransferStatus) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{3}
+}
+
+type TransferMethod int32
+
+const (
+	TransferMethod_TRANSFER_METHOD_UNSPECIFIED TransferMethod = 0
+	// both sides carried the same transfer_ref
+	TransferMethod_TRANSFER_METHOD_REFERENCE TransferMethod = 1
+	// paired by amount, date and description
+	TransferMethod_TRANSFER_METHOD_MATCHED TransferMethod = 2
+	TransferMethod_TRANSFER_METHOD_MANUAL  TransferMethod = 3
+)
+
+// Enum value maps for TransferMethod.
+var (
+	TransferMethod_name = map[int32]string{
+		0: "TRANSFER_METHOD_UNSPECIFIED",
+		1: "TRANSFER_METHOD_REFERENCE",
+		2: "TRANSFER_METHOD_MATCHED",
+		3: "TRANSFER_METHOD_MANUAL",
+	}
+	TransferMethod_value = map[string]int32{
+		"TRANSFER_METHOD_UNSPECIFIED": 0,
+		"TRANSFER_METHOD_REFERENCE":   1,
+		"TRANSFER_METHOD_MATCHED":     2,
+		"TRANSFER_METHOD_MANUAL":      3,
+	}
+)
+
+func (x TransferMethod) Enum() *TransferMethod {
+	p := new(TransferMethod)
+	*p = x
+	return p
+}
+
+func (x TransferMethod) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TransferMethod) Descriptor() protoreflect.EnumDescriptor {
+	return file_nagomi_v1_enums_proto_enumTypes[4].Descriptor()
+}
+
+func (TransferMethod) Type() protoreflect.EnumType {
+	return &file_nagomi_v1_enums_proto_enumTypes[4]
+}
+
+func (x TransferMethod) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TransferMethod.Descriptor instead.
+func (TransferMethod) EnumDescriptor() ([]byte, []int) {
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{4}
+}
+
 type PeriodType int32
 
 const (
@@ -240,11 +349,11 @@ func (x PeriodType) String() string {
 }
 
 func (PeriodType) Descriptor() protoreflect.EnumDescriptor {
-	return file_nagomi_v1_enums_proto_enumTypes[3].Descriptor()
+	return file_nagomi_v1_enums_proto_enumTypes[5].Descriptor()
 }
 
 func (PeriodType) Type() protoreflect.EnumType {
-	return &file_nagomi_v1_enums_proto_enumTypes[3]
+	return &file_nagomi_v1_enums_proto_enumTypes[5]
 }
 
 func (x PeriodType) Number() protoreflect.EnumNumber {
@@ -253,7 +362,7 @@ func (x PeriodType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PeriodType.Descriptor instead.
 func (PeriodType) EnumDescriptor() ([]byte, []int) {
-	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{3}
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{5}
 }
 
 type Granularity int32
@@ -292,11 +401,11 @@ func (x Granularity) String() string {
 }
 
 func (Granularity) Descriptor() protoreflect.EnumDescriptor {
-	return file_nagomi_v1_enums_proto_enumTypes[4].Descriptor()
+	return file_nagomi_v1_enums_proto_enumTypes[6].Descriptor()
 }
 
 func (Granularity) Type() protoreflect.EnumType {
-	return &file_nagomi_v1_enums_proto_enumTypes[4]
+	return &file_nagomi_v1_enums_proto_enumTypes[6]
 }
 
 func (x Granularity) Number() protoreflect.EnumNumber {
@@ -305,7 +414,7 @@ func (x Granularity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Granularity.Descriptor instead.
 func (Granularity) EnumDescriptor() ([]byte, []int) {
-	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{4}
+	return file_nagomi_v1_enums_proto_rawDescGZIP(), []int{6}
 }
 
 var File_nagomi_v1_enums_proto protoreflect.FileDescriptor
@@ -331,7 +440,17 @@ const file_nagomi_v1_enums_proto_rawDesc = "" +
 	"\x18TRANSACTION_SOURCE_EMAIL\x10\x02\x12 \n" +
 	"\x1cTRANSACTION_SOURCE_CONNECTOR\x10\x03\x12 \n" +
 	"\x1cTRANSACTION_SOURCE_STATEMENT\x10\x04\x12\x1c\n" +
-	"\x18TRANSACTION_SOURCE_SPLIT\x10\x05*\xf1\x01\n" +
+	"\x18TRANSACTION_SOURCE_SPLIT\x10\x05*\x8a\x01\n" +
+	"\x0eTransferStatus\x12\x1f\n" +
+	"\x1bTRANSFER_STATUS_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16TRANSFER_STATUS_LINKED\x10\x01\x12\x1d\n" +
+	"\x19TRANSFER_STATUS_SUGGESTED\x10\x02\x12\x1c\n" +
+	"\x18TRANSFER_STATUS_REJECTED\x10\x03*\x89\x01\n" +
+	"\x0eTransferMethod\x12\x1f\n" +
+	"\x1bTRANSFER_METHOD_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19TRANSFER_METHOD_REFERENCE\x10\x01\x12\x1b\n" +
+	"\x17TRANSFER_METHOD_MATCHED\x10\x02\x12\x1a\n" +
+	"\x16TRANSFER_METHOD_MANUAL\x10\x03*\xf1\x01\n" +
 	"\n" +
 	"PeriodType\x12\x1b\n" +
 	"\x17PERIOD_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
@@ -364,13 +483,15 @@ func file_nagomi_v1_enums_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_enums_proto_rawDescData
 }
 
-var file_nagomi_v1_enums_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_nagomi_v1_enums_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
 var file_nagomi_v1_enums_proto_goTypes = []any{
 	(AccountType)(0),          // 0: nagomi.v1.AccountType
 	(TransactionDirection)(0), // 1: nagomi.v1.TransactionDirection
 	(TransactionSource)(0),    // 2: nagomi.v1.TransactionSource
-	(PeriodType)(0),           // 3: nagomi.v1.PeriodType
-	(Granularity)(0),          // 4: nagomi.v1.Granularity
+	(TransferStatus)(0),       // 3: nagomi.v1.TransferStatus
+	(TransferMethod)(0),       // 4: nagomi.v1.TransferMethod
+	(PeriodType)(0),           // 5: nagomi.v1.PeriodType
+	(Granularity)(0),          // 6: nagomi.v1.Granularity
 }
 var file_nagomi_v1_enums_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -390,7 +511,7 @@ func file_nagomi_v1_enums_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_enums_proto_rawDesc), len(file_nagomi_v1_enums_proto_rawDesc)),
-			NumEnums:      5,
+			NumEnums:      7,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,

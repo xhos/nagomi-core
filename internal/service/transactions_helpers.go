@@ -110,6 +110,7 @@ func buildCreateTxParamsList(userID uuid.UUID, req *pb.CreateTransactionRequest)
 			TxDesc:              txInput.Description,
 			Merchant:            txInput.Merchant,
 			UserNotes:           txInput.UserNotes,
+			TransferRef:         txInput.TransferRef,
 			CategoryManuallySet: &categoryManuallySet,
 			MerchantManuallySet: &merchantManuallySet,
 		}

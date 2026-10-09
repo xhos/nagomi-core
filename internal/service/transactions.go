@@ -38,6 +38,7 @@ type txnSvc struct {
 	catSvc         CategoryService
 	ruleSvc        RuleService
 	exchangeClient *exchange.Client
+	transfers      TransferService
 }
 
 func newTxnSvc(
@@ -46,6 +47,7 @@ func newTxnSvc(
 	catSvc CategoryService,
 	ruleSvc RuleService,
 	exchangeClient *exchange.Client,
+	transfers TransferService,
 ) TransactionService {
 	return &txnSvc{
 		queries:        queries,
@@ -53,6 +55,7 @@ func newTxnSvc(
 		catSvc:         catSvc,
 		ruleSvc:        ruleSvc,
 		exchangeClient: exchangeClient,
+		transfers:      transfers,
 	}
 }
 
@@ -70,12 +73,23 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 	}
 
 	created := make([]sqlc.Transaction, 0, len(paramsList))
+	var referenced []int64
 	for _, params := range paramsList {
 		tx, err := s.queries.CreateTransaction(ctx, params)
 		if err != nil {
-			// duplicates are ignored
+			// duplicates are ignored, but may bring a transfer reference the row lacks
 			if errors.Is(err, pgx.ErrNoRows) && params.ExternalID != nil {
 				s.log.Debug("skipping duplicate transaction", "external_id", *params.ExternalID, "account_id", params.AccountID)
+				if params.TransferRef != nil {
+					if id, err := s.queries.SetTransferRef(ctx, sqlc.SetTransferRefParams{
+						TransferRef: *params.TransferRef,
+						UserID:      userID,
+						AccountID:   params.AccountID,
+						ExternalID:  *params.ExternalID,
+					}); err == nil {
+						referenced = append(referenced, id)
+					}
+				}
 				continue
 			}
 			return nil, wrapErr("TransactionService.Create.Insert", err)
@@ -100,9 +114,18 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 		}
 	}
 
+	matchIDs := referenced
+	for _, tx := range created {
+		matchIDs = append(matchIDs, tx.ID)
+	}
+	s.transfers.Match(ctx, userID, matchIDs)
+
 	result := make([]*pb.Transaction, len(created))
 	for i := range created {
 		result[i] = transactionToPb(&created[i])
+	}
+	if err := attachTransfers(ctx, s.queries, result); err != nil {
+		s.log.Warn("failed to load transfers", "error", err)
 	}
 
 	return result, nil
@@ -121,6 +144,9 @@ func (s *txnSvc) Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Trans
 	}
 
 	proto := transactionToPb(&row)
+	if err := attachTransfers(ctx, s.queries, []*pb.Transaction{proto}); err != nil {
+		return nil, wrapErr("TransactionService.Get.Transfers", err)
+	}
 
 	if row.SplitFromID == nil {
 		splits, err := s.queries.GetSplitsBySourceID(ctx, row.ID)
@@ -172,6 +198,10 @@ func (s *txnSvc) Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateTra
 		s.adjustSplitsProportionally(ctx, userID, tx.ID, tx.TxAmountCents, *params.TxAmountCents)
 	}
 
+	if shouldSyncBalances || params.TxDesc != nil || params.Merchant != nil {
+		s.transfers.Match(ctx, userID, []int64{tx.ID})
+	}
+
 	return nil
 }
 
@@ -221,6 +251,9 @@ func (s *txnSvc) List(ctx context.Context, userID uuid.UUID, req *pb.ListTransac
 		if rows[i].ReceiptID != 0 {
 			result[i].ReceiptId = &rows[i].ReceiptID
 		}
+	}
+	if err := attachTransfers(ctx, s.queries, result); err != nil {
+		return nil, nil, wrapErr("TransactionService.List.Transfers", err)
 	}
 
 	var nextCursor *pb.Cursor

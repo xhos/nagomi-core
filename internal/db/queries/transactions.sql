@@ -69,6 +69,10 @@ where
     or (
       sqlc.narg('uncategorized')::boolean = true
       and t.category_id is null
+      and not exists (
+        select 1 from transfers tr
+        where tr.status = 1 and (tr.out_tx_id = t.id or tr.in_tx_id = t.id)
+      )
     )
   )
 order by
@@ -138,6 +142,10 @@ where
     or (
       sqlc.narg('uncategorized')::boolean = true
       and t.category_id is null
+      and not exists (
+        select 1 from transfers tr
+        where tr.status = 1 and (tr.out_tx_id = t.id or tr.in_tx_id = t.id)
+      )
     )
   );
 
@@ -175,7 +183,8 @@ insert into
     split_from_id,
     forgiven,
     source,
-    statement_id
+    statement_id,
+    transfer_ref
   )
 select
   sqlc.narg('external_id')::text,
@@ -199,7 +208,8 @@ select
   sqlc.narg('split_from_id')::bigint,
   coalesce(sqlc.narg('forgiven')::boolean, false),
   coalesce(nullif(sqlc.arg(source)::smallint, 0), 1),
-  sqlc.narg('statement_id')::bigint
+  sqlc.narg('statement_id')::bigint,
+  sqlc.narg('transfer_ref')::text
 from
   accounts a
 where

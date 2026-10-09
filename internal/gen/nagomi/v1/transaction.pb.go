@@ -53,10 +53,12 @@ type Transaction struct {
 	AccountName *string   `protobuf:"bytes,19,opt,name=account_name,json=accountName,proto3,oneof" json:"account_name,omitempty"`
 	ReceiptId   *int64    `protobuf:"varint,20,opt,name=receipt_id,json=receiptId,proto3,oneof" json:"receipt_id,omitempty"`
 	// splitting
-	SplitFromId   *int64            `protobuf:"varint,21,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
-	Forgiven      bool              `protobuf:"varint,22,opt,name=forgiven,proto3" json:"forgiven,omitempty"`
-	Splits        []*Transaction    `protobuf:"bytes,23,rep,name=splits,proto3" json:"splits,omitempty"`
-	Source        TransactionSource `protobuf:"varint,24,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
+	SplitFromId *int64            `protobuf:"varint,21,opt,name=split_from_id,json=splitFromId,proto3,oneof" json:"split_from_id,omitempty"`
+	Forgiven    bool              `protobuf:"varint,22,opt,name=forgiven,proto3" json:"forgiven,omitempty"`
+	Splits      []*Transaction    `protobuf:"bytes,23,rep,name=splits,proto3" json:"splits,omitempty"`
+	Source      TransactionSource `protobuf:"varint,24,opt,name=source,proto3,enum=nagomi.v1.TransactionSource" json:"source,omitempty"`
+	// set when this is one side of a move between the user's own accounts
+	Transfer      *Transfer `protobuf:"bytes,25,opt,name=transfer,proto3,oneof" json:"transfer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,6 +261,90 @@ func (x *Transaction) GetSource() TransactionSource {
 	return TransactionSource_TRANSACTION_SOURCE_UNSPECIFIED
 }
 
+func (x *Transaction) GetTransfer() *Transfer {
+	if x != nil {
+		return x.Transfer
+	}
+	return nil
+}
+
+type Transfer struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Id                   int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CounterpartId        int64                  `protobuf:"varint,2,opt,name=counterpart_id,json=counterpartId,proto3" json:"counterpart_id,omitempty"`
+	CounterpartAccountId int64                  `protobuf:"varint,3,opt,name=counterpart_account_id,json=counterpartAccountId,proto3" json:"counterpart_account_id,omitempty"`
+	Method               TransferMethod         `protobuf:"varint,4,opt,name=method,proto3,enum=nagomi.v1.TransferMethod" json:"method,omitempty"`
+	// what was lost on the way, when both sides share a currency
+	Fee           *money.Money `protobuf:"bytes,5,opt,name=fee,proto3,oneof" json:"fee,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Transfer) Reset() {
+	*x = Transfer{}
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Transfer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Transfer) ProtoMessage() {}
+
+func (x *Transfer) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Transfer.ProtoReflect.Descriptor instead.
+func (*Transfer) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_transaction_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Transfer) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Transfer) GetCounterpartId() int64 {
+	if x != nil {
+		return x.CounterpartId
+	}
+	return 0
+}
+
+func (x *Transfer) GetCounterpartAccountId() int64 {
+	if x != nil {
+		return x.CounterpartAccountId
+	}
+	return 0
+}
+
+func (x *Transfer) GetMethod() TransferMethod {
+	if x != nil {
+		return x.Method
+	}
+	return TransferMethod_TRANSFER_METHOD_UNSPECIFIED
+}
+
+func (x *Transfer) GetFee() *money.Money {
+	if x != nil {
+		return x.Fee
+	}
+	return nil
+}
+
 type TransactionWithScore struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Transaction   *Transaction           `protobuf:"bytes,1,opt,name=transaction,proto3" json:"transaction,omitempty"`
@@ -269,7 +355,7 @@ type TransactionWithScore struct {
 
 func (x *TransactionWithScore) Reset() {
 	*x = TransactionWithScore{}
-	mi := &file_nagomi_v1_transaction_proto_msgTypes[1]
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -281,7 +367,7 @@ func (x *TransactionWithScore) String() string {
 func (*TransactionWithScore) ProtoMessage() {}
 
 func (x *TransactionWithScore) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_transaction_proto_msgTypes[1]
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -294,7 +380,7 @@ func (x *TransactionWithScore) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransactionWithScore.ProtoReflect.Descriptor instead.
 func (*TransactionWithScore) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_transaction_proto_rawDescGZIP(), []int{1}
+	return file_nagomi_v1_transaction_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TransactionWithScore) GetTransaction() *Transaction {
@@ -322,7 +408,7 @@ type TransactionCountByAccount struct {
 
 func (x *TransactionCountByAccount) Reset() {
 	*x = TransactionCountByAccount{}
-	mi := &file_nagomi_v1_transaction_proto_msgTypes[2]
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -334,7 +420,7 @@ func (x *TransactionCountByAccount) String() string {
 func (*TransactionCountByAccount) ProtoMessage() {}
 
 func (x *TransactionCountByAccount) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_transaction_proto_msgTypes[2]
+	mi := &file_nagomi_v1_transaction_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -347,7 +433,7 @@ func (x *TransactionCountByAccount) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransactionCountByAccount.ProtoReflect.Descriptor instead.
 func (*TransactionCountByAccount) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_transaction_proto_rawDescGZIP(), []int{2}
+	return file_nagomi_v1_transaction_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *TransactionCountByAccount) GetAccountId() int64 {
@@ -375,8 +461,7 @@ var File_nagomi_v1_transaction_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"\n" +
-	"\x1bnagomi/v1/transaction.proto\x12\tnagomi.v1\x1a\x18nagomi/v1/category.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xce\n" +
-	"\n" +
+	"\x1bnagomi/v1/transaction.proto\x12\tnagomi.v1\x1a\x18nagomi/v1/category.proto\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x91\v\n" +
 	"\vTransaction\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x123\n" +
 	"\atx_date\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x06txDate\x12/\n" +
@@ -410,7 +495,8 @@ const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"\rsplit_from_id\x18\x15 \x01(\x03H\vR\vsplitFromId\x88\x01\x01\x12\x1a\n" +
 	"\bforgiven\x18\x16 \x01(\bR\bforgiven\x12.\n" +
 	"\x06splits\x18\x17 \x03(\v2\x16.nagomi.v1.TransactionR\x06splits\x124\n" +
-	"\x06source\x18\x18 \x01(\x0e2\x1c.nagomi.v1.TransactionSourceR\x06sourceB\x0e\n" +
+	"\x06source\x18\x18 \x01(\x0e2\x1c.nagomi.v1.TransactionSourceR\x06source\x124\n" +
+	"\btransfer\x18\x19 \x01(\v2\x13.nagomi.v1.TransferH\fR\btransfer\x88\x01\x01B\x0e\n" +
 	"\f_external_idB\x0e\n" +
 	"\f_descriptionB\x0e\n" +
 	"\f_category_idB\v\n" +
@@ -422,7 +508,15 @@ const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"\t_categoryB\x0f\n" +
 	"\r_account_nameB\r\n" +
 	"\v_receipt_idB\x10\n" +
-	"\x0e_split_from_id\"w\n" +
+	"\x0e_split_from_idB\v\n" +
+	"\t_transfer\"\xdd\x01\n" +
+	"\bTransfer\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12%\n" +
+	"\x0ecounterpart_id\x18\x02 \x01(\x03R\rcounterpartId\x124\n" +
+	"\x16counterpart_account_id\x18\x03 \x01(\x03R\x14counterpartAccountId\x121\n" +
+	"\x06method\x18\x04 \x01(\x0e2\x19.nagomi.v1.TransferMethodR\x06method\x12)\n" +
+	"\x03fee\x18\x05 \x01(\v2\x12.google.type.MoneyH\x00R\x03fee\x88\x01\x01B\x06\n" +
+	"\x04_fee\"w\n" +
 	"\x14TransactionWithScore\x128\n" +
 	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\x12%\n" +
 	"\x0emerchant_score\x18\x02 \x01(\x01R\rmerchantScore\"\x8a\x01\n" +
@@ -446,34 +540,39 @@ func file_nagomi_v1_transaction_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_transaction_proto_rawDescData
 }
 
-var file_nagomi_v1_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_nagomi_v1_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_nagomi_v1_transaction_proto_goTypes = []any{
 	(*Transaction)(nil),               // 0: nagomi.v1.Transaction
-	(*TransactionWithScore)(nil),      // 1: nagomi.v1.TransactionWithScore
-	(*TransactionCountByAccount)(nil), // 2: nagomi.v1.TransactionCountByAccount
-	(*timestamppb.Timestamp)(nil),     // 3: google.protobuf.Timestamp
-	(*money.Money)(nil),               // 4: google.type.Money
-	(TransactionDirection)(0),         // 5: nagomi.v1.TransactionDirection
-	(*Category)(nil),                  // 6: nagomi.v1.Category
-	(TransactionSource)(0),            // 7: nagomi.v1.TransactionSource
+	(*Transfer)(nil),                  // 1: nagomi.v1.Transfer
+	(*TransactionWithScore)(nil),      // 2: nagomi.v1.TransactionWithScore
+	(*TransactionCountByAccount)(nil), // 3: nagomi.v1.TransactionCountByAccount
+	(*timestamppb.Timestamp)(nil),     // 4: google.protobuf.Timestamp
+	(*money.Money)(nil),               // 5: google.type.Money
+	(TransactionDirection)(0),         // 6: nagomi.v1.TransactionDirection
+	(*Category)(nil),                  // 7: nagomi.v1.Category
+	(TransactionSource)(0),            // 8: nagomi.v1.TransactionSource
+	(TransferMethod)(0),               // 9: nagomi.v1.TransferMethod
 }
 var file_nagomi_v1_transaction_proto_depIdxs = []int32{
-	3,  // 0: nagomi.v1.Transaction.tx_date:type_name -> google.protobuf.Timestamp
-	4,  // 1: nagomi.v1.Transaction.tx_amount:type_name -> google.type.Money
-	5,  // 2: nagomi.v1.Transaction.direction:type_name -> nagomi.v1.TransactionDirection
-	4,  // 3: nagomi.v1.Transaction.balance_after:type_name -> google.type.Money
-	4,  // 4: nagomi.v1.Transaction.foreign_amount:type_name -> google.type.Money
-	3,  // 5: nagomi.v1.Transaction.created_at:type_name -> google.protobuf.Timestamp
-	3,  // 6: nagomi.v1.Transaction.updated_at:type_name -> google.protobuf.Timestamp
-	6,  // 7: nagomi.v1.Transaction.category:type_name -> nagomi.v1.Category
+	4,  // 0: nagomi.v1.Transaction.tx_date:type_name -> google.protobuf.Timestamp
+	5,  // 1: nagomi.v1.Transaction.tx_amount:type_name -> google.type.Money
+	6,  // 2: nagomi.v1.Transaction.direction:type_name -> nagomi.v1.TransactionDirection
+	5,  // 3: nagomi.v1.Transaction.balance_after:type_name -> google.type.Money
+	5,  // 4: nagomi.v1.Transaction.foreign_amount:type_name -> google.type.Money
+	4,  // 5: nagomi.v1.Transaction.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 6: nagomi.v1.Transaction.updated_at:type_name -> google.protobuf.Timestamp
+	7,  // 7: nagomi.v1.Transaction.category:type_name -> nagomi.v1.Category
 	0,  // 8: nagomi.v1.Transaction.splits:type_name -> nagomi.v1.Transaction
-	7,  // 9: nagomi.v1.Transaction.source:type_name -> nagomi.v1.TransactionSource
-	0,  // 10: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	8,  // 9: nagomi.v1.Transaction.source:type_name -> nagomi.v1.TransactionSource
+	1,  // 10: nagomi.v1.Transaction.transfer:type_name -> nagomi.v1.Transfer
+	9,  // 11: nagomi.v1.Transfer.method:type_name -> nagomi.v1.TransferMethod
+	5,  // 12: nagomi.v1.Transfer.fee:type_name -> google.type.Money
+	0,  // 13: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_transaction_proto_init() }
@@ -484,13 +583,14 @@ func file_nagomi_v1_transaction_proto_init() {
 	file_nagomi_v1_category_proto_init()
 	file_nagomi_v1_enums_proto_init()
 	file_nagomi_v1_transaction_proto_msgTypes[0].OneofWrappers = []any{}
+	file_nagomi_v1_transaction_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_transaction_proto_rawDesc), len(file_nagomi_v1_transaction_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

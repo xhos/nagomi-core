@@ -67,6 +67,8 @@ func main() {
 	// ----- receipt OCR worker ----
 	go services.Receipts.StartWorker(context.Background())
 	go services.Statements.StartCleanup(context.Background())
+	// pairs transfers imported before matching existed
+	go services.Transfers.MatchAll(context.Background())
 
 	// ----- api layer --------
 	srv := api.NewServer(services, logger.WithPrefix("api"))

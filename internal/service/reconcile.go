@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"slices"
 	"sort"
 	"time"
 
@@ -326,6 +327,15 @@ type reconcileResult struct {
 	updated         int32
 	deleted         int32
 	touchedAccounts map[int64]bool
+}
+
+// transactionIDs lists the transactions the statement created or confirmed.
+func (r *reconciliation) transactionIDs(res reconcileResult) []int64 {
+	ids := slices.Clone(res.createdIDs)
+	for _, m := range r.plan.Matches {
+		ids = append(ids, m.TransactionID)
+	}
+	return ids
 }
 
 // apply writes the plan inside the caller's db transaction.

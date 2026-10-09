@@ -155,3 +155,45 @@ func (s *Server) GetFriendBalances(ctx context.Context, req *connect.Request[pb.
 		Balances: balances,
 	}), nil
 }
+
+func (s *Server) LinkTransfer(ctx context.Context, req *connect.Request[pb.LinkTransferRequest]) (*connect.Response[pb.LinkTransferResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.services.Transfers.Link(ctx, userID, req.Msg.GetOutgoingId(), req.Msg.GetIncomingId()); err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.LinkTransferResponse{}), nil
+}
+
+func (s *Server) UnlinkTransfer(ctx context.Context, req *connect.Request[pb.UnlinkTransferRequest]) (*connect.Response[pb.UnlinkTransferResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.services.Transfers.Unlink(ctx, userID, req.Msg.GetTransactionId()); err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.UnlinkTransferResponse{}), nil
+}
+
+func (s *Server) ListTransferSuggestions(ctx context.Context, req *connect.Request[pb.ListTransferSuggestionsRequest]) (*connect.Response[pb.ListTransferSuggestionsResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	suggestions, err := s.services.Transfers.ListSuggestions(ctx, userID)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.ListTransferSuggestionsResponse{
+		Suggestions: suggestions,
+	}), nil
+}

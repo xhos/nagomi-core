@@ -40,7 +40,7 @@ func TestTransactionDashboardContract(t *testing.T) {
 			categorized = row.ID
 		}
 	}
-	svc := newTxnSvc(tdb.Queries, nil, nil, nil, nil)
+	svc := newTxnSvc(tdb.Queries, nil, nil, nil, nil, nil)
 	limit, uncategorized := int32(1), true
 	req := &pb.ListTransactionsRequest{Limit: &limit, Uncategorized: &uncategorized}
 	for page := 0; page < 4; page++ {

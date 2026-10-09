@@ -456,7 +456,7 @@ func (q *Queries) ListImportedStatementPeriods(ctx context.Context, arg ListImpo
 
 const listReconcileCandidates = `-- name: ListReconcileCandidates :many
 select
-  t.id, t.account_id, t.external_id, t.tx_date, t.tx_amount_cents, t.tx_currency, t.tx_direction, t.tx_desc, t.balance_after_cents, t.balance_currency, t.merchant, t.category_id, t.category_manually_set, t.merchant_manually_set, t.suggestions, t.user_notes, t.foreign_amount_cents, t.foreign_currency, t.exchange_rate, t.created_at, t.updated_at, t.split_from_id, t.forgiven, t.source, t.statement_id,
+  t.id, t.account_id, t.external_id, t.tx_date, t.tx_amount_cents, t.tx_currency, t.tx_direction, t.tx_desc, t.balance_after_cents, t.balance_currency, t.merchant, t.category_id, t.category_manually_set, t.merchant_manually_set, t.suggestions, t.user_notes, t.foreign_amount_cents, t.foreign_currency, t.exchange_rate, t.created_at, t.updated_at, t.split_from_id, t.forgiven, t.source, t.statement_id, t.transfer_ref,
   (
     coalesce(t.user_notes, '') <> ''
     or exists(select 1 from receipts r where r.transaction_id = t.id)
@@ -537,6 +537,7 @@ func (q *Queries) ListReconcileCandidates(ctx context.Context, arg ListReconcile
 			&i.Transaction.Forgiven,
 			&i.Transaction.Source,
 			&i.Transaction.StatementID,
+			&i.Transaction.TransferRef,
 			&i.HasUserData,
 			&i.HasSplits,
 			&i.FromStatement,

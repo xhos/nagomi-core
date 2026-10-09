@@ -24,6 +24,7 @@ type Services struct {
 	Connections  ConnectionService
 	Statements   StatementService
 	Emails       EmailService
+	Transfers    TransferService
 }
 
 func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, error) {
@@ -45,7 +46,8 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		return nil, fmt.Errorf("init credentials cipher: %w", err)
 	}
 
-	txnSvc := newTxnSvc(queries, logger.WithPrefix("txn"), catSvc, ruleSvc, exchangeClient)
+	transferSvc := newTransferSvc(queries, logger.WithPrefix("transfer"))
+	txnSvc := newTxnSvc(queries, logger.WithPrefix("txn"), catSvc, ruleSvc, exchangeClient, transferSvc)
 
 	return &Services{
 		Transactions: txnSvc,
@@ -57,7 +59,8 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 		Receipts:     newRcptSvc(queries, logger.WithPrefix("rcpt"), cfg.NagomiReceiptsURL, store),
 		Connector:    newConnSvc(queries, cipher, logger.WithPrefix("connector")),
 		Connections:  newConnectionSvc(queries, cipher),
-		Statements:   newStmtSvc(database.Pool(), queries, logger.WithPrefix("stmt"), cfg.NagomiStatementsURL, store, txnSvc),
+		Statements:   newStmtSvc(database.Pool(), queries, logger.WithPrefix("stmt"), cfg.NagomiStatementsURL, store, txnSvc, transferSvc),
 		Emails:       newEmailSvc(queries, logger.WithPrefix("email")),
+		Transfers:    transferSvc,
 	}, nil
 }

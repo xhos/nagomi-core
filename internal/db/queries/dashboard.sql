@@ -1,9 +1,10 @@
 -- name: GetDashboardTrends :many
 select
   to_char(t.tx_date::date, 'YYYY-MM-DD') as date,
-  SUM(case when t.tx_direction = 1 then t.tx_amount_cents else 0 end)::bigint as income_cents,
-  SUM(case when t.tx_direction = 2 then t.tx_amount_cents else 0 end)::bigint as expense_cents
+  SUM(case when t.tx_direction = 1 then r.report_cents else 0 end)::bigint as income_cents,
+  SUM(case when t.tx_direction = 2 then r.report_cents else 0 end)::bigint as expense_cents
 from transactions t
+join transaction_report r on r.id = t.id
 join accounts a on t.account_id = a.id
 where a.owner_id = @user_id::uuid
   and a.account_type != 6
@@ -16,12 +17,13 @@ order by date;
 select
   COUNT(distinct a.id)::bigint as total_accounts,
   COUNT(t.id)::bigint as total_transactions,
-  COALESCE(SUM(case when t.tx_direction = 1 then t.tx_amount_cents else 0 end), 0)::bigint as total_income_cents,
-  COALESCE(SUM(case when t.tx_direction = 2 then t.tx_amount_cents else 0 end), 0)::bigint as total_expense_cents,
+  COALESCE(SUM(case when t.tx_direction = 1 then r.report_cents else 0 end), 0)::bigint as total_income_cents,
+  COALESCE(SUM(case when t.tx_direction = 2 then r.report_cents else 0 end), 0)::bigint as total_expense_cents,
   COUNT(distinct case when t.tx_date >= CURRENT_DATE - interval '30 days' then t.id end)::bigint as transactions_last_30_days,
-  COUNT(distinct case when t.category_id is null then t.id end)::bigint as uncategorized_transactions
+  COUNT(distinct case when t.category_id is null and not r.is_transfer then t.id end)::bigint as uncategorized_transactions
 from accounts a
 left join transactions t on a.id = t.account_id
+left join transaction_report r on r.id = t.id
 where a.owner_id = @user_id::uuid
   and a.account_type != 6
   and (sqlc.narg('start')::timestamptz is null or t.tx_date >= sqlc.narg('start')::timestamptz)
@@ -32,13 +34,15 @@ select
   c.slug,
   c.color,
   COUNT(t.id)::bigint as transaction_count,
-  SUM(t.tx_amount_cents)::bigint as total_amount_cents
+  SUM(r.report_cents)::bigint as total_amount_cents
 from transactions t
+join transaction_report r on r.id = t.id
 join categories c on t.category_id = c.id
 join accounts a on t.account_id = a.id
 where a.owner_id = @user_id::uuid
   and a.account_type != 6
   and t.tx_direction = 2
+  and r.report_cents > 0
   and (sqlc.narg('start')::timestamptz is null or t.tx_date >= sqlc.narg('start')::timestamptz)
   and (sqlc.narg('end')::timestamptz is null or t.tx_date <= sqlc.narg('end')::timestamptz)
 group by c.id, c.slug, c.color
@@ -52,10 +56,12 @@ select
   SUM(t.tx_amount_cents)::bigint as total_amount_cents,
   AVG(t.tx_amount_cents)::bigint as avg_amount_cents
 from transactions t
+join transaction_report r on r.id = t.id
 join accounts a on t.account_id = a.id
 where a.owner_id = @user_id::uuid
   and a.account_type != 6
   and t.merchant is not null
+  and not r.is_transfer
   and t.tx_direction = 2
   and (sqlc.narg('start')::timestamptz is null or t.tx_date >= sqlc.narg('start')::timestamptz)
   and (sqlc.narg('end')::timestamptz is null or t.tx_date <= sqlc.narg('end')::timestamptz)
@@ -66,10 +72,11 @@ limit COALESCE(sqlc.narg('limit')::int, 10);
 -- name: GetMonthlyComparison :many
 select
   to_char(t.tx_date, 'YYYY-MM') as month,
-  SUM(case when t.tx_direction = 1 then t.tx_amount_cents else 0 end)::bigint as income_cents,
-  SUM(case when t.tx_direction = 2 then t.tx_amount_cents else 0 end)::bigint as expense_cents,
-  SUM(case when t.tx_direction = 1 then t.tx_amount_cents else -t.tx_amount_cents end)::bigint as net_cents
+  SUM(case when t.tx_direction = 1 then r.report_cents else 0 end)::bigint as income_cents,
+  SUM(case when t.tx_direction = 2 then r.report_cents else 0 end)::bigint as expense_cents,
+  SUM(case when t.tx_direction = 1 then r.report_cents else -r.report_cents end)::bigint as net_cents
 from transactions t
+join transaction_report r on r.id = t.id
 join accounts a on t.account_id = a.id
 where a.owner_id = @user_id::uuid
   and a.account_type != 6

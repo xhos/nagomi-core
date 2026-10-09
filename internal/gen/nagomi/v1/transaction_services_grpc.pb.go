@@ -19,15 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TransactionService_ListTransactions_FullMethodName       = "/nagomi.v1.TransactionService/ListTransactions"
-	TransactionService_GetTransaction_FullMethodName         = "/nagomi.v1.TransactionService/GetTransaction"
-	TransactionService_CreateTransaction_FullMethodName      = "/nagomi.v1.TransactionService/CreateTransaction"
-	TransactionService_UpdateTransaction_FullMethodName      = "/nagomi.v1.TransactionService/UpdateTransaction"
-	TransactionService_DeleteTransaction_FullMethodName      = "/nagomi.v1.TransactionService/DeleteTransaction"
-	TransactionService_CategorizeTransactions_FullMethodName = "/nagomi.v1.TransactionService/CategorizeTransactions"
-	TransactionService_SplitTransaction_FullMethodName       = "/nagomi.v1.TransactionService/SplitTransaction"
-	TransactionService_ForgiveTransaction_FullMethodName     = "/nagomi.v1.TransactionService/ForgiveTransaction"
-	TransactionService_GetFriendBalances_FullMethodName      = "/nagomi.v1.TransactionService/GetFriendBalances"
+	TransactionService_ListTransactions_FullMethodName        = "/nagomi.v1.TransactionService/ListTransactions"
+	TransactionService_GetTransaction_FullMethodName          = "/nagomi.v1.TransactionService/GetTransaction"
+	TransactionService_CreateTransaction_FullMethodName       = "/nagomi.v1.TransactionService/CreateTransaction"
+	TransactionService_UpdateTransaction_FullMethodName       = "/nagomi.v1.TransactionService/UpdateTransaction"
+	TransactionService_DeleteTransaction_FullMethodName       = "/nagomi.v1.TransactionService/DeleteTransaction"
+	TransactionService_CategorizeTransactions_FullMethodName  = "/nagomi.v1.TransactionService/CategorizeTransactions"
+	TransactionService_SplitTransaction_FullMethodName        = "/nagomi.v1.TransactionService/SplitTransaction"
+	TransactionService_ForgiveTransaction_FullMethodName      = "/nagomi.v1.TransactionService/ForgiveTransaction"
+	TransactionService_GetFriendBalances_FullMethodName       = "/nagomi.v1.TransactionService/GetFriendBalances"
+	TransactionService_LinkTransfer_FullMethodName            = "/nagomi.v1.TransactionService/LinkTransfer"
+	TransactionService_UnlinkTransfer_FullMethodName          = "/nagomi.v1.TransactionService/UnlinkTransfer"
+	TransactionService_ListTransferSuggestions_FullMethodName = "/nagomi.v1.TransactionService/ListTransferSuggestions"
 )
 
 // TransactionServiceClient is the client API for TransactionService service.
@@ -43,6 +46,9 @@ type TransactionServiceClient interface {
 	SplitTransaction(ctx context.Context, in *SplitTransactionRequest, opts ...grpc.CallOption) (*SplitTransactionResponse, error)
 	ForgiveTransaction(ctx context.Context, in *ForgiveTransactionRequest, opts ...grpc.CallOption) (*ForgiveTransactionResponse, error)
 	GetFriendBalances(ctx context.Context, in *GetFriendBalancesRequest, opts ...grpc.CallOption) (*GetFriendBalancesResponse, error)
+	LinkTransfer(ctx context.Context, in *LinkTransferRequest, opts ...grpc.CallOption) (*LinkTransferResponse, error)
+	UnlinkTransfer(ctx context.Context, in *UnlinkTransferRequest, opts ...grpc.CallOption) (*UnlinkTransferResponse, error)
+	ListTransferSuggestions(ctx context.Context, in *ListTransferSuggestionsRequest, opts ...grpc.CallOption) (*ListTransferSuggestionsResponse, error)
 }
 
 type transactionServiceClient struct {
@@ -143,6 +149,36 @@ func (c *transactionServiceClient) GetFriendBalances(ctx context.Context, in *Ge
 	return out, nil
 }
 
+func (c *transactionServiceClient) LinkTransfer(ctx context.Context, in *LinkTransferRequest, opts ...grpc.CallOption) (*LinkTransferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LinkTransferResponse)
+	err := c.cc.Invoke(ctx, TransactionService_LinkTransfer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) UnlinkTransfer(ctx context.Context, in *UnlinkTransferRequest, opts ...grpc.CallOption) (*UnlinkTransferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnlinkTransferResponse)
+	err := c.cc.Invoke(ctx, TransactionService_UnlinkTransfer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) ListTransferSuggestions(ctx context.Context, in *ListTransferSuggestionsRequest, opts ...grpc.CallOption) (*ListTransferSuggestionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTransferSuggestionsResponse)
+	err := c.cc.Invoke(ctx, TransactionService_ListTransferSuggestions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactionServiceServer is the server API for TransactionService service.
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility.
@@ -156,6 +192,9 @@ type TransactionServiceServer interface {
 	SplitTransaction(context.Context, *SplitTransactionRequest) (*SplitTransactionResponse, error)
 	ForgiveTransaction(context.Context, *ForgiveTransactionRequest) (*ForgiveTransactionResponse, error)
 	GetFriendBalances(context.Context, *GetFriendBalancesRequest) (*GetFriendBalancesResponse, error)
+	LinkTransfer(context.Context, *LinkTransferRequest) (*LinkTransferResponse, error)
+	UnlinkTransfer(context.Context, *UnlinkTransferRequest) (*UnlinkTransferResponse, error)
+	ListTransferSuggestions(context.Context, *ListTransferSuggestionsRequest) (*ListTransferSuggestionsResponse, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -192,6 +231,15 @@ func (UnimplementedTransactionServiceServer) ForgiveTransaction(context.Context,
 }
 func (UnimplementedTransactionServiceServer) GetFriendBalances(context.Context, *GetFriendBalancesRequest) (*GetFriendBalancesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetFriendBalances not implemented")
+}
+func (UnimplementedTransactionServiceServer) LinkTransfer(context.Context, *LinkTransferRequest) (*LinkTransferResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LinkTransfer not implemented")
+}
+func (UnimplementedTransactionServiceServer) UnlinkTransfer(context.Context, *UnlinkTransferRequest) (*UnlinkTransferResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnlinkTransfer not implemented")
+}
+func (UnimplementedTransactionServiceServer) ListTransferSuggestions(context.Context, *ListTransferSuggestionsRequest) (*ListTransferSuggestionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTransferSuggestions not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 func (UnimplementedTransactionServiceServer) testEmbeddedByValue()                            {}
@@ -376,6 +424,60 @@ func _TransactionService_GetFriendBalances_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TransactionService_LinkTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LinkTransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).LinkTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_LinkTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).LinkTransfer(ctx, req.(*LinkTransferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_UnlinkTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnlinkTransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).UnlinkTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_UnlinkTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).UnlinkTransfer(ctx, req.(*UnlinkTransferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_ListTransferSuggestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTransferSuggestionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).ListTransferSuggestions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_ListTransferSuggestions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).ListTransferSuggestions(ctx, req.(*ListTransferSuggestionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +520,18 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFriendBalances",
 			Handler:    _TransactionService_GetFriendBalances_Handler,
+		},
+		{
+			MethodName: "LinkTransfer",
+			Handler:    _TransactionService_LinkTransfer_Handler,
+		},
+		{
+			MethodName: "UnlinkTransfer",
+			Handler:    _TransactionService_UnlinkTransfer_Handler,
+		},
+		{
+			MethodName: "ListTransferSuggestions",
+			Handler:    _TransactionService_ListTransferSuggestions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
