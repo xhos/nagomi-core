@@ -58,6 +58,9 @@ func TestTransfersEndToEnd(t *testing.T) {
 	if got := byID[sweepOut].GetTransfer().GetCounterpartId(); got != sweepIn {
 		t.Errorf("sweep counterpart = %d, want %d", got, sweepIn)
 	}
+	if got := byID[sweepOut].GetTransfer(); moneyToCents(got.GetCounterpartAmount()) != 255000 || got.GetCounterpartDescription() != "Transfer WWW TRANSFER - 8899" {
+		t.Errorf("counterpart = %v %q, want the incoming side", got.GetCounterpartAmount(), got.GetCounterpartDescription())
+	}
 	if byID[rent].Transfer != nil {
 		t.Error("rent was linked as a transfer")
 	}

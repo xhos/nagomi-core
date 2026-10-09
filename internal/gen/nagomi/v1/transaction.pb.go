@@ -275,9 +275,13 @@ type Transfer struct {
 	CounterpartAccountId int64                  `protobuf:"varint,3,opt,name=counterpart_account_id,json=counterpartAccountId,proto3" json:"counterpart_account_id,omitempty"`
 	Method               TransferMethod         `protobuf:"varint,4,opt,name=method,proto3,enum=nagomi.v1.TransferMethod" json:"method,omitempty"`
 	// what was lost on the way, when both sides share a currency
-	Fee           *money.Money `protobuf:"bytes,5,opt,name=fee,proto3,oneof" json:"fee,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Fee *money.Money `protobuf:"bytes,5,opt,name=fee,proto3,oneof" json:"fee,omitempty"`
+	// the other side, so a transfer can be shown as one row without loading it
+	CounterpartAmount      *money.Money           `protobuf:"bytes,6,opt,name=counterpart_amount,json=counterpartAmount,proto3" json:"counterpart_amount,omitempty"`
+	CounterpartDate        *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=counterpart_date,json=counterpartDate,proto3" json:"counterpart_date,omitempty"`
+	CounterpartDescription *string                `protobuf:"bytes,8,opt,name=counterpart_description,json=counterpartDescription,proto3,oneof" json:"counterpart_description,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *Transfer) Reset() {
@@ -343,6 +347,27 @@ func (x *Transfer) GetFee() *money.Money {
 		return x.Fee
 	}
 	return nil
+}
+
+func (x *Transfer) GetCounterpartAmount() *money.Money {
+	if x != nil {
+		return x.CounterpartAmount
+	}
+	return nil
+}
+
+func (x *Transfer) GetCounterpartDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CounterpartDate
+	}
+	return nil
+}
+
+func (x *Transfer) GetCounterpartDescription() string {
+	if x != nil && x.CounterpartDescription != nil {
+		return *x.CounterpartDescription
+	}
+	return ""
 }
 
 type TransactionWithScore struct {
@@ -509,14 +534,18 @@ const file_nagomi_v1_transaction_proto_rawDesc = "" +
 	"\r_account_nameB\r\n" +
 	"\v_receipt_idB\x10\n" +
 	"\x0e_split_from_idB\v\n" +
-	"\t_transfer\"\xdd\x01\n" +
+	"\t_transfer\"\xc1\x03\n" +
 	"\bTransfer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12%\n" +
 	"\x0ecounterpart_id\x18\x02 \x01(\x03R\rcounterpartId\x124\n" +
 	"\x16counterpart_account_id\x18\x03 \x01(\x03R\x14counterpartAccountId\x121\n" +
 	"\x06method\x18\x04 \x01(\x0e2\x19.nagomi.v1.TransferMethodR\x06method\x12)\n" +
-	"\x03fee\x18\x05 \x01(\v2\x12.google.type.MoneyH\x00R\x03fee\x88\x01\x01B\x06\n" +
-	"\x04_fee\"w\n" +
+	"\x03fee\x18\x05 \x01(\v2\x12.google.type.MoneyH\x00R\x03fee\x88\x01\x01\x12A\n" +
+	"\x12counterpart_amount\x18\x06 \x01(\v2\x12.google.type.MoneyR\x11counterpartAmount\x12E\n" +
+	"\x10counterpart_date\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x0fcounterpartDate\x12<\n" +
+	"\x17counterpart_description\x18\b \x01(\tH\x01R\x16counterpartDescription\x88\x01\x01B\x06\n" +
+	"\x04_feeB\x1a\n" +
+	"\x18_counterpart_description\"w\n" +
 	"\x14TransactionWithScore\x128\n" +
 	"\vtransaction\x18\x01 \x01(\v2\x16.nagomi.v1.TransactionR\vtransaction\x12%\n" +
 	"\x0emerchant_score\x18\x02 \x01(\x01R\rmerchantScore\"\x8a\x01\n" +
@@ -567,12 +596,14 @@ var file_nagomi_v1_transaction_proto_depIdxs = []int32{
 	1,  // 10: nagomi.v1.Transaction.transfer:type_name -> nagomi.v1.Transfer
 	9,  // 11: nagomi.v1.Transfer.method:type_name -> nagomi.v1.TransferMethod
 	5,  // 12: nagomi.v1.Transfer.fee:type_name -> google.type.Money
-	0,  // 13: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	5,  // 13: nagomi.v1.Transfer.counterpart_amount:type_name -> google.type.Money
+	4,  // 14: nagomi.v1.Transfer.counterpart_date:type_name -> google.protobuf.Timestamp
+	0,  // 15: nagomi.v1.TransactionWithScore.transaction:type_name -> nagomi.v1.Transaction
+	16, // [16:16] is the sub-list for method output_type
+	16, // [16:16] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_transaction_proto_init() }

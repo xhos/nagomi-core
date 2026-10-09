@@ -122,10 +122,14 @@ select
   o.account_id as out_account_id,
   o.tx_amount_cents as out_amount_cents,
   o.tx_currency as out_currency,
+  o.tx_date as out_date,
+  coalesce(o.tx_desc, o.merchant) as out_description,
   i.id as in_id,
   i.account_id as in_account_id,
   i.tx_amount_cents as in_amount_cents,
-  i.tx_currency as in_currency
+  i.tx_currency as in_currency,
+  i.tx_date as in_date,
+  coalesce(i.tx_desc, i.merchant) as in_description
 from transfers tr
 join transactions o on o.id = tr.out_tx_id
 join transactions i on i.id = tr.in_tx_id
@@ -134,16 +138,20 @@ where tr.status = 1
 `
 
 type ListLinkedTransfersRow struct {
-	ID             int64  `db:"id" json:"id"`
-	Method         int16  `db:"method" json:"method"`
-	OutID          int64  `db:"out_id" json:"out_id"`
-	OutAccountID   int64  `db:"out_account_id" json:"out_account_id"`
-	OutAmountCents int64  `db:"out_amount_cents" json:"out_amount_cents"`
-	OutCurrency    string `db:"out_currency" json:"out_currency"`
-	InID           int64  `db:"in_id" json:"in_id"`
-	InAccountID    int64  `db:"in_account_id" json:"in_account_id"`
-	InAmountCents  int64  `db:"in_amount_cents" json:"in_amount_cents"`
-	InCurrency     string `db:"in_currency" json:"in_currency"`
+	ID             int64     `db:"id" json:"id"`
+	Method         int16     `db:"method" json:"method"`
+	OutID          int64     `db:"out_id" json:"out_id"`
+	OutAccountID   int64     `db:"out_account_id" json:"out_account_id"`
+	OutAmountCents int64     `db:"out_amount_cents" json:"out_amount_cents"`
+	OutCurrency    string    `db:"out_currency" json:"out_currency"`
+	OutDate        time.Time `db:"out_date" json:"out_date"`
+	OutDescription *string   `db:"out_description" json:"out_description"`
+	InID           int64     `db:"in_id" json:"in_id"`
+	InAccountID    int64     `db:"in_account_id" json:"in_account_id"`
+	InAmountCents  int64     `db:"in_amount_cents" json:"in_amount_cents"`
+	InCurrency     string    `db:"in_currency" json:"in_currency"`
+	InDate         time.Time `db:"in_date" json:"in_date"`
+	InDescription  *string   `db:"in_description" json:"in_description"`
 }
 
 // the linked transfer of each given transaction, with both sides' amounts
@@ -163,10 +171,14 @@ func (q *Queries) ListLinkedTransfers(ctx context.Context, ids []int64) ([]ListL
 			&i.OutAccountID,
 			&i.OutAmountCents,
 			&i.OutCurrency,
+			&i.OutDate,
+			&i.OutDescription,
 			&i.InID,
 			&i.InAccountID,
 			&i.InAmountCents,
 			&i.InCurrency,
+			&i.InDate,
+			&i.InDescription,
 		); err != nil {
 			return nil, err
 		}

@@ -85,10 +85,14 @@ select
   o.account_id as out_account_id,
   o.tx_amount_cents as out_amount_cents,
   o.tx_currency as out_currency,
+  o.tx_date as out_date,
+  coalesce(o.tx_desc, o.merchant) as out_description,
   i.id as in_id,
   i.account_id as in_account_id,
   i.tx_amount_cents as in_amount_cents,
-  i.tx_currency as in_currency
+  i.tx_currency as in_currency,
+  i.tx_date as in_date,
+  coalesce(i.tx_desc, i.merchant) as in_description
 from transfers tr
 join transactions o on o.id = tr.out_tx_id
 join transactions i on i.id = tr.in_tx_id

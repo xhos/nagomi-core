@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type TransferService interface {
@@ -247,15 +248,25 @@ func attachTransfers(ctx context.Context, q *sqlc.Queries, txs []*pb.Transaction
 	}
 	byTx := make(map[int64]*pb.Transfer, 2*len(rows))
 	for _, r := range rows {
-		base := func(counterpart, account int64) *pb.Transfer {
-			return &pb.Transfer{
-				Id:                   r.ID,
-				CounterpartId:        counterpart,
-				CounterpartAccountId: account,
-				Method:               pb.TransferMethod(r.Method),
-			}
+		// each side describes the other one
+		out := &pb.Transfer{
+			Id:                     r.ID,
+			CounterpartId:          r.InID,
+			CounterpartAccountId:   r.InAccountID,
+			Method:                 pb.TransferMethod(r.Method),
+			CounterpartAmount:      centsToMoney(r.InAmountCents, r.InCurrency),
+			CounterpartDate:        timestamppb.New(r.InDate),
+			CounterpartDescription: r.InDescription,
 		}
-		out, in := base(r.InID, r.InAccountID), base(r.OutID, r.OutAccountID)
+		in := &pb.Transfer{
+			Id:                     r.ID,
+			CounterpartId:          r.OutID,
+			CounterpartAccountId:   r.OutAccountID,
+			Method:                 pb.TransferMethod(r.Method),
+			CounterpartAmount:      centsToMoney(r.OutAmountCents, r.OutCurrency),
+			CounterpartDate:        timestamppb.New(r.OutDate),
+			CounterpartDescription: r.OutDescription,
+		}
 		if r.OutCurrency == r.InCurrency && r.OutAmountCents > r.InAmountCents {
 			lost := centsToMoney(r.OutAmountCents-r.InAmountCents, r.OutCurrency)
 			out.Fee, in.Fee = lost, lost
