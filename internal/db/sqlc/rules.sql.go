@@ -302,11 +302,11 @@ func (q *Queries) ListRules(ctx context.Context, userID uuid.UUID) ([]Transactio
 const updateRule = `-- name: UpdateRule :exec
 update transaction_rules
 set
-  rule_name = $1,
+  rule_name = coalesce($1, rule_name),
   category_id = $2::bigint,
-  conditions = $3,
+  conditions = coalesce($3, conditions),
   is_active = $4,
-  priority_order = $5,
+  priority_order = coalesce($5, priority_order),
   merchant = $6,
   updated_at = now()
 where rule_id = $7::uuid

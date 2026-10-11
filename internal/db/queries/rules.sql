@@ -18,11 +18,11 @@ returning *;
 -- name: UpdateRule :exec
 update transaction_rules
 set
-  rule_name = sqlc.narg('rule_name'),
+  rule_name = coalesce(sqlc.narg('rule_name'), rule_name),
   category_id = sqlc.narg('category_id')::bigint,
-  conditions = sqlc.narg('conditions'),
+  conditions = coalesce(sqlc.narg('conditions'), conditions),
   is_active = sqlc.narg('is_active'),
-  priority_order = sqlc.narg('priority_order'),
+  priority_order = coalesce(sqlc.narg('priority_order'), priority_order),
   merchant = sqlc.narg('merchant'),
   updated_at = now()
 where rule_id = @rule_id::uuid
