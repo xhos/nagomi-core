@@ -201,7 +201,8 @@ from transactions t
 join accounts a on t.account_id = a.id
 where a.owner_id = $1::uuid
   and ($2::bigint[] is null or t.id = ANY($2::bigint[]))
-  and ($3::boolean = true or (t.category_manually_set = false and t.merchant_manually_set = false))
+  -- BulkApplyRuleToTransactions guards each field, so a hand-set merchant still lets a rule set the category
+  and ($3::boolean = true or t.category_manually_set = false or t.merchant_manually_set = false)
 `
 
 type GetTransactionsForRuleApplicationParams struct {

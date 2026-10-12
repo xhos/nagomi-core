@@ -47,7 +47,8 @@ from transactions t
 join accounts a on t.account_id = a.id
 where a.owner_id = @user_id::uuid
   and (sqlc.narg('transaction_ids')::bigint[] is null or t.id = ANY(sqlc.narg('transaction_ids')::bigint[]))
-  and (sqlc.narg('include_manually_set')::boolean = true or (t.category_manually_set = false and t.merchant_manually_set = false));
+  -- BulkApplyRuleToTransactions guards each field, so a hand-set merchant still lets a rule set the category
+  and (sqlc.narg('include_manually_set')::boolean = true or t.category_manually_set = false or t.merchant_manually_set = false);
 
 -- name: BulkApplyRuleToTransactions :execrows
 update transactions
