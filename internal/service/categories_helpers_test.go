@@ -5,41 +5,7 @@ import (
 	"testing"
 
 	"nagomi-core/internal/db/sqlc"
-
-	"github.com/google/uuid"
 )
-
-func TestBuildUpdateCategoryParams_MapsFields(t *testing.T) {
-	userID := uuid.New()
-	slug := "food.groceries"
-	color := "#123456"
-
-	params := buildUpdateCategoryParams(userID, 9, &slug, &color)
-	if params.ID != 9 || params.UserID != userID {
-		t.Fatalf("expected id/user mapped, got id=%d user=%v", params.ID, params.UserID)
-	}
-	if params.Slug == nil || *params.Slug != slug {
-		t.Fatalf("expected slug mapped, got %v", params.Slug)
-	}
-	if params.Color == nil || *params.Color != color {
-		t.Fatalf("expected color mapped, got %v", params.Color)
-	}
-}
-
-func TestShouldUpdateCategoryHierarchy(t *testing.T) {
-	same := "food"
-	different := "food.groceries"
-
-	if shouldUpdateCategoryHierarchy("food", nil) {
-		t.Fatalf("expected nil slug to skip hierarchy update")
-	}
-	if shouldUpdateCategoryHierarchy("food", &same) {
-		t.Fatalf("expected same slug to skip hierarchy update")
-	}
-	if !shouldUpdateCategoryHierarchy("food", &different) {
-		t.Fatalf("expected different slug to require hierarchy update")
-	}
-}
 
 func TestCategoryParentSlugs(t *testing.T) {
 	noParents := categoryParentSlugs("food")

@@ -76,7 +76,7 @@ where
   user_id = $1::uuid
   and (
     slug = $2::text
-    or slug like $2::text || '.%'
+    or starts_with(slug, $2::text || '.')
   )
 `
 
@@ -189,54 +189,50 @@ func (q *Queries) ListCategories(ctx context.Context, userID uuid.UUID) ([]Categ
 	return items, nil
 }
 
-const updateCategory = `-- name: UpdateCategory :exec
-update
-  categories
-set
-  slug = $1::text,
-  color = $2::text
-where
-  id = $3::bigint
-  and user_id = $4::uuid
-`
-
-type UpdateCategoryParams struct {
-	Slug   *string   `db:"slug" json:"slug"`
-	Color  *string   `db:"color" json:"color"`
-	ID     int64     `db:"id" json:"id"`
-	UserID uuid.UUID `db:"user_id" json:"user_id"`
-}
-
-func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
-	_, err := q.db.Exec(ctx, updateCategory,
-		arg.Slug,
-		arg.Color,
-		arg.ID,
-		arg.UserID,
-	)
-	return err
-}
-
-const updateChildCategorySlugs = `-- name: UpdateChildCategorySlugs :execrows
+const renameCategoryTree = `-- name: RenameCategoryTree :execrows
 update
   categories
 set
   slug = $1::text || substring(slug from length($2::text) + 1)
 where
   user_id = $3::uuid
-  and slug like $2::text || '.%'
+  and (
+    slug = $2::text
+    or starts_with(slug, $2::text || '.')
+  )
 `
 
-type UpdateChildCategorySlugsParams struct {
-	NewSlugPrefix string    `db:"new_slug_prefix" json:"new_slug_prefix"`
-	OldSlugPrefix string    `db:"old_slug_prefix" json:"old_slug_prefix"`
-	UserID        uuid.UUID `db:"user_id" json:"user_id"`
+type RenameCategoryTreeParams struct {
+	NewSlug string    `db:"new_slug" json:"new_slug"`
+	OldSlug string    `db:"old_slug" json:"old_slug"`
+	UserID  uuid.UUID `db:"user_id" json:"user_id"`
 }
 
-func (q *Queries) UpdateChildCategorySlugs(ctx context.Context, arg UpdateChildCategorySlugsParams) (int64, error) {
-	result, err := q.db.Exec(ctx, updateChildCategorySlugs, arg.NewSlugPrefix, arg.OldSlugPrefix, arg.UserID)
+func (q *Queries) RenameCategoryTree(ctx context.Context, arg RenameCategoryTreeParams) (int64, error) {
+	result, err := q.db.Exec(ctx, renameCategoryTree, arg.NewSlug, arg.OldSlug, arg.UserID)
 	if err != nil {
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const updateCategoryColor = `-- name: UpdateCategoryColor :exec
+update
+  categories
+set
+  color = $1::text
+where
+  id = $2::bigint
+  and user_id = $3::uuid
+`
+
+type UpdateCategoryColorParams struct {
+	Color  string    `db:"color" json:"color"`
+	ID     int64     `db:"id" json:"id"`
+	UserID uuid.UUID `db:"user_id" json:"user_id"`
+}
+
+func (q *Queries) UpdateCategoryColor(ctx context.Context, arg UpdateCategoryColorParams) error {
+	_, err := q.db.Exec(ctx, updateCategoryColor, arg.Color, arg.ID, arg.UserID)
+	return err
 }

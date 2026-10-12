@@ -13,22 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func buildUpdateCategoryParams(userID uuid.UUID, categoryID int64, slug, color *string) sqlc.UpdateCategoryParams {
-	return sqlc.UpdateCategoryParams{
-		ID:     categoryID,
-		UserID: userID,
-		Slug:   slug,
-		Color:  color,
-	}
-}
-
-func shouldUpdateCategoryHierarchy(oldSlug string, newSlug *string) bool {
-	if newSlug == nil {
-		return false
-	}
-	return oldSlug != *newSlug
-}
-
 func categoryParentSlugs(slug string) []string {
 	parts := strings.Split(slug, ".")
 	hasParents := len(parts) > 1
@@ -52,9 +36,9 @@ func categoryToPb(c *sqlc.Category) *pb.Category {
 	}
 }
 
-func (s *catSvc) ensureParentCategories(ctx context.Context, userID uuid.UUID, slug string) error {
+func ensureParentCategories(ctx context.Context, q *sqlc.Queries, userID uuid.UUID, slug string) error {
 	for _, parentSlug := range categoryParentSlugs(slug) {
-		_, err := s.queries.GetCategoryBySlug(ctx, sqlc.GetCategoryBySlugParams{Slug: parentSlug, UserID: userID})
+		_, err := q.GetCategoryBySlug(ctx, sqlc.GetCategoryBySlugParams{Slug: parentSlug, UserID: userID})
 		if err == nil {
 			continue
 		}
@@ -63,7 +47,7 @@ func (s *catSvc) ensureParentCategories(ctx context.Context, userID uuid.UUID, s
 		}
 
 		color := generateNiceHexColor()
-		_, err = s.queries.CreateCategoryIfNotExists(ctx, sqlc.CreateCategoryIfNotExistsParams{
+		_, err = q.CreateCategoryIfNotExists(ctx, sqlc.CreateCategoryIfNotExistsParams{
 			UserID: userID,
 			Slug:   parentSlug,
 			Color:  color,

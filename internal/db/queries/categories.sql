@@ -34,12 +34,11 @@ values
 returning
   *;
 
--- name: UpdateCategory :exec
+-- name: UpdateCategoryColor :exec
 update
   categories
 set
-  slug = sqlc.narg('slug')::text,
-  color = sqlc.narg('color')::text
+  color = @color::text
 where
   id = @id::bigint
   and user_id = @user_id::uuid;
@@ -59,14 +58,17 @@ where
   user_id = @user_id::uuid
   and (
     slug = @slug::text
-    or slug like @slug::text || '.%'
+    or starts_with(slug, @slug::text || '.')
   );
 
--- name: UpdateChildCategorySlugs :execrows
+-- name: RenameCategoryTree :execrows
 update
   categories
 set
-  slug = @new_slug_prefix::text || substring(slug from length(@old_slug_prefix::text) + 1)
+  slug = @new_slug::text || substring(slug from length(@old_slug::text) + 1)
 where
   user_id = @user_id::uuid
-  and slug like @old_slug_prefix::text || '.%';
+  and (
+    slug = @old_slug::text
+    or starts_with(slug, @old_slug::text || '.')
+  );

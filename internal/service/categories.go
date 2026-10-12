@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"nagomi-core/internal/db/sqlc"
 	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // ----- interface ---------------------------------------------------------------------------
@@ -22,18 +25,19 @@ type CategoryService interface {
 }
 
 type catSvc struct {
+	pool    *pgxpool.Pool
 	queries *sqlc.Queries
 	log     *log.Logger
 }
 
-func newCatSvc(queries *sqlc.Queries, logger *log.Logger) CategoryService {
-	return &catSvc{queries: queries, log: logger}
+func newCatSvc(pool *pgxpool.Pool, queries *sqlc.Queries, logger *log.Logger) CategoryService {
+	return &catSvc{pool: pool, queries: queries, log: logger}
 }
 
 // ----- methods -----------------------------------------------------------------------------
 
 func (s *catSvc) Create(ctx context.Context, userID uuid.UUID, slug, color string) (*pb.Category, error) {
-	if err := s.ensureParentCategories(ctx, userID, slug); err != nil {
+	if err := ensureParentCategories(ctx, s.queries, userID, slug); err != nil {
 		return nil, wrapErr("CategoryService.Create", err)
 	}
 
@@ -74,31 +78,48 @@ func (s *catSvc) GetBySlug(ctx context.Context, userID uuid.UUID, slug string) (
 }
 
 func (s *catSvc) Update(ctx context.Context, userID uuid.UUID, categoryID int64, slug, color *string) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return wrapErr("CategoryService.Update", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	q := s.queries.WithTx(tx)
+
 	if slug != nil {
-		oldCategory, err := s.queries.GetCategory(ctx, sqlc.GetCategoryParams{ID: categoryID, UserID: userID})
+		old, err := q.GetCategory(ctx, sqlc.GetCategoryParams{ID: categoryID, UserID: userID})
 		if err != nil {
 			return wrapErr("CategoryService.Update", err)
 		}
 
-		slugIsChanging := shouldUpdateCategoryHierarchy(oldCategory.Slug, slug)
-		if slugIsChanging {
-			if err := s.ensureParentCategories(ctx, userID, *slug); err != nil {
+		if *slug != old.Slug {
+			if strings.HasPrefix(*slug, old.Slug+".") {
+				return fmt.Errorf("CategoryService.Update: can't move %q under itself: %w", old.Slug, ErrValidation)
+			}
+
+			// children move with their parent, so "food.coffee" follows "food" -> "eating"
+			_, err = q.RenameCategoryTree(ctx, sqlc.RenameCategoryTreeParams{
+				UserID:  userID,
+				OldSlug: old.Slug,
+				NewSlug: *slug,
+			})
+			if err != nil {
 				return wrapErr("CategoryService.Update", err)
 			}
 
-			_, err = s.queries.UpdateChildCategorySlugs(ctx, sqlc.UpdateChildCategorySlugsParams{
-				UserID:        userID,
-				OldSlugPrefix: oldCategory.Slug,
-				NewSlugPrefix: *slug,
-			})
-			if err != nil {
+			if err := ensureParentCategories(ctx, q, userID, *slug); err != nil {
 				return wrapErr("CategoryService.Update", err)
 			}
 		}
 	}
 
-	err := s.queries.UpdateCategory(ctx, buildUpdateCategoryParams(userID, categoryID, slug, color))
-	if err != nil {
+	if color != nil {
+		err := q.UpdateCategoryColor(ctx, sqlc.UpdateCategoryColorParams{ID: categoryID, UserID: userID, Color: *color})
+		if err != nil {
+			return wrapErr("CategoryService.Update", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
 		return wrapErr("CategoryService.Update", err)
 	}
 	return nil

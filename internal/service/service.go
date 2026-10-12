@@ -29,7 +29,7 @@ type Services struct {
 
 func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, error) {
 	queries := database.Queries
-	catSvc := newCatSvc(queries, logger.WithPrefix("cat"))
+	catSvc := newCatSvc(database.Pool(), queries, logger.WithPrefix("cat"))
 	ruleSvc := newCatRuleSvc(queries, logger.WithPrefix("rules"))
 	exchangeClient := exchange.NewClient(cfg.ExchangeAPIURL)
 
