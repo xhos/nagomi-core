@@ -12,6 +12,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	structpb "google.golang.org/protobuf/types/known/structpb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -584,11 +585,195 @@ func (x *DeleteRuleResponse) GetAffectedRows() int64 {
 	return 0
 }
 
+type SuggestRulesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Limit         *int32                 `protobuf:"varint,2,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SuggestRulesRequest) Reset() {
+	*x = SuggestRulesRequest{}
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SuggestRulesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SuggestRulesRequest) ProtoMessage() {}
+
+func (x *SuggestRulesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SuggestRulesRequest.ProtoReflect.Descriptor instead.
+func (*SuggestRulesRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SuggestRulesRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SuggestRulesRequest) GetLimit() int32 {
+	if x != nil && x.Limit != nil {
+		return *x.Limit
+	}
+	return 0
+}
+
+// a description pattern shared by many uncategorized transactions
+type RuleSuggestion struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// matched case-insensitively as "description starts with pattern"
+	Pattern          string `protobuf:"bytes,1,opt,name=pattern,proto3" json:"pattern,omitempty"`
+	TransactionCount int64  `protobuf:"varint,2,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
+	// a few distinct descriptions the pattern matches, most common first
+	Examples []string `protobuf:"bytes,3,rep,name=examples,proto3" json:"examples,omitempty"`
+	// the category most already-categorized matches of the pattern have
+	CategoryId    *int64                 `protobuf:"varint,4,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
+	LastSeen      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_seen,json=lastSeen,proto3" json:"last_seen,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RuleSuggestion) Reset() {
+	*x = RuleSuggestion{}
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleSuggestion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleSuggestion) ProtoMessage() {}
+
+func (x *RuleSuggestion) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleSuggestion.ProtoReflect.Descriptor instead.
+func (*RuleSuggestion) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RuleSuggestion) GetPattern() string {
+	if x != nil {
+		return x.Pattern
+	}
+	return ""
+}
+
+func (x *RuleSuggestion) GetTransactionCount() int64 {
+	if x != nil {
+		return x.TransactionCount
+	}
+	return 0
+}
+
+func (x *RuleSuggestion) GetExamples() []string {
+	if x != nil {
+		return x.Examples
+	}
+	return nil
+}
+
+func (x *RuleSuggestion) GetCategoryId() int64 {
+	if x != nil && x.CategoryId != nil {
+		return *x.CategoryId
+	}
+	return 0
+}
+
+func (x *RuleSuggestion) GetLastSeen() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastSeen
+	}
+	return nil
+}
+
+type SuggestRulesResponse struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Suggestions        []*RuleSuggestion      `protobuf:"bytes,1,rep,name=suggestions,proto3" json:"suggestions,omitempty"`
+	UncategorizedCount int64                  `protobuf:"varint,2,opt,name=uncategorized_count,json=uncategorizedCount,proto3" json:"uncategorized_count,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SuggestRulesResponse) Reset() {
+	*x = SuggestRulesResponse{}
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SuggestRulesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SuggestRulesResponse) ProtoMessage() {}
+
+func (x *SuggestRulesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_rule_services_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SuggestRulesResponse.ProtoReflect.Descriptor instead.
+func (*SuggestRulesResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_rule_services_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SuggestRulesResponse) GetSuggestions() []*RuleSuggestion {
+	if x != nil {
+		return x.Suggestions
+	}
+	return nil
+}
+
+func (x *SuggestRulesResponse) GetUncategorizedCount() int64 {
+	if x != nil {
+		return x.UncategorizedCount
+	}
+	return 0
+}
+
 var File_nagomi_v1_rule_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\n" +
-	"\x1dnagomi/v1/rule_services.proto\x12\tnagomi.v1\x1a\x14nagomi/v1/rule.proto\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\"5\n" +
+	"\x1dnagomi/v1/rule_services.proto\x12\tnagomi.v1\x1a\x14nagomi/v1/rule.proto\x1a\x1bbuf/validate/validate.proto\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"5\n" +
 	"\x10ListRulesRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\":\n" +
 	"\x11ListRulesResponse\x12%\n" +
@@ -645,7 +830,23 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\arule_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06ruleId\x12!\n" +
 	"\auser_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"9\n" +
 	"\x12DeleteRuleResponse\x12#\n" +
-	"\raffected_rows\x18\x01 \x01(\x03R\faffectedRows2\xf8\x02\n" +
+	"\raffected_rows\x18\x01 \x01(\x03R\faffectedRows\"i\n" +
+	"\x13SuggestRulesRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12%\n" +
+	"\x05limit\x18\x02 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xc8\x01 \x00H\x00R\x05limit\x88\x01\x01B\b\n" +
+	"\x06_limit\"\xe2\x01\n" +
+	"\x0eRuleSuggestion\x12\x18\n" +
+	"\apattern\x18\x01 \x01(\tR\apattern\x12+\n" +
+	"\x11transaction_count\x18\x02 \x01(\x03R\x10transactionCount\x12\x1a\n" +
+	"\bexamples\x18\x03 \x03(\tR\bexamples\x12$\n" +
+	"\vcategory_id\x18\x04 \x01(\x03H\x00R\n" +
+	"categoryId\x88\x01\x01\x127\n" +
+	"\tlast_seen\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\blastSeenB\x0e\n" +
+	"\f_category_id\"\x84\x01\n" +
+	"\x14SuggestRulesResponse\x12;\n" +
+	"\vsuggestions\x18\x01 \x03(\v2\x19.nagomi.v1.RuleSuggestionR\vsuggestions\x12/\n" +
+	"\x13uncategorized_count\x18\x02 \x01(\x03R\x12uncategorizedCount2\xc9\x03\n" +
 	"\vRuleService\x12F\n" +
 	"\tListRules\x12\x1b.nagomi.v1.ListRulesRequest\x1a\x1c.nagomi.v1.ListRulesResponse\x12@\n" +
 	"\aGetRule\x12\x19.nagomi.v1.GetRuleRequest\x1a\x1a.nagomi.v1.GetRuleResponse\x12I\n" +
@@ -654,7 +855,8 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\n" +
 	"UpdateRule\x12\x1c.nagomi.v1.UpdateRuleRequest\x1a\x1d.nagomi.v1.UpdateRuleResponse\x12I\n" +
 	"\n" +
-	"DeleteRule\x12\x1c.nagomi.v1.DeleteRuleRequest\x1a\x1d.nagomi.v1.DeleteRuleResponseB\x94\x01\n" +
+	"DeleteRule\x12\x1c.nagomi.v1.DeleteRuleRequest\x1a\x1d.nagomi.v1.DeleteRuleResponse\x12O\n" +
+	"\fSuggestRules\x12\x1e.nagomi.v1.SuggestRulesRequest\x1a\x1f.nagomi.v1.SuggestRulesResponseB\x94\x01\n" +
 	"\rcom.nagomi.v1B\x11RuleServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -670,7 +872,7 @@ func file_nagomi_v1_rule_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_rule_services_proto_rawDescData
 }
 
-var file_nagomi_v1_rule_services_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_nagomi_v1_rule_services_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_nagomi_v1_rule_services_proto_goTypes = []any{
 	(*ListRulesRequest)(nil),      // 0: nagomi.v1.ListRulesRequest
 	(*ListRulesResponse)(nil),     // 1: nagomi.v1.ListRulesResponse
@@ -682,32 +884,40 @@ var file_nagomi_v1_rule_services_proto_goTypes = []any{
 	(*UpdateRuleResponse)(nil),    // 7: nagomi.v1.UpdateRuleResponse
 	(*DeleteRuleRequest)(nil),     // 8: nagomi.v1.DeleteRuleRequest
 	(*DeleteRuleResponse)(nil),    // 9: nagomi.v1.DeleteRuleResponse
-	(*Rule)(nil),                  // 10: nagomi.v1.Rule
-	(*structpb.Struct)(nil),       // 11: google.protobuf.Struct
-	(*fieldmaskpb.FieldMask)(nil), // 12: google.protobuf.FieldMask
+	(*SuggestRulesRequest)(nil),   // 10: nagomi.v1.SuggestRulesRequest
+	(*RuleSuggestion)(nil),        // 11: nagomi.v1.RuleSuggestion
+	(*SuggestRulesResponse)(nil),  // 12: nagomi.v1.SuggestRulesResponse
+	(*Rule)(nil),                  // 13: nagomi.v1.Rule
+	(*structpb.Struct)(nil),       // 14: google.protobuf.Struct
+	(*fieldmaskpb.FieldMask)(nil), // 15: google.protobuf.FieldMask
+	(*timestamppb.Timestamp)(nil), // 16: google.protobuf.Timestamp
 }
 var file_nagomi_v1_rule_services_proto_depIdxs = []int32{
-	10, // 0: nagomi.v1.ListRulesResponse.rules:type_name -> nagomi.v1.Rule
-	10, // 1: nagomi.v1.GetRuleResponse.rule:type_name -> nagomi.v1.Rule
-	11, // 2: nagomi.v1.CreateRuleRequest.conditions:type_name -> google.protobuf.Struct
-	10, // 3: nagomi.v1.CreateRuleResponse.rule:type_name -> nagomi.v1.Rule
-	12, // 4: nagomi.v1.UpdateRuleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	11, // 5: nagomi.v1.UpdateRuleRequest.conditions:type_name -> google.protobuf.Struct
-	0,  // 6: nagomi.v1.RuleService.ListRules:input_type -> nagomi.v1.ListRulesRequest
-	2,  // 7: nagomi.v1.RuleService.GetRule:input_type -> nagomi.v1.GetRuleRequest
-	4,  // 8: nagomi.v1.RuleService.CreateRule:input_type -> nagomi.v1.CreateRuleRequest
-	6,  // 9: nagomi.v1.RuleService.UpdateRule:input_type -> nagomi.v1.UpdateRuleRequest
-	8,  // 10: nagomi.v1.RuleService.DeleteRule:input_type -> nagomi.v1.DeleteRuleRequest
-	1,  // 11: nagomi.v1.RuleService.ListRules:output_type -> nagomi.v1.ListRulesResponse
-	3,  // 12: nagomi.v1.RuleService.GetRule:output_type -> nagomi.v1.GetRuleResponse
-	5,  // 13: nagomi.v1.RuleService.CreateRule:output_type -> nagomi.v1.CreateRuleResponse
-	7,  // 14: nagomi.v1.RuleService.UpdateRule:output_type -> nagomi.v1.UpdateRuleResponse
-	9,  // 15: nagomi.v1.RuleService.DeleteRule:output_type -> nagomi.v1.DeleteRuleResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	13, // 0: nagomi.v1.ListRulesResponse.rules:type_name -> nagomi.v1.Rule
+	13, // 1: nagomi.v1.GetRuleResponse.rule:type_name -> nagomi.v1.Rule
+	14, // 2: nagomi.v1.CreateRuleRequest.conditions:type_name -> google.protobuf.Struct
+	13, // 3: nagomi.v1.CreateRuleResponse.rule:type_name -> nagomi.v1.Rule
+	15, // 4: nagomi.v1.UpdateRuleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	14, // 5: nagomi.v1.UpdateRuleRequest.conditions:type_name -> google.protobuf.Struct
+	16, // 6: nagomi.v1.RuleSuggestion.last_seen:type_name -> google.protobuf.Timestamp
+	11, // 7: nagomi.v1.SuggestRulesResponse.suggestions:type_name -> nagomi.v1.RuleSuggestion
+	0,  // 8: nagomi.v1.RuleService.ListRules:input_type -> nagomi.v1.ListRulesRequest
+	2,  // 9: nagomi.v1.RuleService.GetRule:input_type -> nagomi.v1.GetRuleRequest
+	4,  // 10: nagomi.v1.RuleService.CreateRule:input_type -> nagomi.v1.CreateRuleRequest
+	6,  // 11: nagomi.v1.RuleService.UpdateRule:input_type -> nagomi.v1.UpdateRuleRequest
+	8,  // 12: nagomi.v1.RuleService.DeleteRule:input_type -> nagomi.v1.DeleteRuleRequest
+	10, // 13: nagomi.v1.RuleService.SuggestRules:input_type -> nagomi.v1.SuggestRulesRequest
+	1,  // 14: nagomi.v1.RuleService.ListRules:output_type -> nagomi.v1.ListRulesResponse
+	3,  // 15: nagomi.v1.RuleService.GetRule:output_type -> nagomi.v1.GetRuleResponse
+	5,  // 16: nagomi.v1.RuleService.CreateRule:output_type -> nagomi.v1.CreateRuleResponse
+	7,  // 17: nagomi.v1.RuleService.UpdateRule:output_type -> nagomi.v1.UpdateRuleResponse
+	9,  // 18: nagomi.v1.RuleService.DeleteRule:output_type -> nagomi.v1.DeleteRuleResponse
+	12, // 19: nagomi.v1.RuleService.SuggestRules:output_type -> nagomi.v1.SuggestRulesResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_rule_services_proto_init() }
@@ -718,13 +928,15 @@ func file_nagomi_v1_rule_services_proto_init() {
 	file_nagomi_v1_rule_proto_init()
 	file_nagomi_v1_rule_services_proto_msgTypes[4].OneofWrappers = []any{}
 	file_nagomi_v1_rule_services_proto_msgTypes[6].OneofWrappers = []any{}
+	file_nagomi_v1_rule_services_proto_msgTypes[10].OneofWrappers = []any{}
+	file_nagomi_v1_rule_services_proto_msgTypes[11].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_rule_services_proto_rawDesc), len(file_nagomi_v1_rule_services_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -141,3 +141,17 @@ func (s *Server) DeleteRule(ctx context.Context, req *connect.Request[pb.DeleteR
 		AffectedRows: affected,
 	}), nil
 }
+
+func (s *Server) SuggestRules(ctx context.Context, req *connect.Request[pb.SuggestRulesRequest]) (*connect.Response[pb.SuggestRulesResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := s.services.Rules.Suggest(ctx, userID, int(req.Msg.GetLimit()))
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(res), nil
+}

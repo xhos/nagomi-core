@@ -73,3 +73,35 @@ where id = ANY(@transaction_ids::bigint[])
     (@category_id::bigint > 0 and category_manually_set = false) or
     (@merchant::text != '' and merchant_manually_set = false)
   );
+-- name: ListUncategorizedDescriptions :many
+-- uncategorized descriptions with how often they occur; manually uncategorized
+-- rows are counted in total_count but are out of reach of rules
+select
+  t.tx_desc::text as tx_desc,
+  count(*) filter (where not t.category_manually_set)::bigint as eligible_count,
+  count(*)::bigint as total_count,
+  max(t.tx_date)::timestamptz as last_seen
+from transactions t
+join accounts a on a.id = t.account_id
+where a.owner_id = @user_id::uuid
+  and a.account_type != 6
+  and t.category_id is null
+  and t.tx_desc is not null
+  and not exists (
+    select 1 from transfers tr
+    where tr.status = 1 and (tr.out_tx_id = t.id or tr.in_tx_id = t.id)
+  )
+group by t.tx_desc;
+
+-- name: ListCategorizedDescriptions :many
+select
+  t.tx_desc::text as tx_desc,
+  t.category_id::bigint as category_id,
+  count(*)::bigint as tx_count
+from transactions t
+join accounts a on a.id = t.account_id
+where a.owner_id = @user_id::uuid
+  and a.account_type != 6
+  and t.category_id is not null
+  and t.tx_desc is not null
+group by t.tx_desc, t.category_id;

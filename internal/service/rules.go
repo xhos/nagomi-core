@@ -18,6 +18,7 @@ type RuleService interface {
 	Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string) error
 	Delete(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID) (int64, error)
 	List(ctx context.Context, userID uuid.UUID) ([]*pb.Rule, error)
+	Suggest(ctx context.Context, userID uuid.UUID, limit int) (*pb.SuggestRulesResponse, error)
 
 	ApplyToTransaction(ctx context.Context, userID uuid.UUID, tx *sqlc.Transaction, account *sqlc.GetAccountRow) (*RuleMatchResult, error)
 	ApplyToExisting(ctx context.Context, userID uuid.UUID, transactionIDs []int64) (int, error)

@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -258,6 +259,46 @@ func (q *Queries) GetTransactionsForRuleApplication(ctx context.Context, arg Get
 	return items, nil
 }
 
+const listCategorizedDescriptions = `-- name: ListCategorizedDescriptions :many
+select
+  t.tx_desc::text as tx_desc,
+  t.category_id::bigint as category_id,
+  count(*)::bigint as tx_count
+from transactions t
+join accounts a on a.id = t.account_id
+where a.owner_id = $1::uuid
+  and a.account_type != 6
+  and t.category_id is not null
+  and t.tx_desc is not null
+group by t.tx_desc, t.category_id
+`
+
+type ListCategorizedDescriptionsRow struct {
+	TxDesc     string `db:"tx_desc" json:"tx_desc"`
+	CategoryID int64  `db:"category_id" json:"category_id"`
+	TxCount    int64  `db:"tx_count" json:"tx_count"`
+}
+
+func (q *Queries) ListCategorizedDescriptions(ctx context.Context, userID uuid.UUID) ([]ListCategorizedDescriptionsRow, error) {
+	rows, err := q.db.Query(ctx, listCategorizedDescriptions, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCategorizedDescriptionsRow
+	for rows.Next() {
+		var i ListCategorizedDescriptionsRow
+		if err := rows.Scan(&i.TxDesc, &i.CategoryID, &i.TxCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listRules = `-- name: ListRules :many
 select rule_id, user_id, rule_name, category_id, merchant, conditions, logic_operator, is_active, priority_order, rule_source, created_at, updated_at, last_applied_at, times_applied
 from transaction_rules
@@ -289,6 +330,59 @@ func (q *Queries) ListRules(ctx context.Context, userID uuid.UUID) ([]Transactio
 			&i.UpdatedAt,
 			&i.LastAppliedAt,
 			&i.TimesApplied,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUncategorizedDescriptions = `-- name: ListUncategorizedDescriptions :many
+select
+  t.tx_desc::text as tx_desc,
+  count(*) filter (where not t.category_manually_set)::bigint as eligible_count,
+  count(*)::bigint as total_count,
+  max(t.tx_date)::timestamptz as last_seen
+from transactions t
+join accounts a on a.id = t.account_id
+where a.owner_id = $1::uuid
+  and a.account_type != 6
+  and t.category_id is null
+  and t.tx_desc is not null
+  and not exists (
+    select 1 from transfers tr
+    where tr.status = 1 and (tr.out_tx_id = t.id or tr.in_tx_id = t.id)
+  )
+group by t.tx_desc
+`
+
+type ListUncategorizedDescriptionsRow struct {
+	TxDesc        string    `db:"tx_desc" json:"tx_desc"`
+	EligibleCount int64     `db:"eligible_count" json:"eligible_count"`
+	TotalCount    int64     `db:"total_count" json:"total_count"`
+	LastSeen      time.Time `db:"last_seen" json:"last_seen"`
+}
+
+// uncategorized descriptions with how often they occur; manually uncategorized
+// rows are counted in total_count but are out of reach of rules
+func (q *Queries) ListUncategorizedDescriptions(ctx context.Context, userID uuid.UUID) ([]ListUncategorizedDescriptionsRow, error) {
+	rows, err := q.db.Query(ctx, listUncategorizedDescriptions, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUncategorizedDescriptionsRow
+	for rows.Next() {
+		var i ListUncategorizedDescriptionsRow
+		if err := rows.Scan(
+			&i.TxDesc,
+			&i.EligibleCount,
+			&i.TotalCount,
+			&i.LastSeen,
 		); err != nil {
 			return nil, err
 		}
