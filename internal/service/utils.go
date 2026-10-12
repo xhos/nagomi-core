@@ -31,18 +31,6 @@ func (e *DuplicateReceiptError) Unwrap() error {
 }
 
 func wrapErr(op string, err error) error {
-	knownErrors := []error{
-		ErrValidation,
-		ErrUnimplemented,
-		ErrDuplicate,
-	}
-
-	for _, knownErr := range knownErrors {
-		if errors.Is(err, knownErr) {
-			return fmt.Errorf("%s: %w", op, knownErr)
-		}
-	}
-
 	return fmt.Errorf("%s: %w", op, err)
 }
 
