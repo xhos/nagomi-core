@@ -293,55 +293,6 @@ func (q *Queries) GetAccount(ctx context.Context, arg GetAccountParams) (GetAcco
 	return i, err
 }
 
-const getAccountAnchorBalance = `-- name: GetAccountAnchorBalance :one
-select
-  anchor_balance_cents,
-  anchor_currency
-from
-  accounts
-where
-  id = $1::bigint
-`
-
-type GetAccountAnchorBalanceRow struct {
-	AnchorBalanceCents int64  `db:"anchor_balance_cents" json:"anchor_balance_cents"`
-	AnchorCurrency     string `db:"anchor_currency" json:"anchor_currency"`
-}
-
-func (q *Queries) GetAccountAnchorBalance(ctx context.Context, id int64) (GetAccountAnchorBalanceRow, error) {
-	row := q.db.QueryRow(ctx, getAccountAnchorBalance, id)
-	var i GetAccountAnchorBalanceRow
-	err := row.Scan(&i.AnchorBalanceCents, &i.AnchorCurrency)
-	return i, err
-}
-
-const getAccountBalance = `-- name: GetAccountBalance :one
-select
-  balance_after_cents,
-  balance_currency
-from
-  transactions
-where
-  account_id = $1::bigint
-order by
-  tx_date desc,
-  id desc
-limit
-  1
-`
-
-type GetAccountBalanceRow struct {
-	BalanceAfterCents *int64  `db:"balance_after_cents" json:"balance_after_cents"`
-	BalanceCurrency   *string `db:"balance_currency" json:"balance_currency"`
-}
-
-func (q *Queries) GetAccountBalance(ctx context.Context, accountID int64) (GetAccountBalanceRow, error) {
-	row := q.db.QueryRow(ctx, getAccountBalance, accountID)
-	var i GetAccountBalanceRow
-	err := row.Scan(&i.BalanceAfterCents, &i.BalanceCurrency)
-	return i, err
-}
-
 const getFriendAccountBalances = `-- name: GetFriendAccountBalances :many
 select
   a.id,
@@ -391,23 +342,6 @@ func (q *Queries) GetFriendAccountBalances(ctx context.Context, userID uuid.UUID
 		return nil, err
 	}
 	return items, nil
-}
-
-const getUserAccountsCount = `-- name: GetUserAccountsCount :one
-select
-  COUNT(*) as account_count
-from
-  accounts a
-where
-  a.owner_id = $1::uuid
-  and a.account_type != 6
-`
-
-func (q *Queries) GetUserAccountsCount(ctx context.Context, userID uuid.UUID) (int64, error) {
-	row := q.db.QueryRow(ctx, getUserAccountsCount, userID)
-	var account_count int64
-	err := row.Scan(&account_count)
-	return account_count, err
 }
 
 const listAccounts = `-- name: ListAccounts :many
@@ -555,38 +489,6 @@ type SetAccountAliasesParams struct {
 func (q *Queries) SetAccountAliases(ctx context.Context, arg SetAccountAliasesParams) error {
 	_, err := q.db.Exec(ctx, setAccountAliases, arg.Aliases, arg.ID, arg.UserID)
 	return err
-}
-
-const setAccountAnchor = `-- name: SetAccountAnchor :execrows
-update
-  accounts
-set
-  anchor_date = now()::date,
-  anchor_balance_cents = $1::bigint,
-  anchor_currency = $2::char(3)
-where
-  id = $3::bigint
-  and owner_id = $4::uuid
-`
-
-type SetAccountAnchorParams struct {
-	AnchorBalanceCents int64     `db:"anchor_balance_cents" json:"anchor_balance_cents"`
-	AnchorCurrency     string    `db:"anchor_currency" json:"anchor_currency"`
-	ID                 int64     `db:"id" json:"id"`
-	UserID             uuid.UUID `db:"user_id" json:"user_id"`
-}
-
-func (q *Queries) SetAccountAnchor(ctx context.Context, arg SetAccountAnchorParams) (int64, error) {
-	result, err := q.db.Exec(ctx, setAccountAnchor,
-		arg.AnchorBalanceCents,
-		arg.AnchorCurrency,
-		arg.ID,
-		arg.UserID,
-	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
 }
 
 const syncAccountBalances = `-- name: SyncAccountBalances :exec

@@ -6,10 +6,6 @@ order by created_at desc;
 select * from users
 where id = @id::uuid;
 
--- name: GetUserByEmail :one
-select * from users
-where lower(email) = lower(@email::text);
-
 -- name: CreateUser :one
 insert into users (id, email, display_name)
 values (@id::uuid, @email::text, sqlc.narg('display_name')::text)

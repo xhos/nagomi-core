@@ -234,20 +234,6 @@ func topMerchantToPb(merchant *sqlc.GetTopMerchantsRow) *pb.TopMerchant {
 	}
 }
 
-func accountBalanceToPb(row *sqlc.GetAccountBalancesRow) *pb.AccountBalance {
-	if row == nil {
-		return nil
-	}
-
-	return &pb.AccountBalance{
-		Id:             row.ID,
-		Name:           row.Name,
-		AccountType:    pb.AccountType(row.AccountType),
-		CurrentBalance: centsToMoney(row.BalanceCents, row.Currency),
-		Currency:       row.Currency,
-	}
-}
-
 func dashboardSummaryToPb(summary *sqlc.GetDashboardSummaryRow) *pb.DashboardSummary {
 	if summary == nil {
 		return nil

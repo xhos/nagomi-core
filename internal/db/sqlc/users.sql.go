@@ -73,26 +73,6 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-select id, email, display_name, primary_currency, timezone, created_at, updated_at from users
-where lower(email) = lower($1::text)
-`
-
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.DisplayName,
-		&i.PrimaryCurrency,
-		&i.Timezone,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getUserPrimaryCurrency = `-- name: GetUserPrimaryCurrency :one
 select
   primary_currency

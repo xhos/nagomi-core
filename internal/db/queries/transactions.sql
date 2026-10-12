@@ -219,38 +219,6 @@ on conflict (account_id, external_id) where external_id is not null do nothing
 returning
   *;
 
--- name: BulkCreateTransactions :many
-insert into
-  transactions (
-    account_id,
-    tx_date,
-    tx_amount_cents,
-    tx_currency,
-    tx_direction,
-    tx_desc,
-    category_id,
-    merchant,
-    user_notes,
-    foreign_amount_cents,
-    foreign_currency,
-    exchange_rate
-  )
-select
-  unnest(@account_ids::bigint[]),
-  unnest(@tx_dates::timestamptz[]),
-  unnest(@tx_amount_cents::bigint[]),
-  unnest(@tx_currencies::char(3)[]),
-  unnest(@tx_directions::smallint[]),
-  unnest(@tx_descs::text[]),
-  unnest(@category_ids::bigint[]),
-  unnest(@merchants::text[]),
-  unnest(@user_notes::text[]),
-  unnest(@foreign_amount_cents::bigint[]),
-  unnest(@foreign_currencies::char(3)[]),
-  unnest(@exchange_rates::double precision[])
-returning
-  *;
-
 -- name: UpdateTransaction :exec
 update
   transactions
@@ -297,28 +265,6 @@ where
       a.owner_id = sqlc.arg(user_id)::uuid
   );
 
--- name: CategorizeTransactionAtomic :one
-update
-  transactions
-set
-  category_id = sqlc.narg('category_id')::bigint,
-  category_manually_set = sqlc.arg(category_manually_set)::boolean,
-  suggestions = sqlc.arg(suggestions)::text []
-where
-  id = sqlc.arg(id)::bigint
-  and category_manually_set = false
-  and account_id in (
-    select
-      a.id
-    from
-      accounts a
-    where
-      a.owner_id = sqlc.arg(user_id)::uuid
-  )
-returning
-  id,
-  category_manually_set;
-
 -- name: BulkCategorizeTransactions :execrows
 update
   transactions
@@ -350,41 +296,6 @@ where
       a.owner_id = sqlc.arg(user_id)::uuid
   );
 
--- name: GetTransactionCountByAccount :many
-select
-  a.id,
-  a.name,
-  COUNT(t.id) as transaction_count
-from
-  accounts a
-  left join transactions t on a.id = t.account_id
-where
-  a.owner_id = sqlc.arg(user_id)::uuid
-  and a.account_type != 6
-group by
-  a.id,
-  a.name
-order by
-  transaction_count desc;
-
--- name: FindCandidateTransactions :many
-select
-  sqlc.embed(t),
-  similarity(t.tx_desc::text, sqlc.arg(merchant)::text) as merchant_score
-from
-  transactions t
-  join accounts a on t.account_id = a.id
-where
-  a.owner_id = sqlc.arg(user_id)::uuid
-  and t.tx_direction = 2
-  and t.tx_date >= (sqlc.arg(date)::date - interval '60 days')
-  and t.tx_amount_cents between sqlc.arg(total_cents)::bigint and (sqlc.arg(total_cents)::bigint * 120 / 100)
-  and similarity(t.tx_desc::text, sqlc.arg(merchant)::text) > 0.3
-order by
-  merchant_score desc
-limit
-  10;
-
 -- name: GetAccountIDsFromTransactionIDs :many
 select
   distinct account_id
@@ -392,18 +303,6 @@ from
   transactions
 where
   id = ANY(@ids::bigint []);
-
--- name: ListAllTransactions :many
-select
-  t.*
-from
-  transactions t
-  join accounts a on t.account_id = a.id
-where
-  a.owner_id = sqlc.arg(user_id)::uuid
-order by
-  t.tx_date desc,
-  t.id desc;
 
 -- name: GetSplitsBySourceID :many
 select t.*

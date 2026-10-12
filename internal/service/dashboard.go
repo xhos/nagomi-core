@@ -18,11 +18,6 @@ import (
 
 // ----- types -------------------------------------------------------------------------------
 
-type AccountSummary struct {
-	Summary *sqlc.GetDashboardSummaryRow
-	Trends  []sqlc.GetDashboardTrendsRow
-}
-
 type PeriodType int
 
 const (
@@ -74,8 +69,6 @@ type DashboardService interface {
 	MonthlyComparison(ctx context.Context, userID uuid.UUID, monthsBack int32) ([]*pb.MonthlyComparison, error)
 	TopCategories(ctx context.Context, userID uuid.UUID, req *pb.GetTopCategoriesRequest) ([]*pb.TopCategory, error)
 	TopMerchants(ctx context.Context, userID uuid.UUID, req *pb.GetTopMerchantsRequest) ([]*pb.TopMerchant, error)
-	AccountBalances(ctx context.Context, userID uuid.UUID) ([]*pb.AccountBalance, error)
-	GetSpendingTrends(ctx context.Context, userID uuid.UUID, startDate string, endDate string, categoryID *int64, accountID *int64) ([]*pb.TrendPoint, error)
 	GetCategorySpendingComparison(ctx context.Context, params CategorySpendingParams) (*CategorySpendingResult, error)
 	GetNetWorthHistory(ctx context.Context, params NetWorthHistoryParams) ([]*pb.NetWorthPoint, error)
 	GetEarliestTransactionDate(ctx context.Context, userID uuid.UUID) (time.Time, error)
@@ -211,42 +204,6 @@ func (s *dashSvc) NetBalance(ctx context.Context, userID uuid.UUID) (*money.Mone
 	}
 
 	return s.centsToMoney(ctx, userID, totalCents)
-}
-
-func (s *dashSvc) AccountBalances(ctx context.Context, userID uuid.UUID) ([]*pb.AccountBalance, error) {
-	balances, err := s.queries.GetAccountBalances(ctx, userID)
-	if err != nil {
-		return nil, wrapErr("DashboardService.AccountBalances", err)
-	}
-
-	result := make([]*pb.AccountBalance, len(balances))
-	for i, balance := range balances {
-		result[i] = accountBalanceToPb(&balance)
-	}
-	return result, nil
-}
-
-func (s *dashSvc) GetSpendingTrends(ctx context.Context, userID uuid.UUID, startDate string, endDate string, categoryID *int64, accountID *int64) ([]*pb.TrendPoint, error) {
-	parsedStart, err := time.Parse("2006-01-02", startDate)
-	if err != nil {
-		return nil, wrapErr("DashboardService.GetSpendingTrends.ParseStartDate", err)
-	}
-
-	parsedEnd, err := time.Parse("2006-01-02", endDate)
-	if err != nil {
-		return nil, wrapErr("DashboardService.GetSpendingTrends.ParseEndDate", err)
-	}
-
-	// TODO: categoryID and accountID ignored until query supports filtering
-	_ = categoryID
-	_ = accountID
-
-	req := &pb.GetSpendingTrendsRequest{
-		StartDate: timeToDate(parsedStart),
-		EndDate:   timeToDate(parsedEnd),
-	}
-
-	return s.Trends(ctx, userID, req)
 }
 
 func (s *dashSvc) GetCategorySpendingComparison(

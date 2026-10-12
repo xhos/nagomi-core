@@ -8,7 +8,6 @@ import (
 
 	"nagomi-core/internal/db/sqlc"
 
-	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -22,7 +21,6 @@ const migrationLockKey = 0x6e61676f6d69 // "nagomi"
 
 type DB struct {
 	*sqlc.Queries
-	log  *log.Logger
 	pool *pgxpool.Pool
 }
 
@@ -42,7 +40,6 @@ func New(dsn string) (*DB, error) {
 
 	return &DB{
 		Queries: sqlc.New(pool),
-		log:     log.WithPrefix("db"),
 		pool:    pool,
 	}, nil
 }

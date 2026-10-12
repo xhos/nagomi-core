@@ -112,53 +112,10 @@ where
   id = @id::bigint
   and owner_id = @user_id::uuid;
 
--- name: SetAccountAnchor :execrows
-update
-  accounts
-set
-  anchor_date = now()::date,
-  anchor_balance_cents = @anchor_balance_cents::bigint,
-  anchor_currency = @anchor_currency::char(3)
-where
-  id = @id::bigint
-  and owner_id = @user_id::uuid;
-
--- name: GetAccountAnchorBalance :one
-select
-  anchor_balance_cents,
-  anchor_currency
-from
-  accounts
-where
-  id = @id::bigint;
-
--- name: GetAccountBalance :one
-select
-  balance_after_cents,
-  balance_currency
-from
-  transactions
-where
-  account_id = @account_id::bigint
-order by
-  tx_date desc,
-  id desc
-limit
-  1;
-
 -- name: AccountHasTransactions :one
 select exists(
   select 1 from transactions where account_id = @account_id::bigint
 ) as has_transactions;
-
--- name: GetUserAccountsCount :one
-select
-  COUNT(*) as account_count
-from
-  accounts a
-where
-  a.owner_id = @user_id::uuid
-  and a.account_type != 6;
 
 -- name: AddAccountAlias :exec
 update accounts

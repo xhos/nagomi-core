@@ -41,16 +41,6 @@ func NewServer(services *service.Services, logger *log.Logger) *Server {
 	}
 }
 
-func (s *Server) SetServingStatus(service string, healthy bool) {
-	if checker, ok := s.healthCheck.(*grpchealth.StaticChecker); ok {
-		if healthy {
-			checker.SetStatus(service, grpchealth.StatusServing)
-		} else {
-			checker.SetStatus(service, grpchealth.StatusNotServing)
-		}
-	}
-}
-
 func (s *Server) GetHandler(authConfig *middleware.AuthConfig) http.Handler {
 	if authConfig == nil {
 		s.log.Fatal("auth configuration is required")
@@ -62,7 +52,6 @@ func (s *Server) GetHandler(authConfig *middleware.AuthConfig) http.Handler {
 	stack := middleware.CreateStack(
 		middleware.CORS(),
 		middleware.Auth(authConfig, s.log),
-		middleware.UserContext(),
 	)
 
 	return stack(mux)

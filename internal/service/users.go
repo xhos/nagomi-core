@@ -15,7 +15,6 @@ type UserService interface {
 	EnsureExists(ctx context.Context, id, email, name string) error
 	Get(ctx context.Context, id string) (*pb.User, error)
 	Update(ctx context.Context, req *pb.UpdateUserRequest) error
-	List(ctx context.Context) ([]*pb.User, error)
 }
 
 type userSvc struct {
@@ -82,19 +81,4 @@ func (s *userSvc) Update(ctx context.Context, req *pb.UpdateUserRequest) error {
 	}
 
 	return nil
-}
-
-func (s *userSvc) List(ctx context.Context) ([]*pb.User, error) {
-	users, err := s.queries.ListUsers(ctx)
-	if err != nil {
-		return nil, wrapErr("UserService.List", err)
-	}
-
-	pbUsers := make([]*pb.User, len(users))
-	for i, user := range users {
-		u := user
-		pbUsers[i] = userToPb(&u)
-	}
-
-	return pbUsers, nil
 }
