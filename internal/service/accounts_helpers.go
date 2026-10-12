@@ -14,12 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func buildCreateAccountParams(req *pb.CreateAccountRequest) (sqlc.CreateAccountParams, error) {
-	userID, err := uuid.Parse(req.GetUserId())
-	if err != nil {
-		return sqlc.CreateAccountParams{}, fmt.Errorf("invalid user_id: %w", err)
-	}
-
+func buildCreateAccountParams(userID uuid.UUID, req *pb.CreateAccountRequest) sqlc.CreateAccountParams {
 	anchorBalance := req.GetAnchorBalance()
 	return sqlc.CreateAccountParams{
 		OwnerID:            userID,
@@ -32,7 +27,7 @@ func buildCreateAccountParams(req *pb.CreateAccountRequest) (sqlc.CreateAccountP
 		MainCurrency:       req.GetMainCurrency(),
 		Color:              req.Color,
 		StatementDriven:    req.GetStatementDriven(),
-	}, nil
+	}
 }
 
 func buildUpdateAccountParams(userID uuid.UUID, req *pb.UpdateAccountRequest) sqlc.UpdateAccountParams {

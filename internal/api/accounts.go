@@ -9,7 +9,12 @@ import (
 )
 
 func (s *Server) CreateAccount(ctx context.Context, req *connect.Request[pb.CreateAccountRequest]) (*connect.Response[pb.CreateAccountResponse], error) {
-	account, err := s.services.Accounts.Create(ctx, req.Msg)
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := s.services.Accounts.Create(ctx, userID, req.Msg)
 	if err != nil {
 		return nil, wrapErr(err)
 	}

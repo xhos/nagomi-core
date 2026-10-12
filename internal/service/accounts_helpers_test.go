@@ -15,12 +15,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func TestBuildCreateAccountParams_DefaultsAndValidation(t *testing.T) {
+func TestBuildCreateAccountParams_MapsFields(t *testing.T) {
 	userID := uuid.New()
 	friendlyName := "Main"
 
-	params, err := buildCreateAccountParams(&pb.CreateAccountRequest{
-		UserId:       userID.String(),
+	params := buildCreateAccountParams(userID, &pb.CreateAccountRequest{
 		Name:         "Checking",
 		Bank:         "My Bank",
 		Type:         pb.AccountType_ACCOUNT_CHEQUING,
@@ -32,9 +31,6 @@ func TestBuildCreateAccountParams_DefaultsAndValidation(t *testing.T) {
 		},
 		MainCurrency: "USD",
 	})
-	if err != nil {
-		t.Fatalf("expected valid create params, got error: %v", err)
-	}
 
 	if params.OwnerID != userID {
 		t.Fatalf("expected owner_id %v, got %v", userID, params.OwnerID)
@@ -44,11 +40,6 @@ func TestBuildCreateAccountParams_DefaultsAndValidation(t *testing.T) {
 	}
 	if params.AnchorCurrency != "USD" {
 		t.Fatalf("expected anchor currency USD, got %q", params.AnchorCurrency)
-	}
-
-	_, err = buildCreateAccountParams(&pb.CreateAccountRequest{UserId: "not-a-uuid"})
-	if err == nil {
-		t.Fatalf("expected error for invalid user id")
 	}
 }
 

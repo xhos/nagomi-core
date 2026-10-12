@@ -14,7 +14,7 @@ import (
 // ----- interface --------------------------------------------------------------------------------
 
 type AccountService interface {
-	Create(ctx context.Context, req *pb.CreateAccountRequest) (*pb.Account, error)
+	Create(ctx context.Context, userID uuid.UUID, req *pb.CreateAccountRequest) (*pb.Account, error)
 	Get(ctx context.Context, userID uuid.UUID, accountID int64) (*pb.Account, error)
 	Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateAccountRequest) error
 	Delete(ctx context.Context, userID uuid.UUID, accountID int64) (int64, error)
@@ -39,11 +39,8 @@ func newAcctSvc(queries *sqlc.Queries, logger *log.Logger) AccountService {
 
 // ----- methods ----------------------------------------------------------------------------------
 
-func (s *acctSvc) Create(ctx context.Context, req *pb.CreateAccountRequest) (*pb.Account, error) {
-	params, err := buildCreateAccountParams(req)
-	if err != nil {
-		return nil, wrapErr("AccountService.Create", err)
-	}
+func (s *acctSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateAccountRequest) (*pb.Account, error) {
+	params := buildCreateAccountParams(userID, req)
 
 	created, err := s.queries.CreateAccount(ctx, params)
 	if err != nil {

@@ -30,19 +30,6 @@ func normalizeOptionalEmail(email *string) *string {
 	return &normalized
 }
 
-func buildCreateUserParams(req *pb.CreateUserRequest) (sqlc.CreateUserParams, error) {
-	userID, err := parseUserID(req.GetId())
-	if err != nil {
-		return sqlc.CreateUserParams{}, err
-	}
-
-	return sqlc.CreateUserParams{
-		ID:          userID,
-		Email:       req.GetEmail(),
-		DisplayName: req.DisplayName,
-	}, nil
-}
-
 func buildUpdateUserParams(req *pb.UpdateUserRequest) (sqlc.UpdateUserParams, error) {
 	userID, err := parseUserID(req.GetId())
 	if err != nil {

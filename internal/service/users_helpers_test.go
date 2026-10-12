@@ -43,24 +43,12 @@ func TestNormalizeEmailHelpers(t *testing.T) {
 	}
 }
 
-func TestBuildCreateAndUpdateUserParams(t *testing.T) {
+func TestBuildUpdateUserParams(t *testing.T) {
 	id := uuid.New().String()
 	displayName := "Test User"
 	email := "User@Example.com"
 	currency := "USD"
 	timezone := "America/Toronto"
-
-	createParams, err := buildCreateUserParams(&pb.CreateUserRequest{
-		Id:          id,
-		Email:       email,
-		DisplayName: &displayName,
-	})
-	if err != nil {
-		t.Fatalf("expected valid create params, got error: %v", err)
-	}
-	if createParams.ID.String() != id || createParams.Email != email {
-		t.Fatalf("expected id/email mapped, got id=%s email=%s", createParams.ID, createParams.Email)
-	}
 
 	updateParams, err := buildUpdateUserParams(&pb.UpdateUserRequest{
 		Id:              id,
@@ -82,10 +70,6 @@ func TestBuildCreateAndUpdateUserParams(t *testing.T) {
 		t.Fatalf("expected mapped primary_currency, got %v", updateParams.PrimaryCurrency)
 	}
 
-	_, err = buildCreateUserParams(&pb.CreateUserRequest{Id: "bad-id"})
-	if err == nil {
-		t.Fatalf("expected create params error for invalid id")
-	}
 	_, err = buildUpdateUserParams(&pb.UpdateUserRequest{Id: "bad-id"})
 	if err == nil {
 		t.Fatalf("expected update params error for invalid id")
