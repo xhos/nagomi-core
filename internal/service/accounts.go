@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"nagomi-core/internal/db/sqlc"
+	"nagomi-core/internal/exchange"
 	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/charmbracelet/log"
@@ -29,18 +30,22 @@ type AccountService interface {
 }
 
 type acctSvc struct {
-	queries *sqlc.Queries
-	log     *log.Logger
+	queries  *sqlc.Queries
+	log      *log.Logger
+	exchange *exchange.Client
 }
 
-func newAcctSvc(queries *sqlc.Queries, logger *log.Logger) AccountService {
-	return &acctSvc{queries: queries, log: logger}
+func newAcctSvc(queries *sqlc.Queries, logger *log.Logger, exchangeClient *exchange.Client) AccountService {
+	return &acctSvc{queries: queries, log: logger, exchange: exchangeClient}
 }
 
 // ----- methods ----------------------------------------------------------------------------------
 
 func (s *acctSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateAccountRequest) (*pb.Account, error) {
 	params := buildCreateAccountParams(userID, req)
+	if err := s.checkCurrencies(&params.AnchorCurrency, &params.MainCurrency); err != nil {
+		return nil, wrapErr("AccountService.Create", err)
+	}
 
 	created, err := s.queries.CreateAccount(ctx, params)
 	if err != nil {
@@ -67,6 +72,9 @@ func (s *acctSvc) Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateAc
 
 	currencyChanging := params.AnchorCurrency != nil || params.MainCurrency != nil
 	if currencyChanging {
+		if err := s.checkCurrencies(params.AnchorCurrency, params.MainCurrency); err != nil {
+			return wrapErr("AccountService.Update", err)
+		}
 		hasTxns, err := s.queries.AccountHasTransactions(ctx, params.ID)
 		if err != nil {
 			return wrapErr("AccountService.Update.CheckTransactions", err)
@@ -276,4 +284,23 @@ func (s *acctSvc) MergeAccounts(ctx context.Context, userID uuid.UUID, primaryID
 	}
 
 	return accountRowToPb(result.Account, result.BalanceCents, result.BalanceCurrency), moved, nil
+}
+
+// checkCurrencies rejects codes the exchange api can't convert, which would silently drop out of totals.
+// an unreachable exchange api doesn't block account edits.
+func (s *acctSvc) checkCurrencies(codes ...*string) error {
+	for _, code := range codes {
+		if code == nil {
+			continue
+		}
+		ok, err := s.exchange.IsValidCurrency(*code)
+		if err != nil {
+			s.log.Warn("couldn't check currency", "currency", *code, "error", err)
+			continue
+		}
+		if !ok {
+			return fmt.Errorf("unsupported currency %q: %w", *code, ErrValidation)
+		}
+	}
+	return nil
 }
