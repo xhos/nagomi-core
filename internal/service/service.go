@@ -47,7 +47,7 @@ func New(database *db.DB, logger *log.Logger, cfg *config.Config) (*Services, er
 	}
 
 	transferSvc := newTransferSvc(queries, logger.WithPrefix("transfer"))
-	txnSvc := newTxnSvc(queries, logger.WithPrefix("txn"), catSvc, ruleSvc, exchangeClient, transferSvc)
+	txnSvc := newTxnSvc(queries, logger.WithPrefix("txn"), ruleSvc, exchangeClient, transferSvc)
 
 	return &Services{
 		Transactions: txnSvc,

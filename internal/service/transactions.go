@@ -35,7 +35,6 @@ type TransactionService interface {
 type txnSvc struct {
 	queries        *sqlc.Queries
 	log            *log.Logger
-	catSvc         CategoryService
 	ruleSvc        RuleService
 	exchangeClient *exchange.Client
 	transfers      TransferService
@@ -44,7 +43,6 @@ type txnSvc struct {
 func newTxnSvc(
 	queries *sqlc.Queries,
 	logger *log.Logger,
-	catSvc CategoryService,
 	ruleSvc RuleService,
 	exchangeClient *exchange.Client,
 	transfers TransferService,
@@ -52,7 +50,6 @@ func newTxnSvc(
 	return &txnSvc{
 		queries:        queries,
 		log:            logger,
-		catSvc:         catSvc,
 		ruleSvc:        ruleSvc,
 		exchangeClient: exchangeClient,
 		transfers:      transfers,
@@ -65,6 +62,9 @@ func (s *txnSvc) Create(ctx context.Context, userID uuid.UUID, req *pb.CreateTra
 	paramsList := buildCreateTxParamsList(userID, req)
 
 	for i := range paramsList {
+		if err := requireOwnCategory(ctx, s.queries, userID, paramsList[i].CategoryID); err != nil {
+			return nil, wrapErr("TransactionService.Create", err)
+		}
 		converted, err := s.processForeignCurrency(ctx, userID, &paramsList[i])
 		if err != nil {
 			return nil, fmt.Errorf("TransactionService.Create: transaction %d currency conversion failed: %w", i, err)
@@ -163,6 +163,15 @@ func (s *txnSvc) Get(ctx context.Context, userID uuid.UUID, id int64) (*pb.Trans
 
 func (s *txnSvc) Update(ctx context.Context, userID uuid.UUID, req *pb.UpdateTransactionRequest) error {
 	params := buildUpdateTxParams(userID, req)
+
+	if err := requireOwnCategory(ctx, s.queries, userID, params.CategoryID); err != nil {
+		return wrapErr("TransactionService.Update", err)
+	}
+	if params.AccountID != nil {
+		if _, err := s.queries.GetAccount(ctx, sqlc.GetAccountParams{ID: *params.AccountID, UserID: userID}); err != nil {
+			return wrapErr("TransactionService.Update.GetAccount", err)
+		}
+	}
 
 	tx, err := s.queries.GetTransaction(ctx, sqlc.GetTransactionParams{UserID: params.UserID, ID: params.ID})
 	if err != nil {
@@ -282,6 +291,9 @@ func (s *txnSvc) Count(ctx context.Context, userID uuid.UUID, req *pb.ListTransa
 }
 
 func (s *txnSvc) Categorize(ctx context.Context, userID uuid.UUID, transactionIDs []int64, categoryID int64) error {
+	if err := requireOwnCategory(ctx, s.queries, userID, &categoryID); err != nil {
+		return wrapErr("TransactionService.Categorize", err)
+	}
 	_, err := s.queries.BulkCategorizeTransactions(ctx, sqlc.BulkCategorizeTransactionsParams{
 		UserID:         userID,
 		TransactionIds: transactionIDs,

@@ -46,7 +46,7 @@ func TestTransfersEndToEnd(t *testing.T) {
 	svc := newTransferSvc(tdb.Queries, log.New(nil))
 	svc.Match(ctx, user, []int64{sweepOut})
 
-	txSvc := newTxnSvc(tdb.Queries, nil, nil, nil, nil, svc)
+	txSvc := newTxnSvc(tdb.Queries, nil, nil, nil, svc)
 	list, _, err := txSvc.List(ctx, user, &pb.ListTransactionsRequest{})
 	if err != nil {
 		t.Fatal(err)

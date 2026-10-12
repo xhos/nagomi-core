@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -158,4 +160,16 @@ func (s *catSvc) List(ctx context.Context, userID uuid.UUID) ([]*pb.Category, er
 	}
 
 	return result, nil
+}
+
+// requireOwnCategory rejects another user's category; the foreign key alone doesn't check the owner
+func requireOwnCategory(ctx context.Context, queries *sqlc.Queries, userID uuid.UUID, categoryID *int64) error {
+	if categoryID == nil {
+		return nil
+	}
+	_, err := queries.GetCategory(ctx, sqlc.GetCategoryParams{ID: *categoryID, UserID: userID})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("category %d not found: %w", *categoryID, ErrValidation)
+	}
+	return err
 }

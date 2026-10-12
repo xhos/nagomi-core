@@ -41,6 +41,9 @@ type RuleMatchResult struct {
 }
 
 func (s *catRuleSvc) Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string) (*pb.Rule, error) {
+	if err := requireOwnCategory(ctx, s.queries, userID, categoryID); err != nil {
+		return nil, wrapErr("RuleService.Create", err)
+	}
 	params := buildCreateRuleParams(userID, ruleName, conditions, categoryID, merchant)
 
 	rule, err := s.queries.CreateRule(ctx, params)
@@ -64,6 +67,9 @@ func (s *catRuleSvc) Get(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID
 }
 
 func (s *catRuleSvc) Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string) error {
+	if err := requireOwnCategory(ctx, s.queries, userID, categoryID); err != nil {
+		return wrapErr("RuleService.Update", err)
+	}
 	params := buildUpdateRuleParams(userID, ruleID, ruleName, conditions, categoryID, merchant)
 
 	err := s.queries.UpdateRule(ctx, params)

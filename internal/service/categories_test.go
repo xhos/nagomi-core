@@ -5,10 +5,14 @@ import (
 	"errors"
 	"slices"
 	"testing"
+	"time"
 
 	"nagomi-core/internal/db"
+	"nagomi-core/internal/db/sqlc"
+	pb "nagomi-core/internal/gen/nagomi/v1"
 
 	"github.com/charmbracelet/log"
+	"github.com/google/uuid"
 )
 
 func TestCategoryRename(t *testing.T) {
@@ -83,5 +87,48 @@ func TestCategoryRename(t *testing.T) {
 
 	if err := svc.Update(ctx, user, drinks.Id, ptr("drinks.hot"), nil); !errors.Is(err, ErrValidation) {
 		t.Fatalf("moving under itself: got %v, want ErrValidation", err)
+	}
+}
+
+func TestForeignCategoryRejected(t *testing.T) {
+	tdb := db.SetupTestDB(t)
+	ctx := context.Background()
+	user := tdb.CreateTestUser(ctx)
+	other := tdb.CreateTestUser(ctx)
+	cats := newCatSvc(tdb.Pool(), tdb.Queries, log.Default())
+	theirs, err := cats.Create(ctx, other, "secret", "#abcdef")
+	if err != nil {
+		t.Fatal(err)
+	}
+	acct := func(owner uuid.UUID) int64 {
+		return tdb.CreateTestAccount(ctx, sqlc.CreateAccountParams{
+			OwnerID: owner, Name: "chequing", Bank: "RBC", AccountType: int16(pb.AccountType_ACCOUNT_CHEQUING), AnchorCurrency: "CAD", MainCurrency: "CAD",
+		}).ID
+	}
+	mine, theirAcct := acct(user), acct(other)
+	notManual := false
+	tx, err := tdb.CreateTransaction(ctx, sqlc.CreateTransactionParams{
+		UserID: user, AccountID: mine, TxDate: time.Now(), TxAmountCents: 100, TxCurrency: "CAD", TxDirection: int16(out),
+		CategoryManuallySet: &notManual, MerchantManuallySet: &notManual,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	txSvc := newTxnSvc(tdb.Queries, log.New(nil), nil, nil, nil)
+	rules := newCatRuleSvc(tdb.Queries, log.New(nil))
+	expectInvalid := func(name string, err error) {
+		t.Helper()
+		if !errors.Is(err, ErrValidation) {
+			t.Errorf("%s: err = %v, want validation error", name, err)
+		}
+	}
+	expectInvalid("update", txSvc.Update(ctx, user, &pb.UpdateTransactionRequest{Id: tx.ID, CategoryId: &theirs.Id}))
+	expectInvalid("categorize", txSvc.Categorize(ctx, user, []int64{tx.ID}, theirs.Id))
+	_, err = rules.Create(ctx, user, "steal", []byte(`{}`), &theirs.Id, nil)
+	expectInvalid("rule", err)
+
+	if err := txSvc.Update(ctx, user, &pb.UpdateTransactionRequest{Id: tx.ID, AccountId: &theirAcct}); err == nil {
+		t.Error("moved a transaction into another user's account")
 	}
 }
