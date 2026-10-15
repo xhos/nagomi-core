@@ -8,6 +8,7 @@ import (
 	"nagomi-core/internal/config"
 	"nagomi-core/internal/db"
 	"nagomi-core/internal/service"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -81,14 +82,20 @@ func main() {
 
 	serverErrors := make(chan error, 1)
 
-	go func() {
-		server := &http.Server{
-			Addr:    cfg.ListenAddress,
-			Handler: h2c.NewHandler(handler, &http2.Server{}),
-		}
+	listener, err := net.Listen("tcp", cfg.ListenAddress)
+	if err != nil {
+		logger.Fatal("failed to listen", "addr", cfg.ListenAddress, "err", err)
+	}
+	logger.Info("server is listening", "addr", cfg.ListenAddress)
 
-		logger.Info("server is listening", "addr", cfg.ListenAddress)
-		serverErrors <- server.ListenAndServe()
+	// dependents ordered after core under Type=notify start only once we accept connections
+	if err := notifyReady(); err != nil {
+		logger.Warn("systemd readiness notification failed", "err", err)
+	}
+
+	go func() {
+		server := &http.Server{Handler: h2c.NewHandler(handler, &http2.Server{})}
+		serverErrors <- server.Serve(listener)
 	}()
 
 	quit := make(chan os.Signal, 1)
@@ -104,4 +111,19 @@ func main() {
 	}
 
 	logger.Info("server shutdown complete")
+}
+
+// notifyReady sends READY=1 to systemd; a no-op outside a Type=notify unit
+func notifyReady() error {
+	socket := os.Getenv("NOTIFY_SOCKET")
+	if socket == "" {
+		return nil
+	}
+	conn, err := net.Dial("unixgram", socket)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+	_, err = conn.Write([]byte("READY=1"))
+	return err
 }
