@@ -21,7 +21,7 @@ set
   rule_name = coalesce(sqlc.narg('rule_name'), rule_name),
   category_id = sqlc.narg('category_id')::bigint,
   conditions = coalesce(sqlc.narg('conditions'), conditions),
-  is_active = sqlc.narg('is_active'),
+  is_active = coalesce(sqlc.narg('is_active'), is_active),
   priority_order = coalesce(sqlc.narg('priority_order'), priority_order),
   merchant = sqlc.narg('merchant'),
   updated_at = now()

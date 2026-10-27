@@ -400,7 +400,7 @@ set
   rule_name = coalesce($1, rule_name),
   category_id = $2::bigint,
   conditions = coalesce($3, conditions),
-  is_active = $4,
+  is_active = coalesce($4, is_active),
   priority_order = coalesce($5, priority_order),
   merchant = $6,
   updated_at = now()

@@ -15,7 +15,7 @@ import (
 type RuleService interface {
 	Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string) (*pb.Rule, error)
 	Get(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID) (*pb.Rule, error)
-	Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string) error
+	Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string, isActive *bool, priorityOrder *int32) error
 	Delete(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID) (int64, error)
 	List(ctx context.Context, userID uuid.UUID) ([]*pb.Rule, error)
 	Suggest(ctx context.Context, userID uuid.UUID, limit int) (*pb.SuggestRulesResponse, error)
@@ -66,11 +66,11 @@ func (s *catRuleSvc) Get(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID
 	return ruleToPb(&rule), nil
 }
 
-func (s *catRuleSvc) Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string) error {
+func (s *catRuleSvc) Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string, isActive *bool, priorityOrder *int32) error {
 	if err := requireOwnCategory(ctx, s.queries, userID, categoryID); err != nil {
 		return wrapErr("RuleService.Update", err)
 	}
-	params := buildUpdateRuleParams(userID, ruleID, ruleName, conditions, categoryID, merchant)
+	params := buildUpdateRuleParams(userID, ruleID, ruleName, conditions, categoryID, merchant, isActive, priorityOrder)
 
 	err := s.queries.UpdateRule(ctx, params)
 	if err != nil {

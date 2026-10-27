@@ -30,11 +30,13 @@ func buildCreateRuleParams(userID uuid.UUID, ruleName string, conditions []byte,
 	return params
 }
 
-func buildUpdateRuleParams(userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string) sqlc.UpdateRuleParams {
+func buildUpdateRuleParams(userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string, isActive *bool, priorityOrder *int32) sqlc.UpdateRuleParams {
 	params := sqlc.UpdateRuleParams{
-		RuleID:   ruleID,
-		UserID:   userID,
-		RuleName: ruleName,
+		RuleID:        ruleID,
+		UserID:        userID,
+		RuleName:      ruleName,
+		IsActive:      isActive,
+		PriorityOrder: priorityOrder,
 	}
 	if len(conditions) > 0 {
 		params.Conditions = conditions

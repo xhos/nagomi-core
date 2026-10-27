@@ -42,7 +42,10 @@ func TestBuildUpdateRuleParams_ConditionsAndPointers(t *testing.T) {
 	categoryID := int64(22)
 	merchant := "Store"
 
-	params := buildUpdateRuleParams(userID, ruleID, &ruleName, []byte(`{"conditions":[1]}`), &categoryID, &merchant)
+	isActive := false
+	priority := int32(3)
+
+	params := buildUpdateRuleParams(userID, ruleID, &ruleName, []byte(`{"conditions":[1]}`), &categoryID, &merchant, &isActive, &priority)
 	if params.RuleID != ruleID || params.UserID != userID {
 		t.Fatalf("expected ids mapped, got %+v", params)
 	}
@@ -58,8 +61,14 @@ func TestBuildUpdateRuleParams_ConditionsAndPointers(t *testing.T) {
 	if params.Merchant == nil || *params.Merchant != merchant {
 		t.Fatalf("expected merchant pointer mapped, got %v", params.Merchant)
 	}
+	if params.IsActive == nil || *params.IsActive != isActive {
+		t.Fatalf("expected is_active pointer mapped, got %v", params.IsActive)
+	}
+	if params.PriorityOrder == nil || *params.PriorityOrder != priority {
+		t.Fatalf("expected priority pointer mapped, got %v", params.PriorityOrder)
+	}
 
-	noConditions := buildUpdateRuleParams(userID, ruleID, nil, nil, nil, nil)
+	noConditions := buildUpdateRuleParams(userID, ruleID, nil, nil, nil, nil, nil, nil)
 	if len(noConditions.Conditions) != 0 {
 		t.Fatalf("expected empty conditions when not provided")
 	}

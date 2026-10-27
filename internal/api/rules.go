@@ -106,7 +106,7 @@ func (s *Server) UpdateRule(ctx context.Context, req *connect.Request[pb.UpdateR
 		}
 	}
 
-	err = s.services.Rules.Update(ctx, userID, ruleID, req.Msg.RuleName, conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant)
+	err = s.services.Rules.Update(ctx, userID, ruleID, req.Msg.RuleName, conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant, req.Msg.IsActive, req.Msg.PriorityOrder)
 	if err != nil {
 		return nil, wrapErr(err)
 	}
