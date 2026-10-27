@@ -58,17 +58,18 @@ func (q *Queries) BulkApplyRuleToTransactions(ctx context.Context, arg BulkApply
 }
 
 const createRule = `-- name: CreateRule :one
-insert into transaction_rules (user_id, rule_name, category_id, conditions, merchant)
-values ($1::uuid, $2::text, $3::bigint, $4::jsonb, $5::text)
+insert into transaction_rules (user_id, rule_name, category_id, conditions, merchant, priority_order)
+values ($1::uuid, $2::text, $3::bigint, $4::jsonb, $5::text, $6::int)
 returning rule_id, user_id, rule_name, category_id, merchant, conditions, logic_operator, is_active, priority_order, rule_source, created_at, updated_at, last_applied_at, times_applied
 `
 
 type CreateRuleParams struct {
-	UserID     uuid.UUID `db:"user_id" json:"user_id"`
-	RuleName   string    `db:"rule_name" json:"rule_name"`
-	CategoryID int64     `db:"category_id" json:"category_id"`
-	Conditions []byte    `db:"conditions" json:"conditions"`
-	Merchant   string    `db:"merchant" json:"merchant"`
+	UserID        uuid.UUID `db:"user_id" json:"user_id"`
+	RuleName      string    `db:"rule_name" json:"rule_name"`
+	CategoryID    int64     `db:"category_id" json:"category_id"`
+	Conditions    []byte    `db:"conditions" json:"conditions"`
+	Merchant      string    `db:"merchant" json:"merchant"`
+	PriorityOrder int32     `db:"priority_order" json:"priority_order"`
 }
 
 func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) (TransactionRule, error) {
@@ -78,6 +79,7 @@ func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) (Transac
 		arg.CategoryID,
 		arg.Conditions,
 		arg.Merchant,
+		arg.PriorityOrder,
 	)
 	var i TransactionRule
 	err := row.Scan(

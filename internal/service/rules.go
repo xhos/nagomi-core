@@ -13,7 +13,7 @@ import (
 // ----- interface ---------------------------------------------------------------------------
 
 type RuleService interface {
-	Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string) (*pb.Rule, error)
+	Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string, priorityOrder int32) (*pb.Rule, error)
 	Get(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID) (*pb.Rule, error)
 	Update(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID, ruleName *string, conditions []byte, categoryID *int64, merchant *string, isActive *bool, priorityOrder *int32) error
 	Delete(ctx context.Context, userID uuid.UUID, ruleID uuid.UUID) (int64, error)
@@ -40,11 +40,11 @@ type RuleMatchResult struct {
 	Merchant   *string
 }
 
-func (s *catRuleSvc) Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string) (*pb.Rule, error) {
+func (s *catRuleSvc) Create(ctx context.Context, userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string, priorityOrder int32) (*pb.Rule, error) {
 	if err := requireOwnCategory(ctx, s.queries, userID, categoryID); err != nil {
 		return nil, wrapErr("RuleService.Create", err)
 	}
-	params := buildCreateRuleParams(userID, ruleName, conditions, categoryID, merchant)
+	params := buildCreateRuleParams(userID, ruleName, conditions, categoryID, merchant, priorityOrder)
 
 	rule, err := s.queries.CreateRule(ctx, params)
 	if err != nil {

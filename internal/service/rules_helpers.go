@@ -15,11 +15,12 @@ type ruleUpdateKey struct {
 	merchant   string
 }
 
-func buildCreateRuleParams(userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string) sqlc.CreateRuleParams {
+func buildCreateRuleParams(userID uuid.UUID, ruleName string, conditions []byte, categoryID *int64, merchant *string, priorityOrder int32) sqlc.CreateRuleParams {
 	params := sqlc.CreateRuleParams{
-		UserID:     userID,
-		RuleName:   ruleName,
-		Conditions: conditions,
+		UserID:        userID,
+		RuleName:      ruleName,
+		Conditions:    conditions,
+		PriorityOrder: priorityOrder,
 	}
 	if categoryID != nil {
 		params.CategoryID = *categoryID

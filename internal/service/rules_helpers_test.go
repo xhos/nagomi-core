@@ -15,7 +15,7 @@ func TestBuildCreateRuleParams_MapsOptionalFields(t *testing.T) {
 	merchant := "Coffee Shop"
 	conditions := []byte(`{"conditions":[]}`)
 
-	withAll := buildCreateRuleParams(userID, "Rule A", conditions, &categoryID, &merchant)
+	withAll := buildCreateRuleParams(userID, "Rule A", conditions, &categoryID, &merchant, 2)
 	if withAll.UserID != userID || withAll.RuleName != "Rule A" {
 		t.Fatalf("expected user/rule_name mapped, got %+v", withAll)
 	}
@@ -25,8 +25,11 @@ func TestBuildCreateRuleParams_MapsOptionalFields(t *testing.T) {
 	if withAll.Merchant != merchant {
 		t.Fatalf("expected merchant %q, got %q", merchant, withAll.Merchant)
 	}
+	if withAll.PriorityOrder != 2 {
+		t.Fatalf("expected priority 2, got %d", withAll.PriorityOrder)
+	}
 
-	withoutOptional := buildCreateRuleParams(userID, "Rule B", conditions, nil, nil)
+	withoutOptional := buildCreateRuleParams(userID, "Rule B", conditions, nil, nil, 0)
 	if withoutOptional.CategoryID != 0 {
 		t.Fatalf("expected zero category when nil, got %d", withoutOptional.CategoryID)
 	}

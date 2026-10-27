@@ -217,6 +217,7 @@ type CreateRuleRequest struct {
 	Conditions      *structpb.Struct       `protobuf:"bytes,4,opt,name=conditions,proto3" json:"conditions,omitempty"`
 	ApplyToExisting *bool                  `protobuf:"varint,5,opt,name=apply_to_existing,json=applyToExisting,proto3,oneof" json:"apply_to_existing,omitempty"`
 	Merchant        *string                `protobuf:"bytes,6,opt,name=merchant,proto3,oneof" json:"merchant,omitempty"`
+	PriorityOrder   *int32                 `protobuf:"varint,7,opt,name=priority_order,json=priorityOrder,proto3,oneof" json:"priority_order,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -291,6 +292,13 @@ func (x *CreateRuleRequest) GetMerchant() string {
 		return *x.Merchant
 	}
 	return ""
+}
+
+func (x *CreateRuleRequest) GetPriorityOrder() int32 {
+	if x != nil && x.PriorityOrder != nil {
+		return *x.PriorityOrder
+	}
+	return 0
 }
 
 type CreateRuleResponse struct {
@@ -782,7 +790,7 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"\arule_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06ruleId\x12!\n" +
 	"\auser_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"6\n" +
 	"\x0fGetRuleResponse\x12#\n" +
-	"\x04rule\x18\x01 \x01(\v2\x0f.nagomi.v1.RuleR\x04rule\"\xad\x03\n" +
+	"\x04rule\x18\x01 \x01(\v2\x0f.nagomi.v1.RuleR\x04rule\"\xec\x03\n" +
 	"\x11CreateRuleRequest\x12!\n" +
 	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12'\n" +
 	"\trule_name\x18\x02 \x01(\tB\n" +
@@ -793,11 +801,13 @@ const file_nagomi_v1_rule_services_proto_rawDesc = "" +
 	"conditions\x18\x04 \x01(\v2\x17.google.protobuf.StructR\n" +
 	"conditions\x12/\n" +
 	"\x11apply_to_existing\x18\x05 \x01(\bH\x01R\x0fapplyToExisting\x88\x01\x01\x12\x1f\n" +
-	"\bmerchant\x18\x06 \x01(\tH\x02R\bmerchant\x88\x01\x01:h\xbaHe\x1ac\n" +
+	"\bmerchant\x18\x06 \x01(\tH\x02R\bmerchant\x88\x01\x01\x12*\n" +
+	"\x0epriority_order\x18\a \x01(\x05H\x03R\rpriorityOrder\x88\x01\x01:h\xbaHe\x1ac\n" +
 	"\x0faction_required\x12#category_id or merchant is required\x1a+has(this.category_id) || has(this.merchant)B\x0e\n" +
 	"\f_category_idB\x14\n" +
 	"\x12_apply_to_existingB\v\n" +
-	"\t_merchant\"9\n" +
+	"\t_merchantB\x11\n" +
+	"\x0f_priority_order\"9\n" +
 	"\x12CreateRuleResponse\x12#\n" +
 	"\x04rule\x18\x01 \x01(\v2\x0f.nagomi.v1.RuleR\x04rule\"\xad\x04\n" +
 	"\x11UpdateRuleRequest\x12!\n" +

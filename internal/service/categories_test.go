@@ -125,7 +125,7 @@ func TestForeignCategoryRejected(t *testing.T) {
 	}
 	expectInvalid("update", txSvc.Update(ctx, user, &pb.UpdateTransactionRequest{Id: tx.ID, CategoryId: &theirs.Id}))
 	expectInvalid("categorize", txSvc.Categorize(ctx, user, []int64{tx.ID}, theirs.Id))
-	_, err = rules.Create(ctx, user, "steal", []byte(`{}`), &theirs.Id, nil)
+	_, err = rules.Create(ctx, user, "steal", []byte(`{}`), &theirs.Id, nil, 0)
 	expectInvalid("rule", err)
 
 	if err := txSvc.Update(ctx, user, &pb.UpdateTransactionRequest{Id: tx.ID, AccountId: &theirAcct}); err == nil {

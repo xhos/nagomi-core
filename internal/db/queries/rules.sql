@@ -11,8 +11,8 @@ where rule_id = @rule_id::uuid
   and user_id = @user_id::uuid;
 
 -- name: CreateRule :one
-insert into transaction_rules (user_id, rule_name, category_id, conditions, merchant)
-values (@user_id::uuid, @rule_name::text, @category_id::bigint, @conditions::jsonb, @merchant::text)
+insert into transaction_rules (user_id, rule_name, category_id, conditions, merchant, priority_order)
+values (@user_id::uuid, @rule_name::text, @category_id::bigint, @conditions::jsonb, @merchant::text, @priority_order::int)
 returning *;
 
 -- name: UpdateRule :exec

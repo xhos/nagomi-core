@@ -70,7 +70,7 @@ func (s *Server) CreateRule(ctx context.Context, req *connect.Request[pb.CreateR
 		return nil, err
 	}
 
-	rule, err := s.services.Rules.Create(ctx, userID, req.Msg.GetRuleName(), conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant)
+	rule, err := s.services.Rules.Create(ctx, userID, req.Msg.GetRuleName(), conditionsBytes, req.Msg.CategoryId, req.Msg.Merchant, req.Msg.GetPriorityOrder())
 	if err != nil {
 		return nil, wrapErr(err)
 	}
