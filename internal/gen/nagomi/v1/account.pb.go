@@ -47,7 +47,10 @@ type Account struct {
 	// the first statement the bank has; earlier periods aren't expected
 	StatementsStart *date.Date `protobuf:"bytes,16,opt,name=statements_start,json=statementsStart,proto3,oneof" json:"statements_start,omitempty"`
 	// no statements are expected after this
-	ClosedAt      *date.Date `protobuf:"bytes,18,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
+	ClosedAt *date.Date `protobuf:"bytes,18,opt,name=closed_at,json=closedAt,proto3,oneof" json:"closed_at,omitempty"`
+	// a group gathers accounts that are one place to the user (every wise currency
+	// balance). only for viewing and filtering; rules and imports still see the account
+	GroupId       *int64 `protobuf:"varint,19,opt,name=group_id,json=groupId,proto3,oneof" json:"group_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -201,6 +204,89 @@ func (x *Account) GetClosedAt() *date.Date {
 	return nil
 }
 
+func (x *Account) GetGroupId() int64 {
+	if x != nil && x.GroupId != nil {
+		return *x.GroupId
+	}
+	return 0
+}
+
+type AccountGroup struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccountGroup) Reset() {
+	*x = AccountGroup{}
+	mi := &file_nagomi_v1_account_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccountGroup) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccountGroup) ProtoMessage() {}
+
+func (x *AccountGroup) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccountGroup.ProtoReflect.Descriptor instead.
+func (*AccountGroup) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AccountGroup) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AccountGroup) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AccountGroup) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *AccountGroup) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *AccountGroup) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
 type AccountBalance struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -214,7 +300,7 @@ type AccountBalance struct {
 
 func (x *AccountBalance) Reset() {
 	*x = AccountBalance{}
-	mi := &file_nagomi_v1_account_proto_msgTypes[1]
+	mi := &file_nagomi_v1_account_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -226,7 +312,7 @@ func (x *AccountBalance) String() string {
 func (*AccountBalance) ProtoMessage() {}
 
 func (x *AccountBalance) ProtoReflect() protoreflect.Message {
-	mi := &file_nagomi_v1_account_proto_msgTypes[1]
+	mi := &file_nagomi_v1_account_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -239,7 +325,7 @@ func (x *AccountBalance) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountBalance.ProtoReflect.Descriptor instead.
 func (*AccountBalance) Descriptor() ([]byte, []int) {
-	return file_nagomi_v1_account_proto_rawDescGZIP(), []int{1}
+	return file_nagomi_v1_account_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AccountBalance) GetId() int64 {
@@ -281,7 +367,7 @@ var File_nagomi_v1_account_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xfd\x06\n" +
+	"\x17nagomi/v1/account.proto\x12\tnagomi.v1\x1a\x17google/type/money.proto\x1a\x15nagomi/v1/enums.proto\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16google/type/date.proto\"\xaa\a\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
 	"\bowner_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x12\x1d\n" +
@@ -304,11 +390,21 @@ const file_nagomi_v1_account_proto_rawDesc = "" +
 	"\abalance\x18\r \x01(\v2\x12.google.type.MoneyR\abalance\x12)\n" +
 	"\x10statement_driven\x18\x0f \x01(\bR\x0fstatementDriven\x12A\n" +
 	"\x10statements_start\x18\x10 \x01(\v2\x11.google.type.DateH\x01R\x0fstatementsStart\x88\x01\x01\x123\n" +
-	"\tclosed_at\x18\x12 \x01(\v2\x11.google.type.DateH\x02R\bclosedAt\x88\x01\x01B\x10\n" +
+	"\tclosed_at\x18\x12 \x01(\v2\x11.google.type.DateH\x02R\bclosedAt\x88\x01\x01\x12\x1e\n" +
+	"\bgroup_id\x18\x13 \x01(\x03H\x03R\agroupId\x88\x01\x01B\x10\n" +
 	"\x0e_friendly_nameB\x13\n" +
 	"\x11_statements_startB\f\n" +
 	"\n" +
-	"_closed_atJ\x04\b\x11\x10\x12R\x15statement_release_day\"\xc8\x01\n" +
+	"_closed_atB\v\n" +
+	"\t_group_idJ\x04\b\x11\x10\x12R\x15statement_release_day\"\xe3\x01\n" +
+	"\fAccountGroup\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dR\x04name\x12.\n" +
+	"\x05color\x18\x03 \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$R\x05color\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc8\x01\n" +
 	"\x0eAccountBalance\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
@@ -330,31 +426,34 @@ func file_nagomi_v1_account_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_account_proto_rawDescData
 }
 
-var file_nagomi_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_nagomi_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_nagomi_v1_account_proto_goTypes = []any{
 	(*Account)(nil),               // 0: nagomi.v1.Account
-	(*AccountBalance)(nil),        // 1: nagomi.v1.AccountBalance
-	(AccountType)(0),              // 2: nagomi.v1.AccountType
-	(*money.Money)(nil),           // 3: google.type.Money
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
-	(*date.Date)(nil),             // 5: google.type.Date
+	(*AccountGroup)(nil),          // 1: nagomi.v1.AccountGroup
+	(*AccountBalance)(nil),        // 2: nagomi.v1.AccountBalance
+	(AccountType)(0),              // 3: nagomi.v1.AccountType
+	(*money.Money)(nil),           // 4: google.type.Money
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*date.Date)(nil),             // 6: google.type.Date
 }
 var file_nagomi_v1_account_proto_depIdxs = []int32{
-	2,  // 0: nagomi.v1.Account.type:type_name -> nagomi.v1.AccountType
-	3,  // 1: nagomi.v1.Account.anchor_balance:type_name -> google.type.Money
-	4,  // 2: nagomi.v1.Account.anchor_date:type_name -> google.protobuf.Timestamp
-	4,  // 3: nagomi.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 4: nagomi.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
-	3,  // 5: nagomi.v1.Account.balance:type_name -> google.type.Money
-	5,  // 6: nagomi.v1.Account.statements_start:type_name -> google.type.Date
-	5,  // 7: nagomi.v1.Account.closed_at:type_name -> google.type.Date
-	2,  // 8: nagomi.v1.AccountBalance.account_type:type_name -> nagomi.v1.AccountType
-	3,  // 9: nagomi.v1.AccountBalance.current_balance:type_name -> google.type.Money
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	3,  // 0: nagomi.v1.Account.type:type_name -> nagomi.v1.AccountType
+	4,  // 1: nagomi.v1.Account.anchor_balance:type_name -> google.type.Money
+	5,  // 2: nagomi.v1.Account.anchor_date:type_name -> google.protobuf.Timestamp
+	5,  // 3: nagomi.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 4: nagomi.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 5: nagomi.v1.Account.balance:type_name -> google.type.Money
+	6,  // 6: nagomi.v1.Account.statements_start:type_name -> google.type.Date
+	6,  // 7: nagomi.v1.Account.closed_at:type_name -> google.type.Date
+	5,  // 8: nagomi.v1.AccountGroup.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 9: nagomi.v1.AccountGroup.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 10: nagomi.v1.AccountBalance.account_type:type_name -> nagomi.v1.AccountType
+	4,  // 11: nagomi.v1.AccountBalance.current_balance:type_name -> google.type.Money
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_account_proto_init() }
@@ -370,7 +469,7 @@ func file_nagomi_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_account_proto_rawDesc), len(file_nagomi_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

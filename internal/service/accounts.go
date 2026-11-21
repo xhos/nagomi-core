@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // ----- interface --------------------------------------------------------------------------------
@@ -27,16 +28,23 @@ type AccountService interface {
 	FindByAlias(ctx context.Context, userID uuid.UUID, alias string) (*pb.Account, error)
 
 	MergeAccounts(ctx context.Context, userID uuid.UUID, primaryID, secondaryID int64) (*pb.Account, int64, error)
+
+	ListGroups(ctx context.Context, userID uuid.UUID) ([]*pb.AccountGroup, error)
+	CreateGroup(ctx context.Context, userID uuid.UUID, req *pb.CreateAccountGroupRequest) (*pb.AccountGroup, error)
+	UpdateGroup(ctx context.Context, userID uuid.UUID, req *pb.UpdateAccountGroupRequest) error
+	DeleteGroup(ctx context.Context, userID uuid.UUID, id int64) error
+	SetGroup(ctx context.Context, userID uuid.UUID, accountIDs []int64, groupID *int64) error
 }
 
 type acctSvc struct {
+	pool     *pgxpool.Pool
 	queries  *sqlc.Queries
 	log      *log.Logger
 	exchange *exchange.Client
 }
 
-func newAcctSvc(queries *sqlc.Queries, logger *log.Logger, exchangeClient *exchange.Client) AccountService {
-	return &acctSvc{queries: queries, log: logger, exchange: exchangeClient}
+func newAcctSvc(pool *pgxpool.Pool, queries *sqlc.Queries, logger *log.Logger, exchangeClient *exchange.Client) AccountService {
+	return &acctSvc{pool: pool, queries: queries, log: logger, exchange: exchangeClient}
 }
 
 // ----- methods ----------------------------------------------------------------------------------

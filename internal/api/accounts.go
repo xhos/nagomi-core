@@ -144,3 +144,70 @@ func (s *Server) MergeAccounts(ctx context.Context, req *connect.Request[pb.Merg
 
 	return connect.NewResponse(&pb.MergeAccountsResponse{Account: account, TransactionsMoved: moved}), nil
 }
+
+func (s *Server) ListAccountGroups(ctx context.Context, req *connect.Request[pb.ListAccountGroupsRequest]) (*connect.Response[pb.ListAccountGroupsResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	groups, err := s.services.Accounts.ListGroups(ctx, userID)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.ListAccountGroupsResponse{Groups: groups}), nil
+}
+
+func (s *Server) CreateAccountGroup(ctx context.Context, req *connect.Request[pb.CreateAccountGroupRequest]) (*connect.Response[pb.CreateAccountGroupResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	group, err := s.services.Accounts.CreateGroup(ctx, userID, req.Msg)
+	if err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.CreateAccountGroupResponse{Group: group}), nil
+}
+
+func (s *Server) UpdateAccountGroup(ctx context.Context, req *connect.Request[pb.UpdateAccountGroupRequest]) (*connect.Response[pb.UpdateAccountGroupResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.services.Accounts.UpdateGroup(ctx, userID, req.Msg); err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.UpdateAccountGroupResponse{}), nil
+}
+
+func (s *Server) DeleteAccountGroup(ctx context.Context, req *connect.Request[pb.DeleteAccountGroupRequest]) (*connect.Response[pb.DeleteAccountGroupResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.services.Accounts.DeleteGroup(ctx, userID, req.Msg.GetId()); err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.DeleteAccountGroupResponse{}), nil
+}
+
+func (s *Server) SetAccountsGroup(ctx context.Context, req *connect.Request[pb.SetAccountsGroupRequest]) (*connect.Response[pb.SetAccountsGroupResponse], error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.services.Accounts.SetGroup(ctx, userID, req.Msg.GetAccountIds(), req.Msg.GroupId); err != nil {
+		return nil, wrapErr(err)
+	}
+
+	return connect.NewResponse(&pb.SetAccountsGroupResponse{}), nil
+}

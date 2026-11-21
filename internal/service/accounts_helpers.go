@@ -159,6 +159,7 @@ func accountRowToPb(a sqlc.Account, balanceCents int64, balanceCurrency string) 
 		StatementDriven: a.StatementDriven,
 		StatementsStart: optionalDate(a.StatementsStart),
 		ClosedAt:        optionalDate(a.ClosedAt),
+		GroupId:         a.GroupID,
 	}
 	return account
 }

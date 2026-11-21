@@ -29,6 +29,16 @@ type Account struct {
 	StatementsStart    *time.Time         `db:"statements_start" json:"statements_start"`
 	ClosedAt           *time.Time         `db:"closed_at" json:"closed_at"`
 	Color              string             `db:"color" json:"color"`
+	GroupID            *int64             `db:"group_id" json:"group_id"`
+}
+
+type AccountGroup struct {
+	ID        int64     `db:"id" json:"id"`
+	OwnerID   uuid.UUID `db:"owner_id" json:"owner_id"`
+	Name      string    `db:"name" json:"name"`
+	Color     string    `db:"color" json:"color"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 type Category struct {

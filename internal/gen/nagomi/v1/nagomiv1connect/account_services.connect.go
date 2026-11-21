@@ -63,6 +63,21 @@ const (
 	// AccountServiceMergeAccountsProcedure is the fully-qualified name of the AccountService's
 	// MergeAccounts RPC.
 	AccountServiceMergeAccountsProcedure = "/nagomi.v1.AccountService/MergeAccounts"
+	// AccountServiceListAccountGroupsProcedure is the fully-qualified name of the AccountService's
+	// ListAccountGroups RPC.
+	AccountServiceListAccountGroupsProcedure = "/nagomi.v1.AccountService/ListAccountGroups"
+	// AccountServiceCreateAccountGroupProcedure is the fully-qualified name of the AccountService's
+	// CreateAccountGroup RPC.
+	AccountServiceCreateAccountGroupProcedure = "/nagomi.v1.AccountService/CreateAccountGroup"
+	// AccountServiceUpdateAccountGroupProcedure is the fully-qualified name of the AccountService's
+	// UpdateAccountGroup RPC.
+	AccountServiceUpdateAccountGroupProcedure = "/nagomi.v1.AccountService/UpdateAccountGroup"
+	// AccountServiceDeleteAccountGroupProcedure is the fully-qualified name of the AccountService's
+	// DeleteAccountGroup RPC.
+	AccountServiceDeleteAccountGroupProcedure = "/nagomi.v1.AccountService/DeleteAccountGroup"
+	// AccountServiceSetAccountsGroupProcedure is the fully-qualified name of the AccountService's
+	// SetAccountsGroup RPC.
+	AccountServiceSetAccountsGroupProcedure = "/nagomi.v1.AccountService/SetAccountsGroup"
 )
 
 // AccountServiceClient is a client for the nagomi.v1.AccountService service.
@@ -77,6 +92,15 @@ type AccountServiceClient interface {
 	SetAccountAliases(context.Context, *connect.Request[v1.SetAccountAliasesRequest]) (*connect.Response[v1.SetAccountAliasesResponse], error)
 	FindAccountByAlias(context.Context, *connect.Request[v1.FindAccountByAliasRequest]) (*connect.Response[v1.FindAccountByAliasResponse], error)
 	MergeAccounts(context.Context, *connect.Request[v1.MergeAccountsRequest]) (*connect.Response[v1.MergeAccountsResponse], error)
+	ListAccountGroups(context.Context, *connect.Request[v1.ListAccountGroupsRequest]) (*connect.Response[v1.ListAccountGroupsResponse], error)
+	// creates the group and moves the given accounts into it
+	CreateAccountGroup(context.Context, *connect.Request[v1.CreateAccountGroupRequest]) (*connect.Response[v1.CreateAccountGroupResponse], error)
+	UpdateAccountGroup(context.Context, *connect.Request[v1.UpdateAccountGroupRequest]) (*connect.Response[v1.UpdateAccountGroupResponse], error)
+	// the accounts stay, ungrouped
+	DeleteAccountGroup(context.Context, *connect.Request[v1.DeleteAccountGroupRequest]) (*connect.Response[v1.DeleteAccountGroupResponse], error)
+	// moves accounts into a group, or out of any when group_id is unset. a group
+	// left without accounts is deleted
+	SetAccountsGroup(context.Context, *connect.Request[v1.SetAccountsGroupRequest]) (*connect.Response[v1.SetAccountsGroupResponse], error)
 }
 
 // NewAccountServiceClient constructs a client for the nagomi.v1.AccountService service. By default,
@@ -150,6 +174,36 @@ func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(accountServiceMethods.ByName("MergeAccounts")),
 			connect.WithClientOptions(opts...),
 		),
+		listAccountGroups: connect.NewClient[v1.ListAccountGroupsRequest, v1.ListAccountGroupsResponse](
+			httpClient,
+			baseURL+AccountServiceListAccountGroupsProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("ListAccountGroups")),
+			connect.WithClientOptions(opts...),
+		),
+		createAccountGroup: connect.NewClient[v1.CreateAccountGroupRequest, v1.CreateAccountGroupResponse](
+			httpClient,
+			baseURL+AccountServiceCreateAccountGroupProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("CreateAccountGroup")),
+			connect.WithClientOptions(opts...),
+		),
+		updateAccountGroup: connect.NewClient[v1.UpdateAccountGroupRequest, v1.UpdateAccountGroupResponse](
+			httpClient,
+			baseURL+AccountServiceUpdateAccountGroupProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("UpdateAccountGroup")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteAccountGroup: connect.NewClient[v1.DeleteAccountGroupRequest, v1.DeleteAccountGroupResponse](
+			httpClient,
+			baseURL+AccountServiceDeleteAccountGroupProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("DeleteAccountGroup")),
+			connect.WithClientOptions(opts...),
+		),
+		setAccountsGroup: connect.NewClient[v1.SetAccountsGroupRequest, v1.SetAccountsGroupResponse](
+			httpClient,
+			baseURL+AccountServiceSetAccountsGroupProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("SetAccountsGroup")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -165,6 +219,11 @@ type accountServiceClient struct {
 	setAccountAliases  *connect.Client[v1.SetAccountAliasesRequest, v1.SetAccountAliasesResponse]
 	findAccountByAlias *connect.Client[v1.FindAccountByAliasRequest, v1.FindAccountByAliasResponse]
 	mergeAccounts      *connect.Client[v1.MergeAccountsRequest, v1.MergeAccountsResponse]
+	listAccountGroups  *connect.Client[v1.ListAccountGroupsRequest, v1.ListAccountGroupsResponse]
+	createAccountGroup *connect.Client[v1.CreateAccountGroupRequest, v1.CreateAccountGroupResponse]
+	updateAccountGroup *connect.Client[v1.UpdateAccountGroupRequest, v1.UpdateAccountGroupResponse]
+	deleteAccountGroup *connect.Client[v1.DeleteAccountGroupRequest, v1.DeleteAccountGroupResponse]
+	setAccountsGroup   *connect.Client[v1.SetAccountsGroupRequest, v1.SetAccountsGroupResponse]
 }
 
 // ListAccounts calls nagomi.v1.AccountService.ListAccounts.
@@ -217,6 +276,31 @@ func (c *accountServiceClient) MergeAccounts(ctx context.Context, req *connect.R
 	return c.mergeAccounts.CallUnary(ctx, req)
 }
 
+// ListAccountGroups calls nagomi.v1.AccountService.ListAccountGroups.
+func (c *accountServiceClient) ListAccountGroups(ctx context.Context, req *connect.Request[v1.ListAccountGroupsRequest]) (*connect.Response[v1.ListAccountGroupsResponse], error) {
+	return c.listAccountGroups.CallUnary(ctx, req)
+}
+
+// CreateAccountGroup calls nagomi.v1.AccountService.CreateAccountGroup.
+func (c *accountServiceClient) CreateAccountGroup(ctx context.Context, req *connect.Request[v1.CreateAccountGroupRequest]) (*connect.Response[v1.CreateAccountGroupResponse], error) {
+	return c.createAccountGroup.CallUnary(ctx, req)
+}
+
+// UpdateAccountGroup calls nagomi.v1.AccountService.UpdateAccountGroup.
+func (c *accountServiceClient) UpdateAccountGroup(ctx context.Context, req *connect.Request[v1.UpdateAccountGroupRequest]) (*connect.Response[v1.UpdateAccountGroupResponse], error) {
+	return c.updateAccountGroup.CallUnary(ctx, req)
+}
+
+// DeleteAccountGroup calls nagomi.v1.AccountService.DeleteAccountGroup.
+func (c *accountServiceClient) DeleteAccountGroup(ctx context.Context, req *connect.Request[v1.DeleteAccountGroupRequest]) (*connect.Response[v1.DeleteAccountGroupResponse], error) {
+	return c.deleteAccountGroup.CallUnary(ctx, req)
+}
+
+// SetAccountsGroup calls nagomi.v1.AccountService.SetAccountsGroup.
+func (c *accountServiceClient) SetAccountsGroup(ctx context.Context, req *connect.Request[v1.SetAccountsGroupRequest]) (*connect.Response[v1.SetAccountsGroupResponse], error) {
+	return c.setAccountsGroup.CallUnary(ctx, req)
+}
+
 // AccountServiceHandler is an implementation of the nagomi.v1.AccountService service.
 type AccountServiceHandler interface {
 	ListAccounts(context.Context, *connect.Request[v1.ListAccountsRequest]) (*connect.Response[v1.ListAccountsResponse], error)
@@ -229,6 +313,15 @@ type AccountServiceHandler interface {
 	SetAccountAliases(context.Context, *connect.Request[v1.SetAccountAliasesRequest]) (*connect.Response[v1.SetAccountAliasesResponse], error)
 	FindAccountByAlias(context.Context, *connect.Request[v1.FindAccountByAliasRequest]) (*connect.Response[v1.FindAccountByAliasResponse], error)
 	MergeAccounts(context.Context, *connect.Request[v1.MergeAccountsRequest]) (*connect.Response[v1.MergeAccountsResponse], error)
+	ListAccountGroups(context.Context, *connect.Request[v1.ListAccountGroupsRequest]) (*connect.Response[v1.ListAccountGroupsResponse], error)
+	// creates the group and moves the given accounts into it
+	CreateAccountGroup(context.Context, *connect.Request[v1.CreateAccountGroupRequest]) (*connect.Response[v1.CreateAccountGroupResponse], error)
+	UpdateAccountGroup(context.Context, *connect.Request[v1.UpdateAccountGroupRequest]) (*connect.Response[v1.UpdateAccountGroupResponse], error)
+	// the accounts stay, ungrouped
+	DeleteAccountGroup(context.Context, *connect.Request[v1.DeleteAccountGroupRequest]) (*connect.Response[v1.DeleteAccountGroupResponse], error)
+	// moves accounts into a group, or out of any when group_id is unset. a group
+	// left without accounts is deleted
+	SetAccountsGroup(context.Context, *connect.Request[v1.SetAccountsGroupRequest]) (*connect.Response[v1.SetAccountsGroupResponse], error)
 }
 
 // NewAccountServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -298,6 +391,36 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 		connect.WithSchema(accountServiceMethods.ByName("MergeAccounts")),
 		connect.WithHandlerOptions(opts...),
 	)
+	accountServiceListAccountGroupsHandler := connect.NewUnaryHandler(
+		AccountServiceListAccountGroupsProcedure,
+		svc.ListAccountGroups,
+		connect.WithSchema(accountServiceMethods.ByName("ListAccountGroups")),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceCreateAccountGroupHandler := connect.NewUnaryHandler(
+		AccountServiceCreateAccountGroupProcedure,
+		svc.CreateAccountGroup,
+		connect.WithSchema(accountServiceMethods.ByName("CreateAccountGroup")),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceUpdateAccountGroupHandler := connect.NewUnaryHandler(
+		AccountServiceUpdateAccountGroupProcedure,
+		svc.UpdateAccountGroup,
+		connect.WithSchema(accountServiceMethods.ByName("UpdateAccountGroup")),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceDeleteAccountGroupHandler := connect.NewUnaryHandler(
+		AccountServiceDeleteAccountGroupProcedure,
+		svc.DeleteAccountGroup,
+		connect.WithSchema(accountServiceMethods.ByName("DeleteAccountGroup")),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceSetAccountsGroupHandler := connect.NewUnaryHandler(
+		AccountServiceSetAccountsGroupProcedure,
+		svc.SetAccountsGroup,
+		connect.WithSchema(accountServiceMethods.ByName("SetAccountsGroup")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/nagomi.v1.AccountService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AccountServiceListAccountsProcedure:
@@ -320,6 +443,16 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 			accountServiceFindAccountByAliasHandler.ServeHTTP(w, r)
 		case AccountServiceMergeAccountsProcedure:
 			accountServiceMergeAccountsHandler.ServeHTTP(w, r)
+		case AccountServiceListAccountGroupsProcedure:
+			accountServiceListAccountGroupsHandler.ServeHTTP(w, r)
+		case AccountServiceCreateAccountGroupProcedure:
+			accountServiceCreateAccountGroupHandler.ServeHTTP(w, r)
+		case AccountServiceUpdateAccountGroupProcedure:
+			accountServiceUpdateAccountGroupHandler.ServeHTTP(w, r)
+		case AccountServiceDeleteAccountGroupProcedure:
+			accountServiceDeleteAccountGroupHandler.ServeHTTP(w, r)
+		case AccountServiceSetAccountsGroupProcedure:
+			accountServiceSetAccountsGroupHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -367,4 +500,24 @@ func (UnimplementedAccountServiceHandler) FindAccountByAlias(context.Context, *c
 
 func (UnimplementedAccountServiceHandler) MergeAccounts(context.Context, *connect.Request[v1.MergeAccountsRequest]) (*connect.Response[v1.MergeAccountsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.MergeAccounts is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) ListAccountGroups(context.Context, *connect.Request[v1.ListAccountGroupsRequest]) (*connect.Response[v1.ListAccountGroupsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.ListAccountGroups is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) CreateAccountGroup(context.Context, *connect.Request[v1.CreateAccountGroupRequest]) (*connect.Response[v1.CreateAccountGroupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.CreateAccountGroup is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) UpdateAccountGroup(context.Context, *connect.Request[v1.UpdateAccountGroupRequest]) (*connect.Response[v1.UpdateAccountGroupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.UpdateAccountGroup is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) DeleteAccountGroup(context.Context, *connect.Request[v1.DeleteAccountGroupRequest]) (*connect.Response[v1.DeleteAccountGroupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.DeleteAccountGroup is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) SetAccountsGroup(context.Context, *connect.Request[v1.SetAccountsGroupRequest]) (*connect.Response[v1.SetAccountsGroupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("nagomi.v1.AccountService.SetAccountsGroup is not implemented"))
 }

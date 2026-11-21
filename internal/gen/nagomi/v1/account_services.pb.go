@@ -1140,6 +1140,494 @@ func (x *MergeAccountsResponse) GetTransactionsMoved() int64 {
 	return 0
 }
 
+type ListAccountGroupsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccountGroupsRequest) Reset() {
+	*x = ListAccountGroupsRequest{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccountGroupsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccountGroupsRequest) ProtoMessage() {}
+
+func (x *ListAccountGroupsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccountGroupsRequest.ProtoReflect.Descriptor instead.
+func (*ListAccountGroupsRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListAccountGroupsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type ListAccountGroupsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Groups        []*AccountGroup        `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccountGroupsResponse) Reset() {
+	*x = ListAccountGroupsResponse{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccountGroupsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccountGroupsResponse) ProtoMessage() {}
+
+func (x *ListAccountGroupsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccountGroupsResponse.ProtoReflect.Descriptor instead.
+func (*ListAccountGroupsResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListAccountGroupsResponse) GetGroups() []*AccountGroup {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+type CreateAccountGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Color         *string                `protobuf:"bytes,3,opt,name=color,proto3,oneof" json:"color,omitempty"`
+	AccountIds    []int64                `protobuf:"varint,4,rep,packed,name=account_ids,json=accountIds,proto3" json:"account_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAccountGroupRequest) Reset() {
+	*x = CreateAccountGroupRequest{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAccountGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAccountGroupRequest) ProtoMessage() {}
+
+func (x *CreateAccountGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAccountGroupRequest.ProtoReflect.Descriptor instead.
+func (*CreateAccountGroupRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *CreateAccountGroupRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CreateAccountGroupRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateAccountGroupRequest) GetColor() string {
+	if x != nil && x.Color != nil {
+		return *x.Color
+	}
+	return ""
+}
+
+func (x *CreateAccountGroupRequest) GetAccountIds() []int64 {
+	if x != nil {
+		return x.AccountIds
+	}
+	return nil
+}
+
+type CreateAccountGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Group         *AccountGroup          `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAccountGroupResponse) Reset() {
+	*x = CreateAccountGroupResponse{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAccountGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAccountGroupResponse) ProtoMessage() {}
+
+func (x *CreateAccountGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAccountGroupResponse.ProtoReflect.Descriptor instead.
+func (*CreateAccountGroupResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *CreateAccountGroupResponse) GetGroup() *AccountGroup {
+	if x != nil {
+		return x.Group
+	}
+	return nil
+}
+
+type UpdateAccountGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	Name          *string                `protobuf:"bytes,3,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Color         *string                `protobuf:"bytes,4,opt,name=color,proto3,oneof" json:"color,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAccountGroupRequest) Reset() {
+	*x = UpdateAccountGroupRequest{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAccountGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAccountGroupRequest) ProtoMessage() {}
+
+func (x *UpdateAccountGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAccountGroupRequest.ProtoReflect.Descriptor instead.
+func (*UpdateAccountGroupRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *UpdateAccountGroupRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateAccountGroupRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateAccountGroupRequest) GetName() string {
+	if x != nil && x.Name != nil {
+		return *x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAccountGroupRequest) GetColor() string {
+	if x != nil && x.Color != nil {
+		return *x.Color
+	}
+	return ""
+}
+
+type UpdateAccountGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAccountGroupResponse) Reset() {
+	*x = UpdateAccountGroupResponse{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAccountGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAccountGroupResponse) ProtoMessage() {}
+
+func (x *UpdateAccountGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAccountGroupResponse.ProtoReflect.Descriptor instead.
+func (*UpdateAccountGroupResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{25}
+}
+
+type DeleteAccountGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAccountGroupRequest) Reset() {
+	*x = DeleteAccountGroupRequest{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAccountGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAccountGroupRequest) ProtoMessage() {}
+
+func (x *DeleteAccountGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAccountGroupRequest.ProtoReflect.Descriptor instead.
+func (*DeleteAccountGroupRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *DeleteAccountGroupRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeleteAccountGroupRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteAccountGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAccountGroupResponse) Reset() {
+	*x = DeleteAccountGroupResponse{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAccountGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAccountGroupResponse) ProtoMessage() {}
+
+func (x *DeleteAccountGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAccountGroupResponse.ProtoReflect.Descriptor instead.
+func (*DeleteAccountGroupResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{27}
+}
+
+type SetAccountsGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	AccountIds    []int64                `protobuf:"varint,2,rep,packed,name=account_ids,json=accountIds,proto3" json:"account_ids,omitempty"`
+	GroupId       *int64                 `protobuf:"varint,3,opt,name=group_id,json=groupId,proto3,oneof" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetAccountsGroupRequest) Reset() {
+	*x = SetAccountsGroupRequest{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAccountsGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAccountsGroupRequest) ProtoMessage() {}
+
+func (x *SetAccountsGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetAccountsGroupRequest.ProtoReflect.Descriptor instead.
+func (*SetAccountsGroupRequest) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *SetAccountsGroupRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SetAccountsGroupRequest) GetAccountIds() []int64 {
+	if x != nil {
+		return x.AccountIds
+	}
+	return nil
+}
+
+func (x *SetAccountsGroupRequest) GetGroupId() int64 {
+	if x != nil && x.GroupId != nil {
+		return *x.GroupId
+	}
+	return 0
+}
+
+type SetAccountsGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetAccountsGroupResponse) Reset() {
+	*x = SetAccountsGroupResponse{}
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAccountsGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAccountsGroupResponse) ProtoMessage() {}
+
+func (x *SetAccountsGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nagomi_v1_account_services_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetAccountsGroupResponse.ProtoReflect.Descriptor instead.
+func (*SetAccountsGroupResponse) Descriptor() ([]byte, []int) {
+	return file_nagomi_v1_account_services_proto_rawDescGZIP(), []int{29}
+}
+
 var File_nagomi_v1_account_services_proto protoreflect.FileDescriptor
 
 const file_nagomi_v1_account_services_proto_rawDesc = "" +
@@ -1234,7 +1722,40 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x14secondary_account_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x12secondaryAccountId\"t\n" +
 	"\x15MergeAccountsResponse\x12,\n" +
 	"\aaccount\x18\x01 \x01(\v2\x12.nagomi.v1.AccountR\aaccount\x12-\n" +
-	"\x12transactions_moved\x18\x02 \x01(\x03R\x11transactionsMoved2\xfc\x06\n" +
+	"\x12transactions_moved\x18\x02 \x01(\x03R\x11transactionsMoved\"=\n" +
+	"\x18ListAccountGroupsRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\"L\n" +
+	"\x19ListAccountGroupsResponse\x12/\n" +
+	"\x06groups\x18\x01 \x03(\v2\x17.nagomi.v1.AccountGroupR\x06groups\"\xcb\x01\n" +
+	"\x19CreateAccountGroupRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dR\x04name\x123\n" +
+	"\x05color\x18\x03 \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$H\x00R\x05color\x88\x01\x01\x12-\n" +
+	"\vaccount_ids\x18\x04 \x03(\x03B\f\xbaH\t\x92\x01\x06\"\x04\"\x02 \x00R\n" +
+	"accountIdsB\b\n" +
+	"\x06_color\"K\n" +
+	"\x1aCreateAccountGroupResponse\x12-\n" +
+	"\x05group\x18\x01 \x01(\v2\x17.nagomi.v1.AccountGroupR\x05group\"\xc3\x01\n" +
+	"\x19UpdateAccountGroupRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
+	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\"\n" +
+	"\x04name\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18dH\x00R\x04name\x88\x01\x01\x123\n" +
+	"\x05color\x18\x04 \x01(\tB\x18\xbaH\x15r\x132\x11^#[0-9a-fA-F]{6}$H\x01R\x05color\x88\x01\x01B\a\n" +
+	"\x05_nameB\b\n" +
+	"\x06_color\"\x1c\n" +
+	"\x1aUpdateAccountGroupResponse\"W\n" +
+	"\x19DeleteAccountGroupRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12\x17\n" +
+	"\x02id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"\x1c\n" +
+	"\x1aDeleteAccountGroupResponse\"\xa3\x01\n" +
+	"\x17SetAccountsGroupRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06userId\x12/\n" +
+	"\vaccount_ids\x18\x02 \x03(\x03B\x0e\xbaH\v\x92\x01\b\b\x01\"\x04\"\x02 \x00R\n" +
+	"accountIds\x12'\n" +
+	"\bgroup_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00H\x00R\agroupId\x88\x01\x01B\v\n" +
+	"\t_group_id\"\x1a\n" +
+	"\x18SetAccountsGroupResponse2\xe2\n" +
+	"\n" +
 	"\x0eAccountService\x12O\n" +
 	"\fListAccounts\x12\x1e.nagomi.v1.ListAccountsRequest\x1a\x1f.nagomi.v1.ListAccountsResponse\x12I\n" +
 	"\n" +
@@ -1246,7 +1767,12 @@ const file_nagomi_v1_account_services_proto_rawDesc = "" +
 	"\x12RemoveAccountAlias\x12$.nagomi.v1.RemoveAccountAliasRequest\x1a%.nagomi.v1.RemoveAccountAliasResponse\x12^\n" +
 	"\x11SetAccountAliases\x12#.nagomi.v1.SetAccountAliasesRequest\x1a$.nagomi.v1.SetAccountAliasesResponse\x12a\n" +
 	"\x12FindAccountByAlias\x12$.nagomi.v1.FindAccountByAliasRequest\x1a%.nagomi.v1.FindAccountByAliasResponse\x12R\n" +
-	"\rMergeAccounts\x12\x1f.nagomi.v1.MergeAccountsRequest\x1a .nagomi.v1.MergeAccountsResponseB\x97\x01\n" +
+	"\rMergeAccounts\x12\x1f.nagomi.v1.MergeAccountsRequest\x1a .nagomi.v1.MergeAccountsResponse\x12^\n" +
+	"\x11ListAccountGroups\x12#.nagomi.v1.ListAccountGroupsRequest\x1a$.nagomi.v1.ListAccountGroupsResponse\x12a\n" +
+	"\x12CreateAccountGroup\x12$.nagomi.v1.CreateAccountGroupRequest\x1a%.nagomi.v1.CreateAccountGroupResponse\x12a\n" +
+	"\x12UpdateAccountGroup\x12$.nagomi.v1.UpdateAccountGroupRequest\x1a%.nagomi.v1.UpdateAccountGroupResponse\x12a\n" +
+	"\x12DeleteAccountGroup\x12$.nagomi.v1.DeleteAccountGroupRequest\x1a%.nagomi.v1.DeleteAccountGroupResponse\x12[\n" +
+	"\x10SetAccountsGroup\x12\".nagomi.v1.SetAccountsGroupRequest\x1a#.nagomi.v1.SetAccountsGroupResponseB\x97\x01\n" +
 	"\rcom.nagomi.v1B\x14AccountServicesProtoP\x01Z+nagomi-core/internal/gen/nagomi/v1;nagomiv1\xa2\x02\x03NXX\xaa\x02\tNagomi.V1\xca\x02\tNagomi\\V1\xe2\x02\x15Nagomi\\V1\\GPBMetadata\xea\x02\n" +
 	"Nagomi::V1b\x06proto3"
 
@@ -1262,7 +1788,7 @@ func file_nagomi_v1_account_services_proto_rawDescGZIP() []byte {
 	return file_nagomi_v1_account_services_proto_rawDescData
 }
 
-var file_nagomi_v1_account_services_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_nagomi_v1_account_services_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_nagomi_v1_account_services_proto_goTypes = []any{
 	(*ListAccountsRequest)(nil),        // 0: nagomi.v1.ListAccountsRequest
 	(*ListAccountsResponse)(nil),       // 1: nagomi.v1.ListAccountsResponse
@@ -1284,52 +1810,75 @@ var file_nagomi_v1_account_services_proto_goTypes = []any{
 	(*FindAccountByAliasResponse)(nil), // 17: nagomi.v1.FindAccountByAliasResponse
 	(*MergeAccountsRequest)(nil),       // 18: nagomi.v1.MergeAccountsRequest
 	(*MergeAccountsResponse)(nil),      // 19: nagomi.v1.MergeAccountsResponse
-	(*Account)(nil),                    // 20: nagomi.v1.Account
-	(AccountType)(0),                   // 21: nagomi.v1.AccountType
-	(*money.Money)(nil),                // 22: google.type.Money
-	(*fieldmaskpb.FieldMask)(nil),      // 23: google.protobuf.FieldMask
-	(*timestamppb.Timestamp)(nil),      // 24: google.protobuf.Timestamp
-	(*date.Date)(nil),                  // 25: google.type.Date
+	(*ListAccountGroupsRequest)(nil),   // 20: nagomi.v1.ListAccountGroupsRequest
+	(*ListAccountGroupsResponse)(nil),  // 21: nagomi.v1.ListAccountGroupsResponse
+	(*CreateAccountGroupRequest)(nil),  // 22: nagomi.v1.CreateAccountGroupRequest
+	(*CreateAccountGroupResponse)(nil), // 23: nagomi.v1.CreateAccountGroupResponse
+	(*UpdateAccountGroupRequest)(nil),  // 24: nagomi.v1.UpdateAccountGroupRequest
+	(*UpdateAccountGroupResponse)(nil), // 25: nagomi.v1.UpdateAccountGroupResponse
+	(*DeleteAccountGroupRequest)(nil),  // 26: nagomi.v1.DeleteAccountGroupRequest
+	(*DeleteAccountGroupResponse)(nil), // 27: nagomi.v1.DeleteAccountGroupResponse
+	(*SetAccountsGroupRequest)(nil),    // 28: nagomi.v1.SetAccountsGroupRequest
+	(*SetAccountsGroupResponse)(nil),   // 29: nagomi.v1.SetAccountsGroupResponse
+	(*Account)(nil),                    // 30: nagomi.v1.Account
+	(AccountType)(0),                   // 31: nagomi.v1.AccountType
+	(*money.Money)(nil),                // 32: google.type.Money
+	(*fieldmaskpb.FieldMask)(nil),      // 33: google.protobuf.FieldMask
+	(*timestamppb.Timestamp)(nil),      // 34: google.protobuf.Timestamp
+	(*date.Date)(nil),                  // 35: google.type.Date
+	(*AccountGroup)(nil),               // 36: nagomi.v1.AccountGroup
 }
 var file_nagomi_v1_account_services_proto_depIdxs = []int32{
-	20, // 0: nagomi.v1.ListAccountsResponse.accounts:type_name -> nagomi.v1.Account
-	20, // 1: nagomi.v1.GetAccountResponse.account:type_name -> nagomi.v1.Account
-	21, // 2: nagomi.v1.CreateAccountRequest.type:type_name -> nagomi.v1.AccountType
-	22, // 3: nagomi.v1.CreateAccountRequest.anchor_balance:type_name -> google.type.Money
-	20, // 4: nagomi.v1.CreateAccountResponse.account:type_name -> nagomi.v1.Account
-	23, // 5: nagomi.v1.UpdateAccountRequest.update_mask:type_name -> google.protobuf.FieldMask
-	21, // 6: nagomi.v1.UpdateAccountRequest.account_type:type_name -> nagomi.v1.AccountType
-	24, // 7: nagomi.v1.UpdateAccountRequest.anchor_date:type_name -> google.protobuf.Timestamp
-	22, // 8: nagomi.v1.UpdateAccountRequest.anchor_balance:type_name -> google.type.Money
-	25, // 9: nagomi.v1.UpdateAccountRequest.statements_start:type_name -> google.type.Date
-	25, // 10: nagomi.v1.UpdateAccountRequest.closed_at:type_name -> google.type.Date
-	20, // 11: nagomi.v1.FindAccountByAliasResponse.account:type_name -> nagomi.v1.Account
-	20, // 12: nagomi.v1.MergeAccountsResponse.account:type_name -> nagomi.v1.Account
-	0,  // 13: nagomi.v1.AccountService.ListAccounts:input_type -> nagomi.v1.ListAccountsRequest
-	2,  // 14: nagomi.v1.AccountService.GetAccount:input_type -> nagomi.v1.GetAccountRequest
-	4,  // 15: nagomi.v1.AccountService.CreateAccount:input_type -> nagomi.v1.CreateAccountRequest
-	6,  // 16: nagomi.v1.AccountService.UpdateAccount:input_type -> nagomi.v1.UpdateAccountRequest
-	8,  // 17: nagomi.v1.AccountService.DeleteAccount:input_type -> nagomi.v1.DeleteAccountRequest
-	10, // 18: nagomi.v1.AccountService.AddAccountAlias:input_type -> nagomi.v1.AddAccountAliasRequest
-	12, // 19: nagomi.v1.AccountService.RemoveAccountAlias:input_type -> nagomi.v1.RemoveAccountAliasRequest
-	14, // 20: nagomi.v1.AccountService.SetAccountAliases:input_type -> nagomi.v1.SetAccountAliasesRequest
-	16, // 21: nagomi.v1.AccountService.FindAccountByAlias:input_type -> nagomi.v1.FindAccountByAliasRequest
-	18, // 22: nagomi.v1.AccountService.MergeAccounts:input_type -> nagomi.v1.MergeAccountsRequest
-	1,  // 23: nagomi.v1.AccountService.ListAccounts:output_type -> nagomi.v1.ListAccountsResponse
-	3,  // 24: nagomi.v1.AccountService.GetAccount:output_type -> nagomi.v1.GetAccountResponse
-	5,  // 25: nagomi.v1.AccountService.CreateAccount:output_type -> nagomi.v1.CreateAccountResponse
-	7,  // 26: nagomi.v1.AccountService.UpdateAccount:output_type -> nagomi.v1.UpdateAccountResponse
-	9,  // 27: nagomi.v1.AccountService.DeleteAccount:output_type -> nagomi.v1.DeleteAccountResponse
-	11, // 28: nagomi.v1.AccountService.AddAccountAlias:output_type -> nagomi.v1.AddAccountAliasResponse
-	13, // 29: nagomi.v1.AccountService.RemoveAccountAlias:output_type -> nagomi.v1.RemoveAccountAliasResponse
-	15, // 30: nagomi.v1.AccountService.SetAccountAliases:output_type -> nagomi.v1.SetAccountAliasesResponse
-	17, // 31: nagomi.v1.AccountService.FindAccountByAlias:output_type -> nagomi.v1.FindAccountByAliasResponse
-	19, // 32: nagomi.v1.AccountService.MergeAccounts:output_type -> nagomi.v1.MergeAccountsResponse
-	23, // [23:33] is the sub-list for method output_type
-	13, // [13:23] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	30, // 0: nagomi.v1.ListAccountsResponse.accounts:type_name -> nagomi.v1.Account
+	30, // 1: nagomi.v1.GetAccountResponse.account:type_name -> nagomi.v1.Account
+	31, // 2: nagomi.v1.CreateAccountRequest.type:type_name -> nagomi.v1.AccountType
+	32, // 3: nagomi.v1.CreateAccountRequest.anchor_balance:type_name -> google.type.Money
+	30, // 4: nagomi.v1.CreateAccountResponse.account:type_name -> nagomi.v1.Account
+	33, // 5: nagomi.v1.UpdateAccountRequest.update_mask:type_name -> google.protobuf.FieldMask
+	31, // 6: nagomi.v1.UpdateAccountRequest.account_type:type_name -> nagomi.v1.AccountType
+	34, // 7: nagomi.v1.UpdateAccountRequest.anchor_date:type_name -> google.protobuf.Timestamp
+	32, // 8: nagomi.v1.UpdateAccountRequest.anchor_balance:type_name -> google.type.Money
+	35, // 9: nagomi.v1.UpdateAccountRequest.statements_start:type_name -> google.type.Date
+	35, // 10: nagomi.v1.UpdateAccountRequest.closed_at:type_name -> google.type.Date
+	30, // 11: nagomi.v1.FindAccountByAliasResponse.account:type_name -> nagomi.v1.Account
+	30, // 12: nagomi.v1.MergeAccountsResponse.account:type_name -> nagomi.v1.Account
+	36, // 13: nagomi.v1.ListAccountGroupsResponse.groups:type_name -> nagomi.v1.AccountGroup
+	36, // 14: nagomi.v1.CreateAccountGroupResponse.group:type_name -> nagomi.v1.AccountGroup
+	0,  // 15: nagomi.v1.AccountService.ListAccounts:input_type -> nagomi.v1.ListAccountsRequest
+	2,  // 16: nagomi.v1.AccountService.GetAccount:input_type -> nagomi.v1.GetAccountRequest
+	4,  // 17: nagomi.v1.AccountService.CreateAccount:input_type -> nagomi.v1.CreateAccountRequest
+	6,  // 18: nagomi.v1.AccountService.UpdateAccount:input_type -> nagomi.v1.UpdateAccountRequest
+	8,  // 19: nagomi.v1.AccountService.DeleteAccount:input_type -> nagomi.v1.DeleteAccountRequest
+	10, // 20: nagomi.v1.AccountService.AddAccountAlias:input_type -> nagomi.v1.AddAccountAliasRequest
+	12, // 21: nagomi.v1.AccountService.RemoveAccountAlias:input_type -> nagomi.v1.RemoveAccountAliasRequest
+	14, // 22: nagomi.v1.AccountService.SetAccountAliases:input_type -> nagomi.v1.SetAccountAliasesRequest
+	16, // 23: nagomi.v1.AccountService.FindAccountByAlias:input_type -> nagomi.v1.FindAccountByAliasRequest
+	18, // 24: nagomi.v1.AccountService.MergeAccounts:input_type -> nagomi.v1.MergeAccountsRequest
+	20, // 25: nagomi.v1.AccountService.ListAccountGroups:input_type -> nagomi.v1.ListAccountGroupsRequest
+	22, // 26: nagomi.v1.AccountService.CreateAccountGroup:input_type -> nagomi.v1.CreateAccountGroupRequest
+	24, // 27: nagomi.v1.AccountService.UpdateAccountGroup:input_type -> nagomi.v1.UpdateAccountGroupRequest
+	26, // 28: nagomi.v1.AccountService.DeleteAccountGroup:input_type -> nagomi.v1.DeleteAccountGroupRequest
+	28, // 29: nagomi.v1.AccountService.SetAccountsGroup:input_type -> nagomi.v1.SetAccountsGroupRequest
+	1,  // 30: nagomi.v1.AccountService.ListAccounts:output_type -> nagomi.v1.ListAccountsResponse
+	3,  // 31: nagomi.v1.AccountService.GetAccount:output_type -> nagomi.v1.GetAccountResponse
+	5,  // 32: nagomi.v1.AccountService.CreateAccount:output_type -> nagomi.v1.CreateAccountResponse
+	7,  // 33: nagomi.v1.AccountService.UpdateAccount:output_type -> nagomi.v1.UpdateAccountResponse
+	9,  // 34: nagomi.v1.AccountService.DeleteAccount:output_type -> nagomi.v1.DeleteAccountResponse
+	11, // 35: nagomi.v1.AccountService.AddAccountAlias:output_type -> nagomi.v1.AddAccountAliasResponse
+	13, // 36: nagomi.v1.AccountService.RemoveAccountAlias:output_type -> nagomi.v1.RemoveAccountAliasResponse
+	15, // 37: nagomi.v1.AccountService.SetAccountAliases:output_type -> nagomi.v1.SetAccountAliasesResponse
+	17, // 38: nagomi.v1.AccountService.FindAccountByAlias:output_type -> nagomi.v1.FindAccountByAliasResponse
+	19, // 39: nagomi.v1.AccountService.MergeAccounts:output_type -> nagomi.v1.MergeAccountsResponse
+	21, // 40: nagomi.v1.AccountService.ListAccountGroups:output_type -> nagomi.v1.ListAccountGroupsResponse
+	23, // 41: nagomi.v1.AccountService.CreateAccountGroup:output_type -> nagomi.v1.CreateAccountGroupResponse
+	25, // 42: nagomi.v1.AccountService.UpdateAccountGroup:output_type -> nagomi.v1.UpdateAccountGroupResponse
+	27, // 43: nagomi.v1.AccountService.DeleteAccountGroup:output_type -> nagomi.v1.DeleteAccountGroupResponse
+	29, // 44: nagomi.v1.AccountService.SetAccountsGroup:output_type -> nagomi.v1.SetAccountsGroupResponse
+	30, // [30:45] is the sub-list for method output_type
+	15, // [15:30] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_nagomi_v1_account_services_proto_init() }
@@ -1341,13 +1890,16 @@ func file_nagomi_v1_account_services_proto_init() {
 	file_nagomi_v1_enums_proto_init()
 	file_nagomi_v1_account_services_proto_msgTypes[4].OneofWrappers = []any{}
 	file_nagomi_v1_account_services_proto_msgTypes[6].OneofWrappers = []any{}
+	file_nagomi_v1_account_services_proto_msgTypes[22].OneofWrappers = []any{}
+	file_nagomi_v1_account_services_proto_msgTypes[24].OneofWrappers = []any{}
+	file_nagomi_v1_account_services_proto_msgTypes[28].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nagomi_v1_account_services_proto_rawDesc), len(file_nagomi_v1_account_services_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

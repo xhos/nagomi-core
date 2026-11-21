@@ -72,7 +72,7 @@ values
     $10::boolean
   )
 returning
-  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, created_at, updated_at, aliases, statement_driven, statements_start, closed_at, color
+  id, owner_id, name, bank, account_type, friendly_name, anchor_date, anchor_balance_cents, anchor_currency, main_currency, created_at, updated_at, aliases, statement_driven, statements_start, closed_at, color, group_id
 `
 
 type CreateAccountParams struct {
@@ -120,6 +120,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		&i.StatementsStart,
 		&i.ClosedAt,
 		&i.Color,
+		&i.GroupID,
 	)
 	return i, err
 }
@@ -146,7 +147,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, arg DeleteAccountParams) (i
 }
 
 const findAccountByAlias = `-- name: FindAccountByAlias :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color, a.group_id
 from accounts a
 where a.owner_id = $1::uuid
   and a.aliases @> array[$2::text]
@@ -183,12 +184,13 @@ func (q *Queries) FindAccountByAlias(ctx context.Context, arg FindAccountByAlias
 		&i.Account.StatementsStart,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
+		&i.Account.GroupID,
 	)
 	return i, err
 }
 
 const findAccountByName = `-- name: FindAccountByName :one
-select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color
+select a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color, a.group_id
 from accounts a
 where a.owner_id = $1::uuid
   and a.name = $2::text
@@ -225,13 +227,14 @@ func (q *Queries) FindAccountByName(ctx context.Context, arg FindAccountByNamePa
 		&i.Account.StatementsStart,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
+		&i.Account.GroupID,
 	)
 	return i, err
 }
 
 const getAccount = `-- name: GetAccount :one
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color, a.group_id,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -287,6 +290,7 @@ func (q *Queries) GetAccount(ctx context.Context, arg GetAccountParams) (GetAcco
 		&i.Account.StatementsStart,
 		&i.Account.ClosedAt,
 		&i.Account.Color,
+		&i.Account.GroupID,
 		&i.BalanceCents,
 		&i.BalanceCurrency,
 	)
@@ -346,7 +350,7 @@ func (q *Queries) GetFriendAccountBalances(ctx context.Context, userID uuid.UUID
 
 const listAccounts = `-- name: ListAccounts :many
 select
-  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color,
+  a.id, a.owner_id, a.name, a.bank, a.account_type, a.friendly_name, a.anchor_date, a.anchor_balance_cents, a.anchor_currency, a.main_currency, a.created_at, a.updated_at, a.aliases, a.statement_driven, a.statements_start, a.closed_at, a.color, a.group_id,
   COALESCE(
     (select t.balance_after_cents
      from transactions t
@@ -404,6 +408,7 @@ func (q *Queries) ListAccounts(ctx context.Context, userID uuid.UUID) ([]ListAcc
 			&i.Account.StatementsStart,
 			&i.Account.ClosedAt,
 			&i.Account.Color,
+			&i.Account.GroupID,
 			&i.BalanceCents,
 			&i.BalanceCurrency,
 		); err != nil {

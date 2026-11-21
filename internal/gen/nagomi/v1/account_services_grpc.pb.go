@@ -29,6 +29,11 @@ const (
 	AccountService_SetAccountAliases_FullMethodName  = "/nagomi.v1.AccountService/SetAccountAliases"
 	AccountService_FindAccountByAlias_FullMethodName = "/nagomi.v1.AccountService/FindAccountByAlias"
 	AccountService_MergeAccounts_FullMethodName      = "/nagomi.v1.AccountService/MergeAccounts"
+	AccountService_ListAccountGroups_FullMethodName  = "/nagomi.v1.AccountService/ListAccountGroups"
+	AccountService_CreateAccountGroup_FullMethodName = "/nagomi.v1.AccountService/CreateAccountGroup"
+	AccountService_UpdateAccountGroup_FullMethodName = "/nagomi.v1.AccountService/UpdateAccountGroup"
+	AccountService_DeleteAccountGroup_FullMethodName = "/nagomi.v1.AccountService/DeleteAccountGroup"
+	AccountService_SetAccountsGroup_FullMethodName   = "/nagomi.v1.AccountService/SetAccountsGroup"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -45,6 +50,15 @@ type AccountServiceClient interface {
 	SetAccountAliases(ctx context.Context, in *SetAccountAliasesRequest, opts ...grpc.CallOption) (*SetAccountAliasesResponse, error)
 	FindAccountByAlias(ctx context.Context, in *FindAccountByAliasRequest, opts ...grpc.CallOption) (*FindAccountByAliasResponse, error)
 	MergeAccounts(ctx context.Context, in *MergeAccountsRequest, opts ...grpc.CallOption) (*MergeAccountsResponse, error)
+	ListAccountGroups(ctx context.Context, in *ListAccountGroupsRequest, opts ...grpc.CallOption) (*ListAccountGroupsResponse, error)
+	// creates the group and moves the given accounts into it
+	CreateAccountGroup(ctx context.Context, in *CreateAccountGroupRequest, opts ...grpc.CallOption) (*CreateAccountGroupResponse, error)
+	UpdateAccountGroup(ctx context.Context, in *UpdateAccountGroupRequest, opts ...grpc.CallOption) (*UpdateAccountGroupResponse, error)
+	// the accounts stay, ungrouped
+	DeleteAccountGroup(ctx context.Context, in *DeleteAccountGroupRequest, opts ...grpc.CallOption) (*DeleteAccountGroupResponse, error)
+	// moves accounts into a group, or out of any when group_id is unset. a group
+	// left without accounts is deleted
+	SetAccountsGroup(ctx context.Context, in *SetAccountsGroupRequest, opts ...grpc.CallOption) (*SetAccountsGroupResponse, error)
 }
 
 type accountServiceClient struct {
@@ -155,6 +169,56 @@ func (c *accountServiceClient) MergeAccounts(ctx context.Context, in *MergeAccou
 	return out, nil
 }
 
+func (c *accountServiceClient) ListAccountGroups(ctx context.Context, in *ListAccountGroupsRequest, opts ...grpc.CallOption) (*ListAccountGroupsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAccountGroupsResponse)
+	err := c.cc.Invoke(ctx, AccountService_ListAccountGroups_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) CreateAccountGroup(ctx context.Context, in *CreateAccountGroupRequest, opts ...grpc.CallOption) (*CreateAccountGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAccountGroupResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateAccountGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) UpdateAccountGroup(ctx context.Context, in *UpdateAccountGroupRequest, opts ...grpc.CallOption) (*UpdateAccountGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateAccountGroupResponse)
+	err := c.cc.Invoke(ctx, AccountService_UpdateAccountGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) DeleteAccountGroup(ctx context.Context, in *DeleteAccountGroupRequest, opts ...grpc.CallOption) (*DeleteAccountGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAccountGroupResponse)
+	err := c.cc.Invoke(ctx, AccountService_DeleteAccountGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) SetAccountsGroup(ctx context.Context, in *SetAccountsGroupRequest, opts ...grpc.CallOption) (*SetAccountsGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetAccountsGroupResponse)
+	err := c.cc.Invoke(ctx, AccountService_SetAccountsGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -169,6 +233,15 @@ type AccountServiceServer interface {
 	SetAccountAliases(context.Context, *SetAccountAliasesRequest) (*SetAccountAliasesResponse, error)
 	FindAccountByAlias(context.Context, *FindAccountByAliasRequest) (*FindAccountByAliasResponse, error)
 	MergeAccounts(context.Context, *MergeAccountsRequest) (*MergeAccountsResponse, error)
+	ListAccountGroups(context.Context, *ListAccountGroupsRequest) (*ListAccountGroupsResponse, error)
+	// creates the group and moves the given accounts into it
+	CreateAccountGroup(context.Context, *CreateAccountGroupRequest) (*CreateAccountGroupResponse, error)
+	UpdateAccountGroup(context.Context, *UpdateAccountGroupRequest) (*UpdateAccountGroupResponse, error)
+	// the accounts stay, ungrouped
+	DeleteAccountGroup(context.Context, *DeleteAccountGroupRequest) (*DeleteAccountGroupResponse, error)
+	// moves accounts into a group, or out of any when group_id is unset. a group
+	// left without accounts is deleted
+	SetAccountsGroup(context.Context, *SetAccountsGroupRequest) (*SetAccountsGroupResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -208,6 +281,21 @@ func (UnimplementedAccountServiceServer) FindAccountByAlias(context.Context, *Fi
 }
 func (UnimplementedAccountServiceServer) MergeAccounts(context.Context, *MergeAccountsRequest) (*MergeAccountsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method MergeAccounts not implemented")
+}
+func (UnimplementedAccountServiceServer) ListAccountGroups(context.Context, *ListAccountGroupsRequest) (*ListAccountGroupsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAccountGroups not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateAccountGroup(context.Context, *CreateAccountGroupRequest) (*CreateAccountGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateAccountGroup not implemented")
+}
+func (UnimplementedAccountServiceServer) UpdateAccountGroup(context.Context, *UpdateAccountGroupRequest) (*UpdateAccountGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateAccountGroup not implemented")
+}
+func (UnimplementedAccountServiceServer) DeleteAccountGroup(context.Context, *DeleteAccountGroupRequest) (*DeleteAccountGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteAccountGroup not implemented")
+}
+func (UnimplementedAccountServiceServer) SetAccountsGroup(context.Context, *SetAccountsGroupRequest) (*SetAccountsGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetAccountsGroup not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -410,6 +498,96 @@ func _AccountService_MergeAccounts_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_ListAccountGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAccountGroupsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).ListAccountGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_ListAccountGroups_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).ListAccountGroups(ctx, req.(*ListAccountGroupsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_CreateAccountGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAccountGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateAccountGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateAccountGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateAccountGroup(ctx, req.(*CreateAccountGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_UpdateAccountGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAccountGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).UpdateAccountGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_UpdateAccountGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).UpdateAccountGroup(ctx, req.(*UpdateAccountGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_DeleteAccountGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAccountGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).DeleteAccountGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_DeleteAccountGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).DeleteAccountGroup(ctx, req.(*DeleteAccountGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_SetAccountsGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetAccountsGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).SetAccountsGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_SetAccountsGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).SetAccountsGroup(ctx, req.(*SetAccountsGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -456,6 +634,26 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MergeAccounts",
 			Handler:    _AccountService_MergeAccounts_Handler,
+		},
+		{
+			MethodName: "ListAccountGroups",
+			Handler:    _AccountService_ListAccountGroups_Handler,
+		},
+		{
+			MethodName: "CreateAccountGroup",
+			Handler:    _AccountService_CreateAccountGroup_Handler,
+		},
+		{
+			MethodName: "UpdateAccountGroup",
+			Handler:    _AccountService_UpdateAccountGroup_Handler,
+		},
+		{
+			MethodName: "DeleteAccountGroup",
+			Handler:    _AccountService_DeleteAccountGroup_Handler,
+		},
+		{
+			MethodName: "SetAccountsGroup",
+			Handler:    _AccountService_SetAccountsGroup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
