@@ -106,33 +106,38 @@ where
     or t.account_id = ANY($7::bigint [])
   )
   and (
-    $8::text [] is null
-    or c.slug = ANY($8::text [])
+    $8::text is null
+    or t.merchant ILIKE ('%' || $8::text || '%')
   )
   and (
     $9::text is null
-    or t.merchant ILIKE ('%' || $9::text || '%')
+    or t.tx_desc ILIKE ('%' || $9::text || '%')
   )
   and (
-    $10::text is null
-    or t.tx_desc ILIKE ('%' || $10::text || '%')
+    $10::char(3) is null
+    or t.tx_currency = $10::char(3)
   )
   and (
-    $11::char(3) is null
-    or t.tx_currency = $11::char(3)
+    $11::time is null
+    or t.tx_date::time >= $11::time
   )
   and (
     $12::time is null
-    or t.tx_date::time >= $12::time
+    or t.tx_date::time <= $12::time
   )
+  -- categories and uncategorized together are one choice: a transaction in any
+  -- picked category (or under it, so "food" takes "food.dining"), or with none
   and (
-    $13::time is null
-    or t.tx_date::time <= $13::time
-  )
-  and (
-    $14::boolean is null
+    (
+      $13::text [] is null
+      and not coalesce($14::boolean, false)
+    )
+    or exists (
+      select 1 from unnest($13::text []) picked
+      where c.slug = picked or left(c.slug, length(picked) + 1) = picked || '.'
+    )
     or (
-      $14::boolean = true
+      coalesce($14::boolean, false)
       and t.category_id is null
       and not exists (
         select 1 from transfers tr
@@ -150,12 +155,12 @@ type CountTransactionsParams struct {
 	AmountMaxCents *int64      `db:"amount_max_cents" json:"amount_max_cents"`
 	Direction      *int16      `db:"direction" json:"direction"`
 	AccountIds     []int64     `db:"account_ids" json:"account_ids"`
-	Categories     []string    `db:"categories" json:"categories"`
 	MerchantQ      *string     `db:"merchant_q" json:"merchant_q"`
 	DescQ          *string     `db:"desc_q" json:"desc_q"`
 	Currency       *string     `db:"currency" json:"currency"`
 	TodStart       pgtype.Time `db:"tod_start" json:"tod_start"`
 	TodEnd         pgtype.Time `db:"tod_end" json:"tod_end"`
+	Categories     []string    `db:"categories" json:"categories"`
 	Uncategorized  *bool       `db:"uncategorized" json:"uncategorized"`
 }
 
@@ -168,12 +173,12 @@ func (q *Queries) CountTransactions(ctx context.Context, arg CountTransactionsPa
 		arg.AmountMaxCents,
 		arg.Direction,
 		arg.AccountIds,
-		arg.Categories,
 		arg.MerchantQ,
 		arg.DescQ,
 		arg.Currency,
 		arg.TodStart,
 		arg.TodEnd,
+		arg.Categories,
 		arg.Uncategorized,
 	)
 	var count int64
@@ -558,33 +563,38 @@ where
     or t.account_id = ANY($9::bigint [])
   )
   and (
-    $10::text [] is null
-    or c.slug = ANY($10::text [])
+    $10::text is null
+    or t.merchant ILIKE ('%' || $10::text || '%')
   )
   and (
     $11::text is null
-    or t.merchant ILIKE ('%' || $11::text || '%')
+    or t.tx_desc ILIKE ('%' || $11::text || '%')
   )
   and (
-    $12::text is null
-    or t.tx_desc ILIKE ('%' || $12::text || '%')
+    $12::char(3) is null
+    or t.tx_currency = $12::char(3)
   )
   and (
-    $13::char(3) is null
-    or t.tx_currency = $13::char(3)
+    $13::time is null
+    or t.tx_date::time >= $13::time
   )
   and (
     $14::time is null
-    or t.tx_date::time >= $14::time
+    or t.tx_date::time <= $14::time
   )
+  -- categories and uncategorized together are one choice: a transaction in any
+  -- picked category (or under it, so "food" takes "food.dining"), or with none
   and (
-    $15::time is null
-    or t.tx_date::time <= $15::time
-  )
-  and (
-    $16::boolean is null
+    (
+      $15::text [] is null
+      and not coalesce($16::boolean, false)
+    )
+    or exists (
+      select 1 from unnest($15::text []) picked
+      where c.slug = picked or left(c.slug, length(picked) + 1) = picked || '.'
+    )
     or (
-      $16::boolean = true
+      coalesce($16::boolean, false)
       and t.category_id is null
       and not exists (
         select 1 from transfers tr
@@ -609,12 +619,12 @@ type ListTransactionsParams struct {
 	AmountMaxCents *int64      `db:"amount_max_cents" json:"amount_max_cents"`
 	Direction      *int16      `db:"direction" json:"direction"`
 	AccountIds     []int64     `db:"account_ids" json:"account_ids"`
-	Categories     []string    `db:"categories" json:"categories"`
 	MerchantQ      *string     `db:"merchant_q" json:"merchant_q"`
 	DescQ          *string     `db:"desc_q" json:"desc_q"`
 	Currency       *string     `db:"currency" json:"currency"`
 	TodStart       pgtype.Time `db:"tod_start" json:"tod_start"`
 	TodEnd         pgtype.Time `db:"tod_end" json:"tod_end"`
+	Categories     []string    `db:"categories" json:"categories"`
 	Uncategorized  *bool       `db:"uncategorized" json:"uncategorized"`
 	Limit          *int32      `db:"limit" json:"limit"`
 }
@@ -635,12 +645,12 @@ func (q *Queries) ListTransactions(ctx context.Context, arg ListTransactionsPara
 		arg.AmountMaxCents,
 		arg.Direction,
 		arg.AccountIds,
-		arg.Categories,
 		arg.MerchantQ,
 		arg.DescQ,
 		arg.Currency,
 		arg.TodStart,
 		arg.TodEnd,
+		arg.Categories,
 		arg.Uncategorized,
 		arg.Limit,
 	)

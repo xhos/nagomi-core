@@ -41,10 +41,6 @@ where
     or t.account_id = ANY(sqlc.narg('account_ids')::bigint [])
   )
   and (
-    sqlc.narg('categories')::text [] is null
-    or c.slug = ANY(sqlc.narg('categories')::text [])
-  )
-  and (
     sqlc.narg('merchant_q')::text is null
     or t.merchant ILIKE ('%' || sqlc.narg('merchant_q')::text || '%')
   )
@@ -64,10 +60,19 @@ where
     sqlc.narg('tod_end')::time is null
     or t.tx_date::time <= sqlc.narg('tod_end')::time
   )
+  -- categories and uncategorized together are one choice: a transaction in any
+  -- picked category (or under it, so "food" takes "food.dining"), or with none
   and (
-    sqlc.narg('uncategorized')::boolean is null
+    (
+      sqlc.narg('categories')::text [] is null
+      and not coalesce(sqlc.narg('uncategorized')::boolean, false)
+    )
+    or exists (
+      select 1 from unnest(sqlc.narg('categories')::text []) picked
+      where c.slug = picked or left(c.slug, length(picked) + 1) = picked || '.'
+    )
     or (
-      sqlc.narg('uncategorized')::boolean = true
+      coalesce(sqlc.narg('uncategorized')::boolean, false)
       and t.category_id is null
       and not exists (
         select 1 from transfers tr
@@ -114,10 +119,6 @@ where
     or t.account_id = ANY(sqlc.narg('account_ids')::bigint [])
   )
   and (
-    sqlc.narg('categories')::text [] is null
-    or c.slug = ANY(sqlc.narg('categories')::text [])
-  )
-  and (
     sqlc.narg('merchant_q')::text is null
     or t.merchant ILIKE ('%' || sqlc.narg('merchant_q')::text || '%')
   )
@@ -137,10 +138,19 @@ where
     sqlc.narg('tod_end')::time is null
     or t.tx_date::time <= sqlc.narg('tod_end')::time
   )
+  -- categories and uncategorized together are one choice: a transaction in any
+  -- picked category (or under it, so "food" takes "food.dining"), or with none
   and (
-    sqlc.narg('uncategorized')::boolean is null
+    (
+      sqlc.narg('categories')::text [] is null
+      and not coalesce(sqlc.narg('uncategorized')::boolean, false)
+    )
+    or exists (
+      select 1 from unnest(sqlc.narg('categories')::text []) picked
+      where c.slug = picked or left(c.slug, length(picked) + 1) = picked || '.'
+    )
     or (
-      sqlc.narg('uncategorized')::boolean = true
+      coalesce(sqlc.narg('uncategorized')::boolean, false)
       and t.category_id is null
       and not exists (
         select 1 from transfers tr
